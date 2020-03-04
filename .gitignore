@@ -6,7 +6,7 @@ __pycache__
 *.pyc
 *.cpython-36.pyc
 app/assets/*
-
+secure.py
 
 
 .DS_Store
