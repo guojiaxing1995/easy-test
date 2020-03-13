@@ -83,6 +83,5 @@ def create_app(register_all=True, environment='production'):
         apply_cors(app)
         # 创建所有表格
         create_tables(app)
-        from flask_pymongo import PyMongo
-        mongo = PyMongo(app)
-    return app,mongo
+
+    return app
