@@ -50,3 +50,13 @@ def info():
 #     return jsonify({
 #         'hello': current_user.nickname
 #     })
+
+
+@test_api.route('/mongo', methods=['GET'])
+def mongo_test():
+    from starter import mongo
+    users = mongo.db.easy.find()
+    users = list(users)
+    for user in users:
+        del user['_id']
+    return jsonify(users)
