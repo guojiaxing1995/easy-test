@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+cymysql = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==0.9.13"}
+requests = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "*"}
+pipfile = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "*"}
+oss2 = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==2.6.1"}
+Flask = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==1.0.2"}
+Flask-SQLAlchemy = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==2.3.2"}
+Flask-WTF = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==0.14.2"}
+Flask-Cors = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==2.1.0"}
+Lin-CMS = "==0.2.0b2"
+
+[dev-packages]
+pytest = "*"
+
+[requires]
+python_version = "3.6"
