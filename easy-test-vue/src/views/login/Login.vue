@@ -121,9 +121,9 @@ export default {
       margin-bottom: 15%;
 
       h1 {
-        padding-left: 74px;
+        // padding-left: 74px;
         box-sizing: border-box;
-        text-align: left;
+        text-align: center;
         color: #8c98ae;
       }
     }
