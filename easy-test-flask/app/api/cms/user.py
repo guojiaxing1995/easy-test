@@ -160,3 +160,23 @@ def _register_user(form: RegisterForm):
         user.password = form.password.data
         user.group_id = form.group_id.data
         db.session.add(user)
+
+#按照分组返回所有用户
+@user_api.route('/UserByGroup', methods=['GET'])
+# @login_required
+def users_by_group():
+    groups = manager.group_model.get(one=False)
+    if groups is None:
+        raise NotFound(msg='不存在任何权限组')
+
+    for group in groups:
+        users = manager.user_model.query.filter().filter_by(group_id=group.id).all()
+        if users:
+            for user in users:
+                user.hide('active','admin','group_id','update_time','create_time')
+            setattr(group, 'users', users)
+            group._fields.append('users')
+        else:
+            groups.remove(group)
+
+    return jsonify(groups)

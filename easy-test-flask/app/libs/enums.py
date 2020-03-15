@@ -9,7 +9,7 @@ from enum import Enum, unique
 
 
 @unique
-class UserAuth(Enum):
+class UserAuthEnum(Enum):
     '''用户权限枚举类'''
     GROUP = 1
     project = 2

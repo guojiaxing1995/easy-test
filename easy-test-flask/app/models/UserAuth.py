@@ -8,6 +8,8 @@
 from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, SmallInteger, Integer
 
+from app.libs.enums import UserAuthEnum
+
 
 class UserAuth(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -17,7 +19,7 @@ class UserAuth(Base):
 
     @property
     def type(self):
-        return UserAuth(self._type)
+        return UserAuthEnum(self._type)
 
     @type.setter
     def type(self,user_auth):
