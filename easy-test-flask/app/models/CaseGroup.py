@@ -102,6 +102,18 @@ class CaseGroup(Base):
         #     )
         return True
 
+
+    @classmethod
+    def get_detail(cls, gid):
+        group = cls.query.filter_by(id=gid, delete_time=None).first_or_404()
+        # 获取目标分组的授权人员
+        user_auth = UserAuth.query.filter_by(auth_id=gid, _type=UserAuthEnum.GROUP.value).all()
+        users = [user.user_id for user in user_auth]
+        setattr(group, 'users', users)
+        group._fields.append('users')
+
+        return group
+
     @classmethod
     def remove_group(cls, gid):
         group = cls.query.filter_by(id=gid, delete_time=None).first_or_404()

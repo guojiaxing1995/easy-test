@@ -15,6 +15,12 @@ from app.validators.CaseForm import CaseGroupForm, CaseGroupSearchForm
 
 case_croup_api = Redprint('caseGroup')
 
+@case_croup_api.route('/<gid>', methods=['GET'])
+# @login_required
+def get_group(gid):
+    group = CaseGroup.get_detail(gid)
+    return jsonify(group)
+
 @case_croup_api.route('', methods=['POST'])
 # @login_required
 def create_group():
