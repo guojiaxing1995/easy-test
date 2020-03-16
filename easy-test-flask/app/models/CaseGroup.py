@@ -19,7 +19,7 @@ class CaseGroup(Base):
         group = CaseGroup.query.filter_by(name=form.name.data, delete_time=None).first()
         if group is not None:
             raise ParameterException(msg='分组已存在')
-        # 新增分组的时候同时新增可查看当前用例组的人员。当出现问题时进行回归，人员和分组都不插入
+        # 新增分组的时候同时新增可查看当前用例组的人员。当出现问题时进行回滚，人员和分组都不插入
         try:
             group = CaseGroup()
             group.name = form.name.data
@@ -93,13 +93,7 @@ class CaseGroup(Base):
                 raise UnknownException(msg='新增异常 数据已回滚')
         elif group_by_name is not None:
             raise ParameterException(msg='分组已存在')
-        # else:
-        #     group.update(
-        #         id=gid,
-        #         name=form.name.data,
-        #         info=form.info.data,
-        #         commit=True
-        #     )
+
         return True
 
 
@@ -111,7 +105,6 @@ class CaseGroup(Base):
         users = [user.user_id for user in user_auth]
         setattr(group, 'users', users)
         group._fields.append('users')
-
         return group
 
     @classmethod
