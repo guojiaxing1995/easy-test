@@ -21,3 +21,9 @@ class CaseGroupForm(Form):
 
 class CaseGroupSearchForm(Form):
     name = StringField(validators=[DataRequired(message='请输入分组名称')])
+
+class UserGroupAuthForm(Form):
+    # 权限组id 可以不传，编辑传值，新增不传
+    caseGroupId = IntegerField(validators=[Optional()])
+    # 权限类型 对应权限枚举类
+    authType = IntegerField(validators=[Optional()])

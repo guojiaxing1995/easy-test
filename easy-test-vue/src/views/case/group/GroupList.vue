@@ -25,18 +25,20 @@
           align="center"
           fixed="right"
           label="操作">
-          <el-button
-            size="mini"
-            type="primary"
-            plain
-            style="margin:auto"
-            @click="confirmEdit">编辑</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            plain
-            style="margin:auto"
-            @click="confirmEdit">删除</el-button>
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="primary"
+              plain
+              style="margin:auto"
+              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              plain
+              style="margin:auto"
+              @click="confirmEdit">删除</el-button>
+          </template>
         </el-table-column>
       </el-table>
     <el-dialog
@@ -46,7 +48,7 @@
       class="groupListInfoDialog"
     >
       <div style="margin-top:-25px;">
-        <el-tabs v-model="activeTab" @tab-click="handleClick">
+        <el-tabs v-model="activeTab" @tab-click="handleClick" v-loading="editLoading">
           <el-tab-pane label="修改信息" name="修改信息" style="margin-top:10px;">
             <el-form
               status-icon
@@ -67,16 +69,15 @@
             </el-form>
           </el-tab-pane>
           <el-tab-pane label="配置权限" name="配置权限" style="margin-top:10px;">
-            <group-auths
+            <group-users
               v-if="dialogFormVisible"
-              :id="id"
+              :groupId="id"
+              :authType="type"
               ref="groupAuths"
               @updateAuths="updateAuths"
-              @updateCacheAuths="updateCacheAuths"
-              @updateAllAuths="updateAllAuths"
               style="margin-right:-30px;margin-left:-25px;margin-bottom:-10px;"
             >
-            </group-auths>
+            </group-users>
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -89,19 +90,19 @@
 </template>
 
 <script>
-import { get } from '@/lin/plugins/axios'
-import Utils from '@/lin/utils/util'
+import { get, put } from '@/lin/plugins/axios'
 import Admin from '@/lin/models/admin'
-import GroupAuths from './GroupAuths'
+import GroupUsers from './GroupUsers'
 
 export default {
   components: {
-    GroupAuths,
+    GroupUsers,
   },
   inject: ['eventBus'],
   data() {
     return {
       id: 0, // 分组id
+      type: 1, // 类型为用例分组
       tableData: [], // 表格数据
       dialogFormVisible: false, // 是否弹窗
       labelPosition: 'right', // 设置label位置
@@ -109,16 +110,11 @@ export default {
         // 表单信息
         name: '',
         info: '',
+        users: [],
       },
-      allAuths: {}, // 所有分组权限
-      auths: [], // 拥有的分组权限
-      cacheAuths: [], // 缓存第一次打开弹窗的数据
-      cacheForm: {
-        // 缓存第一次的表单信息
-        name: '',
-        info: '',
-      },
+      groupUsers: [], // 拥有的分组权限
       loading: false,
+      editLoading: false,
       activeTab: '修改信息', // tab 标题
       rules: {
         // 表单验证规则
@@ -138,62 +134,39 @@ export default {
         this.loading = false
       }
     },
+    // 获取所有授权用户的id放入数组
+    getAuths() {
+      const allAuthsUsers = []
+      for (const group of this.groupUsers) {
+        if (typeof group.choose !== 'undefined') {
+          allAuthsUsers.push(...group.choose)
+        }
+      }
+      this.form.users = allAuthsUsers
+    },
     async confirmEdit() {
       // 修改分组信息
-      if (this.activeTab === '修改信息') {
-        if (this.form.name === '') {
-          this.$message.warning('请将信息填写完整')
-          return
+      if (this.form.name === '') {
+        this.$message.warning('请将信息填写完整')
+        return
+      }
+      if (this.groupUsers === []) {
+        this.$message.warning('请等待数据加载完重试')
+        return
+      }
+      this.editLoading = true
+      this.getAuths()
+      let res
+      try {
+        res = await put(`/v1/caseGroup/${this.id}`, this.form, { showBackend: true })
+        if (res.error_code === 0) {
+          this.$message.success(`${res.msg}`)
+        } else {
+          this.$message.error(`${res.msg}`)
         }
-        if (this.cacheForm.name !== this.form.name || this.cacheForm.info !== this.form.info) {
-          // eslint-disable-line
-          const res = await Admin.updateOneGroup(this.form.name, this.form.info, this.id)
-          if (res.error_code === 0) {
-            this.$message.success(`${res.msg}`)
-            this.getAllGroups()
-          }
-        }
-      } else {
-        // 修改权限
-        // 权限取子集(module)
-        this.auths = this.auths.filter(item => Object.keys(this.allAuths).indexOf(item) < 0)
-        this.cacheAuths = this.cacheAuths.filter(item => Object.keys(this.allAuths).indexOf(item) < 0) // eslint-disable-line
-        // 判断是否更改了分组权限
-        if (this.auths.sort().toString() !== this.cacheAuths.sort().toString()) {
-          const addAuths = [...this.auths] // 增加的权限
-          const deleteAuths = this.cacheAuths // 删除的权限
-          let addRes = {}
-          let delRes = {}
-          // 判断增加的权限
-          for (let i = 0; i < addAuths.length; i++) {
-            // eslint-disable-line
-            for (let j = 0; j < this.cacheAuths.length; j++) {
-              // eslint-disable-line
-              if (addAuths[i] === this.cacheAuths[j]) {
-                addAuths.splice(i, 1)
-              }
-            }
-          }
-          // 判断删除的权限
-          for (let i = 0; i < deleteAuths.length; i++) {
-            // eslint-disable-line
-            for (let j = 0; j < this.auths.length; j++) {
-              // eslint-disable-line
-              if (deleteAuths[i] === this.auths[j]) {
-                deleteAuths.splice(i, 1)
-              }
-            }
-          }
-          if (addAuths.length > 0) {
-            addRes = await Admin.dispatchAuths(this.id, addAuths)
-          }
-          if (deleteAuths.length > 0) {
-            delRes = await Admin.removeAuths(this.id, deleteAuths)
-          }
-          if (addRes.error_code === 0 || delRes.error_code === 0) {
-            this.$message.success('权限修改成功')
-          }
-        }
+        this.editLoading = false
+      } catch (error) {
+        this.editLoading = false
       }
       this.dialogFormVisible = false
     },
@@ -202,19 +175,10 @@ export default {
       this.$refs.groupAuths.getGroupAuths()
     },
     // 获取所拥有的权限并渲染  由子组件提供
-    handleEdit(val) {
-      let selectedData
-      // 单击 编辑按键
-      if (val.index >= 0) {
-        selectedData = val.row
-      } else {
-        // 单机 table row
-        selectedData = val
-      }
-      this.id = selectedData.id
-      this.form.name = selectedData.name
-      this.form.info = selectedData.info
-      this.cacheForm = { ...this.form }
+    handleEdit(index, val) {
+      this.id = val.id
+      this.form.name = val.name
+      this.form.info = val.info
       this.dialogFormVisible = true
     },
     handleDelete(val) {
@@ -246,29 +210,9 @@ export default {
         }
       })
     },
-    // 双击 table row
-    rowClick(row) {
-      this.handleEdit(row)
-    },
-    // 弹窗打开时，判断某一分类权限是否全部选中
-    initModuleCheck(moduleName) {
-      const currentModuleChildrenArr = Object.keys(this.allAuths[moduleName])
-      const intersect = Utils.getIntersect(currentModuleChildrenArr, this.auths)
-      if (intersect.length === currentModuleChildrenArr.length) {
-        this.auths.push(moduleName)
-      }
-    },
-    // 弹窗打开时，记录缓存所拥有的全部权限
-    updateCacheAuths(cacheAuths) {
-      this.cacheAuths = cacheAuths
-    },
     // 获取拥有的权限
-    updateAuths(auths) {
-      this.auths = auths
-    },
-    // 获取所有权限
-    updateAllAuths(allAuths) {
-      this.allAuths = allAuths
+    updateAuths(groupUsers) {
+      this.groupUsers = groupUsers
     },
     // 弹框 右上角 X
     handleClose(done) {

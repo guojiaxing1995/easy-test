@@ -21,13 +21,12 @@
               <el-input size="medium" clearable v-model="form.info"></el-input>
             </el-form-item>
             <el-form-item>
-              <group-auths
+              <group-users
                 @updateAuths="updateAuths"
-                @updateAllAuths="updateAllAuths"
-                ref="groupAuths"
-                title="分配权限"
+                ref="groupUsers"
+                title="分配人员"
               >
-              </group-auths>
+              </group-users>
             </el-form-item>
             <el-form-item class="submit">
               <el-button type="primary" @click="submitForm('form')">保 存</el-button>
@@ -41,12 +40,12 @@
 </template>
 
 <script>
-import Admin from '@/lin/models/admin'
-import GroupAuths from './GroupAuths'
+import { post } from '@/lin/plugins/axios'
+import GroupUsers from './GroupUsers'
 
 export default {
   components: {
-    GroupAuths,
+    GroupUsers,
   },
   inject: ['eventBus'],
   data() {
@@ -58,11 +57,11 @@ export default {
       callback()
     }
     return {
-      allAuths: [], // 所有权限
-      auths: [], // 最终选择的权限
+      groupUsers: [], // 子组件传递的用户组人员被选情况 需处理
       form: {
         name: '',
         info: '',
+        users: [],
       },
       rules: {
         name: [{ validator: checkName, trigger: ['blur', 'change'], required: true }],
@@ -72,21 +71,28 @@ export default {
     }
   },
   methods: {
-    updateAuths(auths) {
-      this.auths = auths
+    updateAuths(groupUsers) {
+      this.groupUsers = groupUsers
     },
-    updateAllAuths(allAuths) {
-      this.allAuths = allAuths
+    // 获取所有授权用户的id放入数组
+    getAuths() {
+      const allAuthsUsers = []
+      for (const group of this.groupUsers) {
+        if (typeof group.choose !== 'undefined') {
+          allAuthsUsers.push(...group.choose)
+        }
+      }
+      this.form.users = allAuthsUsers
     },
     async submitForm(formName) {
       this.$refs[formName].validate(async valid => {
         // eslint-disable-line
         if (valid) {
+          this.getAuths()
           let res
-          const finalAuths = this.auths.filter(x => Object.keys(this.allAuths).indexOf(x) < 0)
           try {
             this.loading = true
-            res = await Admin.createOneGroup(this.form.name, this.form.info, finalAuths, this.id) // eslint-disable-line
+            res = await post('/v1/caseGroup', this.form, { showBackend: true })
           } catch (e) {
             this.loading = false
             console.log(e)
@@ -95,7 +101,7 @@ export default {
             this.loading = false
             this.$message.success(`${res.msg}`)
             this.eventBus.$emit('addGroup', true)
-            this.$router.push('/admin/group/list')
+            this.$router.push('/case/group/list')
             this.resetForm('form')
           } else {
             this.loading = false
@@ -109,7 +115,7 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
-      this.$refs.groupAuths.getGroupAuths()
+      this.$refs.groupUsers.getGroupAuths()
     },
   },
 }

@@ -24,3 +24,8 @@ class UserAuth(Base):
     @type.setter
     def type(self,user_auth):
         self._type = user_auth.value
+
+    @classmethod
+    def get_user_auth(cls,user_id, auth_id, type):
+        auth = UserAuth.query.filter().filter_by(user_id=user_id,auth_id=auth_id,_type=type).first()
+        return auth
