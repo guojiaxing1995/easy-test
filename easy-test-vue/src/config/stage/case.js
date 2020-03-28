@@ -48,6 +48,7 @@ const caseRouter = {
       icon: null,
       filePath: 'views/case/group',
       inNav: true,
+      permission: ['用例分组'],
       children: [
         {
           route: '/case/group/list',
@@ -57,7 +58,7 @@ const caseRouter = {
           filePath: 'views/case/group/GroupList.vue',
           title: '分组列表',
           icon: 'iconfont icon-huiyuanguanli',
-          // permission: ['超级管理员独有权限'],
+          keepAlive: false,
         },
         {
           route: '/case/group/add',
@@ -67,7 +68,7 @@ const caseRouter = {
           inNav: true,
           title: '添加分组',
           icon: 'iconfont icon-add',
-          // permission: ['超级管理员独有权限'],
+          keepAlive: false,
         },
       ],
     },

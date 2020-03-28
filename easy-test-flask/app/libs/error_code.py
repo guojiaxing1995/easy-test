@@ -16,3 +16,8 @@ class RefreshException(APIException):
     code = 401
     msg = "refresh token 获取失败"
     error_code = 10100
+
+class CaseGroupDeleteException(APIException):
+    code = 401
+    msg = "删除测试用例分组失败"
+    error_code = 91001

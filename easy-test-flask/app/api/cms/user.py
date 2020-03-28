@@ -163,7 +163,7 @@ def _register_user(form: RegisterForm):
 
 #按照分组返回所有用户
 @user_api.route('/UserByGroup', methods=['GET'])
-# @login_required
+@login_required
 def users_by_group():
     groups = manager.group_model.get(one=False)
     if groups is None:

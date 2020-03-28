@@ -9,15 +9,16 @@ from flask import jsonify
 from lin import manager
 from lin.exception import NotFound
 from lin.redprint import Redprint
+from lin import route_meta, group_required, login_required
 
 from app.models.UserAuth import UserAuth
 from app.validators.CaseForm import UserGroupAuthForm
 
 case_api = Redprint('case')
 
-#按照用户分组返回所有用户 并显示目标类型权限授权情况
+#按照用户权限分组返回所有用户 并显示目标类型权限授权情况
 @case_api.route('/UserByGroup', methods=['GET'])
-# @login_required
+@login_required
 def users_by_group():
     form = UserGroupAuthForm().validate_for_api()
 
@@ -30,9 +31,9 @@ def users_by_group():
         if users:
             for user in users:
                 # 如果传入权限分组和权限类型则返回对应用户是否获取到授权
-                if form.caseGroupId.data:
+                if form.authId.data:
                     # 查询权限表看当前循环用户是否有权限
-                    auth = UserAuth.get_user_auth(user.id, form.caseGroupId.data, form.authType.data)
+                    auth = UserAuth.get_user_auth(user.id, form.authId.data, form.authType.data)
                     if auth:
                         setattr(user, 'permission', True)
                         user._fields.append('permission')

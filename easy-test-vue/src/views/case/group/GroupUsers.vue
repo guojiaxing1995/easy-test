@@ -47,7 +47,7 @@ export default {
       this.loading = true
       this.allUsers = await get('/v1/case/UserByGroup',
         {
-          caseGroupId: this.groupId,
+          authId: this.groupId,
           authType: this.authType
         },
         { showBackend: true })

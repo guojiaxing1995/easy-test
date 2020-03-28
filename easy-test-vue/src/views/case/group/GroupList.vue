@@ -1,46 +1,57 @@
 <template>
   <div class="container">
-    <div class="title">测试用例分组信息</div>
-      <el-table
-        :data="tableData"
-        stripe
-        v-loading="loading"
-        style="width: 100%">
-        <el-table-column
-          fixed
-          prop="name"
-          label="名称"
-          :show-overflow-tooltip="true"
-          min-width="200">
-        </el-table-column>
-        <el-table-column
-          fixed
-          prop="info"
-          label="描述"
-          :show-overflow-tooltip="true"
-          min-width="350">
-        </el-table-column>
-        <el-table-column
-          width="180"
-          align="center"
-          fixed="right"
-          label="操作">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              type="primary"
-              plain
-              style="margin:auto"
-              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-            <el-button
-              size="mini"
-              type="danger"
-              plain
-              style="margin:auto"
-              @click="confirmEdit">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+    <div class="title">
+      测试用例分组信息
+      <el-select size="small" v-model="selectGroup" filterable placeholder="请输入分组名称查询" class="select" clearable>
+        <el-option
+          v-for="item in selectData"
+          :key="item.id"
+          :label="item.name"
+          :value="item.name">
+        </el-option>
+      </el-select>
+    </div>
+    <el-table
+      :data="tableData"
+      stripe
+      v-loading="loading"
+      style="width: 100%">
+      <el-table-column
+        fixed
+        prop="name"
+        label="名称"
+        :show-overflow-tooltip="true"
+        min-width="200">
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="info"
+        label="描述"
+        :show-overflow-tooltip="true"
+        min-width="350">
+      </el-table-column>
+      <el-table-column
+        width="180"
+        align="center"
+        fixed="right"
+        label="操作">
+        <template slot-scope="scope">
+          <el-button
+            size="mini"
+            type="primary"
+            plain
+            style="margin:auto"
+            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button
+            v-auth="{ auth: '删除用例分组', type: 'disabled'}"
+            size="mini"
+            type="danger"
+            plain
+            style="margin:auto"
+            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
     <el-dialog
       :append-to-body="true"
       :visible.sync="dialogFormVisible"
@@ -90,8 +101,7 @@
 </template>
 
 <script>
-import { get, put } from '@/lin/plugins/axios'
-import Admin from '@/lin/models/admin'
+import { get, put, _delete } from '@/lin/plugins/axios'
 import GroupUsers from './GroupUsers'
 
 export default {
@@ -104,6 +114,8 @@ export default {
       id: 0, // 分组id
       type: 1, // 类型为用例分组
       tableData: [], // 表格数据
+      selectData: [], // 拉框数据
+      selectGroup: '',
       dialogFormVisible: false, // 是否弹窗
       labelPosition: 'right', // 设置label位置
       form: {
@@ -123,12 +135,27 @@ export default {
       },
     }
   },
+  watch: {
+    selectGroup() {
+      if (this.selectGroup === '') {
+        this.tableData = this.selectData
+      } else {
+        for (const group of this.selectData) {
+          if (group.name === this.selectGroup) {
+            this.tableData = []
+            this.tableData.push(group)
+          }
+        }
+      }
+    },
+  },
   methods: {
     // 获取所有分组并传给table渲染
     async getAllGroups() {
       try {
         this.loading = true
         this.tableData = await get('/v1/caseGroup', { showBackend: true })
+        this.selectData = this.tableData
         this.loading = false
       } catch (e) {
         this.loading = false
@@ -161,6 +188,8 @@ export default {
         res = await put(`/v1/caseGroup/${this.id}`, this.form, { showBackend: true })
         if (res.error_code === 0) {
           this.$message.success(`${res.msg}`)
+          this.dialogFormVisible = false
+          await this.getAllGroups()
         } else {
           this.$message.error(`${res.msg}`)
         }
@@ -168,7 +197,6 @@ export default {
       } catch (error) {
         this.editLoading = false
       }
-      this.dialogFormVisible = false
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
@@ -181,7 +209,7 @@ export default {
       this.form.info = val.info
       this.dialogFormVisible = true
     },
-    handleDelete(val) {
+    handleDelete(index, val) {
       let res
       this.$confirm('此操作将永久删除该分组, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -190,7 +218,7 @@ export default {
       }).then(async () => {
         try {
           this.loading = true
-          res = await Admin.deleteOneGroup(val.row.id)
+          res = await _delete(`/v1/caseGroup/${val.id}`, { showBackend: true })
         } catch (e) {
           this.loading = false
           console.log(e)
@@ -250,6 +278,12 @@ export default {
     color: $parent-title-color;
     font-size: 16px;
     font-weight: 500;
+    position: relative;
+    width: 100%;
+    .select {
+      position: absolute;
+      right: 0;
+    }
   }
 }
 .groupListInfoDialog /deep/ .el-dialog__footer {

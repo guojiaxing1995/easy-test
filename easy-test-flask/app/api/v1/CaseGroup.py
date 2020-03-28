@@ -6,44 +6,39 @@
 @Desc    :
 """
 from flask import jsonify
-from lin import login_required
+from lin import login_required, route_meta, group_required
 from lin.exception import Success
 from lin.redprint import Redprint
 
 from app.models.CaseGroup import CaseGroup
-from app.validators.CaseForm import CaseGroupForm, CaseGroupSearchForm
+from app.validators.CaseForm import CaseGroupForm
 
 case_group_api = Redprint('caseGroup')
 
-@case_group_api.route('/<gid>', methods=['GET'])
-# @login_required
-def get_group(gid):
-    group = CaseGroup.get_detail(gid)
-    return jsonify(group)
-
 @case_group_api.route('', methods=['POST'])
-# @login_required
+@login_required
 def create_group():
     form = CaseGroupForm().validate_for_api()
     CaseGroup.new_group(form)
     return Success(msg='新建分组成功')
 
 @case_group_api.route('', methods=['GET'])
-# @login_required
+@route_meta('用例分组', module='测试用例')
+@group_required
 def get_groups():
     groups = CaseGroup.get_all()
     return jsonify(groups)
 
-@case_group_api.route('/search', methods=['GET'])
-# @login_required
-def search():
-    form = CaseGroupSearchForm().validate_for_api()
-    groups = CaseGroup.search_by_keywords(form.name.data)
-    return jsonify(groups)
-
 @case_group_api.route('/<gid>', methods=['PUT'])
-# @login_required
+@login_required
 def update_group(gid):
     form = CaseGroupForm().validate_for_api()
     CaseGroup.edit_group(gid, form)
     return Success(msg='更新分组成功')
+
+@case_group_api.route('/<gid>', methods=['DELETE'])
+@route_meta('删除用例分组', module='测试用例')
+@group_required
+def delete_group(gid):
+    CaseGroup.remove_group(gid)
+    return Success(msg='删除分组成功')

@@ -119,6 +119,13 @@ _axios.interceptors.response.use(
 
       // refresh_token 异常，直接登出
       if (error_code === 10000 || error_code === 10100) {
+        if (error_code === 10000) {
+          Vue.prototype.$notify({
+            title: '无权限操作',
+            dangerouslyUseHTMLString: true,
+            message: '<strong class="my-notify">请申请权限</strong>',
+          })
+        }
         setTimeout(() => {
           store.dispatch('loginOut')
           const { origin } = window.location

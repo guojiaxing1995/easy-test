@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import current_app
 from lin.db import db
 from lin.exception import NotFound, ParameterException, UnknownException
@@ -5,7 +7,9 @@ from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, String
 
 from app.libs.enums import UserAuthEnum
+from app.libs.error_code import CaseGroupDeleteException
 from app.models.UserAuth import UserAuth
+from app.models.case import Case
 
 
 class CaseGroup(Base):
@@ -49,13 +53,6 @@ class CaseGroup(Base):
         return groups
 
     @classmethod
-    def search_by_keywords(cls, q):
-        groups = cls.query.filter(CaseGroup.name.like('%' + q + '%'), CaseGroup.delete_time == None).all()
-        if not groups:
-            raise NotFound(msg='暂无分组')
-        return groups
-
-    @classmethod
     def edit_group(cls, gid, form):
         gid = int(gid)
         group = cls.query.filter_by(id=gid, delete_time=None).first_or_404()
@@ -66,7 +63,7 @@ class CaseGroup(Base):
         old_users = [user.user_id for user in old_user_auth]
         #新的授权人员
         new_users = form.users.data
-        if group_by_name == group:
+        if group_by_name == group or group_by_name is None:
             try:
                 group.id = gid
                 group.name = form.name.data
@@ -76,7 +73,7 @@ class CaseGroup(Base):
                     old = list(set(old_users).difference(set(new_users)))
                     if old:
                         for user_id in old:
-                            user = UserAuth.query.filter_by(user_id=user_id, _type=UserAuthEnum.GROUP.value, auth_id=gid,).first_or_404()
+                            user = UserAuth.query.filter_by(user_id=user_id, _type=UserAuthEnum.GROUP.value, auth_id=gid).first_or_404()
                             db.session.delete(user)
                     # 新人员列表中有 旧人员列表中没有，这部分新增
                     new = list(set(new_users).difference(set(old_users)))
@@ -90,26 +87,31 @@ class CaseGroup(Base):
                 db.session.commit()
             except Exception as e:
                 db.session.rollback()
-                raise UnknownException(msg='新增异常 数据已回滚')
+                raise UnknownException(msg='新增异常请检查数据重试')
         elif group_by_name is not None:
             raise ParameterException(msg='分组已存在')
 
         return True
 
-
-    @classmethod
-    def get_detail(cls, gid):
-        group = cls.query.filter_by(id=gid, delete_time=None).first_or_404()
-        # 获取目标分组的授权人员
-        user_auth = UserAuth.query.filter_by(auth_id=gid, _type=UserAuthEnum.GROUP.value).all()
-        users = [user.user_id for user in user_auth]
-        setattr(group, 'users', users)
-        group._fields.append('users')
-        return group
-
     @classmethod
     def remove_group(cls, gid):
         group = cls.query.filter_by(id=gid, delete_time=None).first_or_404()
-        # 删除分组，逻辑删除
-        group.delete(commit=True)
+        cases = Case.query.filter_by(case_group=gid, delete_time=None).all()
+        if cases:
+            raise CaseGroupDeleteException(msg='分组下存在用例无法删除')
+
+        try:
+            # 删除分组用户权限表，物理删除
+            user_auth = UserAuth.query.filter_by(auth_id=gid, _type=UserAuthEnum.GROUP.value).all()
+            if user_auth:
+                users = [user.user_id for user in user_auth]
+                for user in users:
+                    user = UserAuth.query.filter_by(user_id=user, _type=UserAuthEnum.GROUP.value,auth_id=gid).first()
+                    db.session.delete(user)
+            # 删除分组，逻辑删除
+            group.delete_time = datetime.now()
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise UnknownException(msg='删除异常请重试')
         return True

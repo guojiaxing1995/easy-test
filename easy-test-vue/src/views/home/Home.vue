@@ -4,7 +4,7 @@
       <el-aside :width="sideBarWidth" class="aside" :style="asideStyle">
         <side-bar :isCollapse="isCollapse" :is-phone="isPhone"></side-bar>
       </el-aside>
-      <el-container>
+      <el-container class="container">
         <el-header class="header">
           <div class="left">
             <div class="operate" ref="operate">
@@ -14,10 +14,12 @@
             <el-collapse-transition> <reuse-tab ref="reuse"></reuse-tab> </el-collapse-transition>
           </div>
         </el-header>
-        <el-main ref="main">
-          <menu-tab></menu-tab>
-          <app-main ref="appMain"></app-main>
-        </el-main>
+        <el-scrollbar style="height:100%">
+          <el-main ref="main">
+            <menu-tab></menu-tab>
+            <app-main ref="appMain"></app-main>
+          </el-main>
+        </el-scrollbar>
         <back-top :right="50" :bottom="50" :fontSize="34"></back-top>
       </el-container>
       <div class="sidenav-mask" :class="{ show: isPhone && isCollapse }" @click="changeSlidebarState"></div>
@@ -175,6 +177,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.container /deep/ .el-scrollbar__wrap {
+  overflow-x: hidden;
+}
 .aside {
   background: rgb(25, 42, 94);
   overflow-x: hidden;
