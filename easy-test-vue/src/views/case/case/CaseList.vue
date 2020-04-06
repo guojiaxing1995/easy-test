@@ -1,0 +1,429 @@
+<template>
+  <div>
+    <div class="container" v-if="!showEdit">
+      <div class="header">
+        <el-row justify="space-between" type="flex">
+        <el-col :span="5">
+          <label class="label">用例分组</label>
+          <el-select v-model="caseGroup" filterable placeholder="请选用例分组" clearable size="small" style="width:60%">
+            <el-option
+              v-for="item in allGroup"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="5">
+          <label class="label" >用例名称</label>
+          <el-input placeholder="请输入用例名称" v-model="name" clearable style="width:60%" size="small"></el-input>
+        </el-col>
+        <el-col :span="6">
+          <label class="label" >URL</label>
+          <el-input placeholder="请输入URL" v-model="url" clearable style="width:75%" size="small"></el-input>
+        </el-col>
+          <el-col :span="7">
+          <label class="label" >更新时间</label>
+          <el-date-picker
+            v-model="datetime"
+            clearable
+            :default-time="['00:00:00', '23:59:59']"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            size="small"
+            style="width:70%"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期">
+          </el-date-picker>
+        </el-col>
+        <el-col :span="1"><i class="el-icon-refresh" @click="handleRefresh"></i></el-col>
+      </el-row>
+      </div>
+      <!-- 列表页面 -->
+      <div class="table">
+        <el-table
+          :data="tableData"
+          stripe
+          v-loading="loading"
+          style="width: 100%">
+          <el-table-column type="expand" fixed>
+            <template slot-scope="props">
+              <el-form label-position="left" inline class="demo-table-expand">
+                <el-form-item label="处理方法">
+                  <div v-for="(val,key) in type.deal" :key="key">
+                    <span v-if="props.row.deal === parseInt(key)">{{ val }}</span>
+                  </div>
+                </el-form-item>
+                <el-form-item label="处理语句">
+                  <span>{{ props.row.condition }}</span>
+                </el-form-item>
+                <el-form-item label="断言方式">
+                  <div v-for="(val,key) in type.assert" :key="key">
+                    <span v-if="props.row.caseAssert === parseInt(key)">{{ val }}</span>
+                  </div>
+                </el-form-item>
+                <el-form-item label="预期结果">
+                  <span>{{ props.row.expectResult }}</span>
+                </el-form-item>
+                <el-form-item label="data">
+                  <span>{{ props.row.data }}</span>
+                </el-form-item>
+                <el-form-item label="header">
+                  <span>{{ props.row.header }}</span>
+                </el-form-item>
+              </el-form>
+            </template>
+          </el-table-column>
+          <el-table-column
+            fixed
+            prop="name"
+            label="用例名称"
+            :show-overflow-tooltip="true"
+            min-width="150">
+          </el-table-column>
+          <el-table-column
+            label="请求方法"
+            :show-overflow-tooltip="true"
+            width="130">
+            <template slot-scope="scope">
+              <div :key="key" v-for="(val,key) in type.method" class="method">
+                <div v-if="scope.row.method === 1 && scope.row.method === parseInt(key)" class="get">{{val}}</div>
+                <div v-else-if="scope.row.method === 2 && scope.row.method === parseInt(key)" class="post">{{val}}</div>
+                <div v-else-if="scope.row.method === 3 && scope.row.method === parseInt(key)" class="put">{{val}}</div>
+                <div v-else-if="scope.row.method === 4 && scope.row.method === parseInt(key)" class="delete">{{val}}</div>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="url"
+            label="URL"
+            :show-overflow-tooltip="true"
+            width="280">
+          </el-table-column>
+          <el-table-column
+            label="提交方式"
+            :show-overflow-tooltip="true"
+            width="130">
+            <template slot-scope="scope">
+              <div :key="key" v-for="(val,key) in type.submit" class="submit">
+                <div v-if="scope.row.submit === 1 && scope.row.submit === parseInt(key)" class="json">{{val}}</div>
+                <div v-else-if="scope.row.submit === 2 && scope.row.submit === parseInt(key)" class="form">{{val}}</div>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="groupName"
+            label="用例组"
+            :show-overflow-tooltip="true"
+            width="130">
+          </el-table-column>
+          <el-table-column
+            label="描述"
+            align="center"
+            width="100">
+            <template slot-scope="scope">
+              <el-tooltip effect="dark" placement="top-start" v-if="scope.row.info">
+                <div slot="content">{{scope.row.info}}</div>
+                <l-icon name="info" color="#3963bc" height="1.6em" width="1.6em" style="margin:auto"></l-icon>
+              </el-tooltip>
+              <l-icon name="info" color="#ccc" height="1.6em" width="1.6em" v-else style="margin:auto"></l-icon>
+            </template>
+          </el-table-column>
+          <el-table-column
+            width="250"
+            align="center"
+            fixed="right"
+            label="操作">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                style="margin:auto"
+                type="primary"
+                plain
+                v-auth="{ auth: '编辑用例', type: 'disabled'}"
+                @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+              <el-button
+                size="mini"
+                type="danger"
+                style="margin:auto"
+                plain
+                v-auth="{ auth: '删除用例', type: 'disabled'}"
+                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              <el-button
+                size="mini"
+                type="info"
+                style="margin:auto"
+                plain=""
+                @click="handleStart(scope.$index, scope.row)">调试</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div class="pagination">
+        <el-pagination
+          background
+          :hide-on-single-page=true
+          @current-change="handleCurrentChange"
+          layout="prev, pager, next"
+          :current-page="page"
+          :page-size=10
+          :total="total">
+        </el-pagination>
+      </div>
+    </div>
+    <!-- 编辑页面 -->
+    <case-add-or-edit v-else @editClose="editClose" :editCase="editCase"></case-add-or-edit>
+  </div>
+</template>
+
+<script>
+import Utils from 'lin/utils/util'
+
+import { get, _delete } from '@/lin/plugins/axios'
+import CaseAddOrEdit from './CaseAddOrEdit'
+
+export default {
+  components: {
+    CaseAddOrEdit
+  },
+  inject: ['eventBus'],
+  data() {
+    return {
+      editBookID: {},
+      loading: false,
+      caseGroup: null,
+      allGroup: null,
+      name: '',
+      url: '',
+      datetime: null,
+      startTime: null,
+      endTime: null,
+      tableData: [],
+      showEdit: false,
+      editBook: {},
+      page: 1,
+      pages: 1,
+      total: 0,
+      type: {
+        method: {},
+        submit: {},
+        deal: {},
+        assert: {}
+      }
+    }
+  },
+  async created() {
+    this.loading = true
+    await this.getType()
+    await this.getCases()
+    this.loading = false
+    await this.getAllGroups()
+    // 节流搜素
+    this.$watch(
+      'name',
+      Utils.debounce(() => {
+        this.getCases()
+      }, 1000),
+    )
+    this.$watch(
+      'url',
+      Utils.debounce(() => {
+        this.getCases()
+      }, 1000),
+    )
+
+    this.eventBus.$on('case', this.case)
+  },
+  beforeDestroy() {
+    this.eventBus.$off('case', this.case)
+  },
+  methods: {
+    // 监听新增更新用例是否成功
+    async case(flag) {
+      if (flag === true) {
+        await this.getCases()
+      }
+    },
+    async handleRefresh() {
+      await this.getCases()
+    },
+    async getType() {
+      const method = await get('/v1/case/type', { type: 'METHOD' }, { showBackend: true })
+      const submit = await get('/v1/case/type', { type: 'SUBMIT' }, { showBackend: true })
+      const deal = await get('/v1/case/type', { type: 'DEAL' }, { showBackend: true })
+      const assert = await get('/v1/case/type', { type: 'ASSERT' }, { showBackend: true })
+      this.type.method = method
+      this.type.submit = submit
+      this.type.deal = deal
+      this.type.assert = assert
+    },
+    async getAllGroups() {
+      try {
+        this.allGroup = await get('/v1/caseGroup/auth', { showBackend: true })
+      } catch (e) {
+        this.loading = false
+      }
+    },
+    async getCases() {
+      this.loading = true
+      if (this.datetime) {
+        [this.startTime, this.endTime] = this.datetime
+      } else {
+        this.startTime = null
+        this.endTime = null
+      }
+      try {
+        const data = await get('/v1/case', {
+          caseGroup: this.caseGroup,
+          name: this.name,
+          url: this.url,
+          start: this.startTime,
+          end: this.endTime,
+          page: this.page
+        }, { showBackend: true })
+        this.tableData = data.data
+        this.total = data.total
+        this.page = data.page
+        this.pages = data.pages
+        this.loading = false
+      } catch (error) {
+        if (error.error_code !== 0) {
+          this.tableData = []
+        }
+        this.loading = false
+      }
+    },
+    handleEdit(index, row) {
+      this.showEdit = true
+      this.editCase = row
+    },
+    handleDelete(index, row) {
+      this.$confirm('此操作将永久删除该用例, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(async () => {
+        const res = await _delete(`/v1/case/${row.id}`, { showBackend: true })
+        if (res.error_code === 0) {
+          this.getCases()
+          this.$message({
+            type: 'success',
+            message: `${res.msg}`,
+          })
+        }
+      })
+    },
+    editClose() {
+      this.showEdit = false
+      this.getCases()
+    },
+    handleCurrentChange(val) {
+      this.page = val
+      this.getCases()
+    },
+  },
+  watch: {
+    caseGroup() {
+      this.getCases()
+    },
+    datetime() {
+      this.getCases()
+    },
+  },
+}
+</script>
+
+<style lang="scss" scoped>
+.container {
+  padding: 0 30px;
+
+  .header {
+    align-items: center;
+    height: 65px;
+    line-height: 65px;
+    color: $parent-title-color;
+    font-size: 16px;
+    font-weight: 500;
+
+    .el-icon-refresh{
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .label {
+      margin-right: 10px;
+    }
+  }
+
+  .table{
+
+    .method {
+      .get {
+        color: #67C23A;
+        font-weight: 500;
+      }
+      .post {
+        color: #E6A23C;
+        font-weight: 500;
+      }
+      .put {
+        color: #409EFF;
+        font-weight: 500;
+      }
+      .delete {
+        color: #F56C6C;
+        font-weight: 500;
+      }
+    }
+
+    .submit {
+      .json {
+        color: #4f383e;
+        font-weight: 500;
+      }
+      .form {
+        color: #5c2223;
+        font-weight: 500;
+      }
+    }
+
+  }
+
+  .table /deep/ .demo-table-expand {
+    font-size: 0;
+  }
+  .table /deep/ .demo-table-expand label {
+    width: 80px;
+    color: #3963bc;
+  }
+  .table /deep/ .demo-table-expand .el-form-item {
+    margin-right: 0;
+    margin-bottom: 0;
+    width: 50%;
+  }
+  .table /deep/ .el-form-item__content {
+    margin-bottom: 0;
+  }
+  .table /deep/ .el-table .cell {
+    padding-left: 20px;
+  }
+  // 滚动条优化
+  .table /deep/ .el-table__body-wrapper::-webkit-scrollbar {
+    width: 6px;
+    height: 10px;
+  }
+  .table /deep/ .el-table__body-wrapper::-webkit-scrollbar-thumb {
+    background-color: #ddd;
+    border-radius: 5px;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+    margin-bottom: 20px;
+  }
+
+}
+</style>

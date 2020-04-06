@@ -1,0 +1,294 @@
+<template>
+  <div class="container">
+    <div class="title" v-if="editCase">
+      <span>修改用例</span> <span class="back" @click="back"> <i class="iconfont icon-fanhui"></i> 返回 </span>
+    </div>
+    <el-divider></el-divider>
+    <div class="wrap">
+      <el-row>
+        <el-col :lg="16" :md="20" :sm="24" :xs="24">
+          <el-form :model="form" status-icon ref="form" label-width="100px" v-loading="loading" @submit.native.prevent class="form" :rules="rules">
+            <el-form-item label="用例名称" prop="name">
+              <el-input size="medium" v-model="form.name" placeholder="请填写用例名称"></el-input>
+            </el-form-item>
+            <el-form-item label="所属分组" prop="caseGroup">
+              <el-select v-model="form.caseGroup" filterable placeholder="请选用例分组" size="medium" :disabled="Boolean(editCase)">
+                <el-option
+                  v-for="item in allGroup"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="URL" prop="url">
+              <el-input size="medium" v-model="form.url" placeholder="请填写URL">
+                <template slot="prepend">http://server</template>
+              </el-input>
+            </el-form-item>
+            <el-form-item label="请求方法">
+              <el-radio-group v-model="form.method">
+                <label v-for="(val,key) in type.method" :key="key" class="el-radio">
+                  <el-radio :label="key">{{val}}</el-radio>
+                </label>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="data" prop="data">
+              <el-input size="medium" type="textarea" :autosize="{ minRows: 3, maxRows: 9}" placeholder="请输入请求体" v-model="form.data">
+              </el-input>
+            </el-form-item>
+            <el-form-item label="header" prop="header">
+              <el-input size="medium" type="textarea" :autosize="{ minRows: 3, maxRows: 9}" placeholder="请输入请求头" v-model="form.header">
+              </el-input>
+            </el-form-item>
+            <el-form-item label="请求方式">
+              <el-radio-group v-model="form.submit">
+                <label v-for="(val,key) in type.submit" :key="key" class="el-radio">
+                  <el-radio :label="key">{{val}}</el-radio>
+                </label>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="后置处理">
+              <el-radio-group v-model="form.deal">
+                <label v-for="(val,key) in type.deal" :key="key" class="el-radio">
+                  <el-radio :label="key">{{val}}</el-radio>
+                </label>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="处理语句" prop="condition">
+              <el-input size="medium" type="textarea" :autosize="{ minRows: 1, maxRows: 3}" placeholder="请输入处理语句" v-model="form.condition" maxlength="50" show-word-limit>
+              </el-input>
+            </el-form-item>
+            <el-form-item label="断言方式">
+              <el-radio-group v-model="form.caseAssert">
+                <label v-for="(val,key) in type.assert" :key="key" class="el-radio">
+                  <el-radio :label="key">{{val}}</el-radio>
+                </label>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="期望结果" prop="expectResult">
+              <el-input size="medium" type="textarea" :autosize="{ minRows: 2, maxRows: 6}" placeholder="请输入期望结果" v-model="form.expectResult" maxlength="500" show-word-limit>
+              </el-input>
+            </el-form-item>
+            <el-form-item label="用例描述" prop="info">
+              <el-input size="medium" type="textarea" :autosize="{ minRows: 3, maxRows: 9}" placeholder="请输入用例描述" v-model="form.info" maxlength="50" show-word-limit>
+              </el-input>
+            </el-form-item>
+            <el-form-item class="submit">
+              <el-button type="primary" @click="submitForm('form')">保 存</el-button>
+              <el-button @click="resetForm('form')">重 置</el-button>
+            </el-form-item>
+          </el-form>
+        </el-col>
+      </el-row>
+    </div>
+  </div>
+</template>
+
+<script>
+import { get, post, put } from '@/lin/plugins/axios'
+
+export default {
+  inject: ['eventBus'],
+  props: {
+    editCase: {
+      type: Object,
+    },
+  },
+  data() {
+    return {
+      loading: false,
+      allGroup: [],
+      oldCase: {},
+      form: {
+        name: '',
+        info: '',
+        data: '',
+        header: '',
+        url: '',
+        method: '1',
+        submit: '1',
+        deal: '1',
+        condition: '',
+        caseAssert: '1',
+        expectResult: '',
+        caseGroup: '',
+        type: 1
+      },
+      rules: {
+        name: [
+          { required: true, message: '请输入用例名称', trigger: 'blur' },
+          { max: 20, message: '用例名称需小于20字', trigger: 'blur' },
+        ],
+        caseGroup: [
+          { required: true, message: '请选择用例分组', trigger: 'blur' },
+        ],
+        url: [
+          { required: true, message: '请输入请求地址', trigger: 'blur' },
+          { max: 500, message: '用例名称需小于500字', trigger: 'blur' }
+        ],
+      },
+      type: {
+        method: {},
+        submit: {},
+        deal: {},
+        assert: {}
+      },
+    }
+  },
+  async mounted() {
+    this.loading = true
+    await this.getType()
+    await this.getAllGroups()
+    if (this.editCase) {
+      this.form = this.editCase
+      this.form.deal = this.editCase.deal.toString()
+      this.form.method = this.editCase.method.toString()
+      this.form.submit = this.editCase.submit.toString()
+      this.form.caseAssert = this.editCase.caseAssert.toString()
+    }
+    this.loading = false
+  },
+  methods: {
+    async getAllGroups() {
+      try {
+        this.allGroup = await get('/v1/caseGroup/auth', { showBackend: true })
+      } catch (e) {
+        this.loading = false
+      }
+    },
+    async getType() {
+      const method = await get('/v1/case/type', { type: 'METHOD' }, { showBackend: true })
+      const submit = await get('/v1/case/type', { type: 'SUBMIT' }, { showBackend: true })
+      const deal = await get('/v1/case/type', { type: 'DEAL' }, { showBackend: true })
+      const assert = await get('/v1/case/type', { type: 'ASSERT' }, { showBackend: true })
+      this.type.method = method
+      this.type.submit = submit
+      this.type.deal = deal
+      this.type.assert = assert
+    },
+    async create() {
+      const newForm = this.form
+      newForm.method = parseInt(this.form.method, 10)
+      newForm.submit = parseInt(this.form.submit, 10)
+      newForm.deal = parseInt(this.form.deal, 10)
+      newForm.caseAssert = parseInt(this.form.caseAssert, 10)
+      let res
+      try {
+        this.loading = true
+        res = await post('/v1/case', newForm, { showBackend: true })
+      } catch (e) {
+        this.loading = false
+      }
+      if (res.error_code === 0) {
+        this.loading = false
+        this.$message.success(`${res.msg}`)
+        this.eventBus.$emit('case', true)
+        this.$router.push('/case/case/list')
+      } else {
+        this.loading = false
+        this.$message.error(`${res.msg}`)
+      }
+    },
+    async edit() {
+      const newForm = this.form
+      newForm.method = parseInt(this.form.method, 10)
+      newForm.submit = parseInt(this.form.submit, 10)
+      newForm.deal = parseInt(this.form.deal, 10)
+      newForm.caseAssert = parseInt(this.form.caseAssert, 10)
+      let res
+      try {
+        this.loading = true
+        res = await put(`/v1/case/${newForm.id}`, newForm, { showBackend: true })
+      } catch (e) {
+        this.loading = false
+      }
+      if (res.error_code === 0) {
+        this.loading = false
+        this.$message.success(`${res.msg}`)
+        this.eventBus.$emit('case', true)
+        this.$emit('editClose')
+      } else {
+        this.loading = false
+        this.$message.error(`${res.msg}`)
+      }
+    },
+    async submitForm(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          if (this.editCase) {
+            this.edit()
+          } else {
+            this.create()
+          }
+        } else {
+          return false
+        }
+      })
+    },
+    // 重置表单
+    async resetForm(formName) {
+      // 如果是编辑用例则重置为编辑初始值
+      if (this.editCase) {
+        this.loading = true
+        const reult = await get('/v1/case', {
+          id: this.editCase.id,
+        }, { showBackend: true })
+        const [form] = reult.data
+        this.form = form
+        this.form.deal = form.deal.toString()
+        this.form.method = form.method.toString()
+        this.form.submit = form.submit.toString()
+        this.form.caseAssert = form.caseAssert.toString()
+        this.loading = false
+      } else {
+        this.$refs[formName].resetFields()
+        this.form.submit = '1'
+        this.form.deal = '1'
+        this.form.caseAssert = '1'
+        this.form.method = '1'
+      }
+    },
+    back() {
+      this.$emit('editClose')
+    },
+  },
+}
+</script>
+
+<style lang="scss" scoped>
+.el-divider--horizontal {
+  margin: 0;
+}
+
+.container {
+  .title {
+    height: 59px;
+    line-height: 59px;
+    color: $parent-title-color;
+    font-size: 16px;
+    font-weight: 500;
+    text-indent: 40px;
+
+    .back {
+      float: right;
+      margin-right: 40px;
+      cursor: pointer;
+    }
+  }
+
+  .form /deep/ .el-input-group__prepend {
+    background: #f5f7fa;
+    border: 1px solid #3963bc;
+    color: #3963bc;
+  }
+
+  .wrap {
+    padding: 20px;
+  }
+
+  .submit {
+    float: left;
+  }
+}
+</style>

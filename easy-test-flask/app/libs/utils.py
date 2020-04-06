@@ -47,3 +47,12 @@ def json_res(**kwargs):
     count, items, page, total, total_page ...
     '''
     return jsonify(kwargs)
+
+def paging(paginate):
+    return {
+        'data': paginate.items,
+        'page': paginate.page,
+        'pages': paginate.pages,
+        'count': paginate.per_page,
+        'total': paginate.total
+    }

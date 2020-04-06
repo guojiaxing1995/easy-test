@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import current_app
+from flask_jwt_extended import current_user
 from lin.db import db
 from lin.exception import NotFound, ParameterException, UnknownException
 from lin.interface import InfoCrud as Base
@@ -48,6 +49,19 @@ class CaseGroup(Base):
     @classmethod
     def get_all(cls):
         groups = cls.query.filter_by(delete_time=None).all()
+        if not groups:
+            raise NotFound(msg='暂无分组')
+        return groups
+
+    @classmethod
+    def get_auth(cls):
+        '''获取当前用户授权的分组 如果登陆用户是管理员则返回多有用例组'''
+        if current_user.id == 1:
+            groups = cls.get_all()
+        else:
+            auths = UserAuth.query.filter_by(user_id=current_user.id, _type=UserAuthEnum.GROUP.value).all()
+            gids = [auth.auth_id for auth in auths]
+            groups = cls.query.filter(cls.delete_time==None, cls.id.in_(gids)).all()
         if not groups:
             raise NotFound(msg='暂无分组')
         return groups

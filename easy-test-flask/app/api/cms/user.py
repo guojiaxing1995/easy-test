@@ -176,7 +176,5 @@ def users_by_group():
                 user.hide('active','admin','group_id','update_time','create_time')
             setattr(group, 'users', users)
             group._fields.append('users')
-        else:
-            groups.remove(group)
 
     return jsonify(groups)

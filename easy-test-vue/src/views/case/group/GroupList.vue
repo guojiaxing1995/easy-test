@@ -263,7 +263,7 @@ export default {
     this.eventBus.$on('addGroup', this.addGroup)
   },
   beforeDestroy() {
-    this.eventBus.$off('addUser', this.addGroup)
+    this.eventBus.$off('addGroup', this.addGroup)
   },
 }
 </script>

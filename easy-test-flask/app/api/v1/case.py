@@ -5,14 +5,16 @@
 @File    : case.py
 @Desc    : 用例视图
 """
-from flask import jsonify
+from flask import jsonify, current_app
 from lin import manager
-from lin.exception import NotFound
+from lin.exception import NotFound, Success, ParameterException
 from lin.redprint import Redprint
 from lin import route_meta, group_required, login_required
 
+from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTypeEnum, CaseAssertEnum
 from app.models.UserAuth import UserAuth
-from app.validators.CaseForm import UserGroupAuthForm
+from app.models.case import Case
+from app.validators.CaseForm import UserGroupAuthForm, CaseForm, CaseSearchForm, EnumTypeForm
 
 case_api = Redprint('case')
 
@@ -46,7 +48,59 @@ def users_by_group():
                 user.hide('active','admin','group_id','update_time','create_time')
             setattr(user_group, 'users', users)
             user_group._fields.append('users')
-        else:
-            user_groups.remove(user_group)
 
     return jsonify(user_groups)
+
+@case_api.route('', methods=['POST'])
+@route_meta('新增用例', module='用例')
+@group_required
+def create_case():
+    form = CaseForm().validate_for_api()
+    case = Case(form.caseGroup.data,form.name.data,form.info.data,form.url.data,form.method.data,form.submit.data,
+                form.header.data,form.data.data,form.deal.data,form.condition.data,form.expectResult.data,form.caseAssert.data,form.type.data)
+    case.new_case()
+    return Success(msg='新增用例成功')
+
+@case_api.route('/<cid>', methods=['PUT'])
+@route_meta('编辑用例', module='用例')
+@group_required
+def update_case(cid):
+    form = CaseForm().validate_for_api()
+    case = Case.query.filter_by(id=cid, case_group=form.caseGroup.data, delete_time=None).first_or_404()
+    case.edit_case(form.name.data,form.info.data,form.url.data,form.method.data,form.submit.data,form.header.data,
+                   form.data.data,form.deal.data,form.condition.data,form.expectResult.data,form.caseAssert.data,form.type.data)
+    return Success(msg='更新用例成功')
+
+@case_api.route('/<cid>', methods=['DELETE'])
+@route_meta('删除用例', module='用例')
+@group_required
+def delete_case(cid):
+    case = Case.query.filter_by(id=cid, delete_time=None).first_or_404()
+    case.remove_case()
+    return Success(msg='删除用例成功')
+
+@case_api.route('', methods=['GET'])
+@route_meta('测试用例', module='用例')
+@group_required
+def get_case():
+    form = CaseSearchForm().validate_for_api()
+    result = Case.search_case(form.name.data,form.url.data,form.caseGroup.data,form.start.data,form.end.data,form.id.data,form.page.data,form.count.data)
+
+    return jsonify(result)
+
+@case_api.route('/type', methods=['GET'])
+@login_required
+def enum_type():
+    form = EnumTypeForm().validate_for_api()
+    if form.type.data == 'METHOD':
+        return CaseMethodEnum.data()
+    elif form.type.data == 'SUBMIT':
+        return CaseSubmitEnum.data()
+    elif form.type.data == 'DEAL':
+        return CaseDealEnum.data()
+    elif form.type.data == 'TYPE':
+        return CaseTypeEnum.data()
+    elif form.type.data == 'ASSERT':
+        return CaseAssertEnum.data()
+    else:
+        raise ParameterException(msg='无目标类型')

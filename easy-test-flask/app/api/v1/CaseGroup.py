@@ -23,7 +23,7 @@ def create_group():
     return Success(msg='新建分组成功')
 
 @case_group_api.route('', methods=['GET'])
-@route_meta('用例分组', module='测试用例')
+@route_meta('用例分组', module='用例')
 @group_required
 def get_groups():
     groups = CaseGroup.get_all()
@@ -37,8 +37,15 @@ def update_group(gid):
     return Success(msg='更新分组成功')
 
 @case_group_api.route('/<gid>', methods=['DELETE'])
-@route_meta('删除用例分组', module='测试用例')
+@route_meta('删除用例分组', module='用例')
 @group_required
 def delete_group(gid):
     CaseGroup.remove_group(gid)
     return Success(msg='删除分组成功')
+
+@case_group_api.route('/auth', methods=['GET'])
+@login_required
+def get_auth_groups():
+    '''获取当前登陆用户的授权分组'''
+    groups = CaseGroup.get_auth()
+    return jsonify(groups)
