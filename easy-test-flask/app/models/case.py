@@ -238,6 +238,7 @@ class Case(Base):
             'body': body,
             'headers': res.headers,
             'cookies': res.cookies,
-            'encoding': res.encoding
+            'encoding': res.encoding,
+            'totalSeconds': res.elapsed.total_seconds()
         }
         return result
