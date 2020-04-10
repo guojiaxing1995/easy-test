@@ -1,4 +1,4 @@
-""" 
+"""
 @Time    : 2020/3/21 10:36
 @Author  : 郭家兴
 @Email   : 302802003@qq.com
@@ -14,7 +14,7 @@ from lin import route_meta, group_required, login_required
 from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTypeEnum, CaseAssertEnum
 from app.models.UserAuth import UserAuth
 from app.models.case import Case
-from app.validators.CaseForm import UserGroupAuthForm, CaseForm, CaseSearchForm, EnumTypeForm
+from app.validators.CaseForm import UserGroupAuthForm, CaseForm, CaseSearchForm, EnumTypeForm, CaseDebugForm
 
 case_api = Redprint('case')
 
@@ -104,3 +104,11 @@ def enum_type():
         return CaseAssertEnum.data()
     else:
         raise ParameterException(msg='无目标类型')
+
+@case_api.route('/debug', methods=['POST'])
+@login_required
+def debug():
+    form = CaseDebugForm().validate_for_api()
+    case = Case(None,None,None,form.url.data,form.method.data,form.submit.data,form.header.data,form.data.data)
+    result = case.case_debug()
+    return jsonify(result)

@@ -1,4 +1,4 @@
-""" 
+"""
 @Time    : 2020/3/25 19:08
 @Author  : 郭家兴
 @Email   : 302802003@qq.com
@@ -6,7 +6,9 @@
 @Desc    : 测试用例模型
 """
 from datetime import datetime
-
+import json
+import re
+import requests
 from flask import current_app
 from flask_jwt_extended import current_user, get_current_user
 from lin.exception import ParameterException, AuthFailed
@@ -53,8 +55,8 @@ class Case(Base):
         self.case_assert = CaseAssertEnum(case_assert)
         self.type = CaseTypeEnum(type)
         self.case_group = case_group
-        self.create_user = get_current_user().id
-        self.update_user = get_current_user().id
+        self.create_user = get_current_user().id if get_current_user() else None
+        self.update_user = get_current_user().id if get_current_user() else None
         self.create_user = 1
         self.update_user = 1
 
@@ -174,3 +176,68 @@ class Case(Base):
         results.items = items
         data = paging(results)
         return data
+
+    #字符串转字典
+    def str_to_dict(self):
+        self.data = json.loads(self.data) if self.data  else self.data
+        self.header = json.loads(self.header) if self.header else  self.header
+
+    def get_request(self):
+        res = requests.get(url=self.url,params=self.data,headers=self.header)
+        return res
+
+    def post_request(self):
+        if self.submit == CaseSubmitEnum.JSON.value:
+            res = requests.post(url=self.url, json=self.data, headers=self.header)
+        elif self.submit == CaseSubmitEnum.FORM.value:
+            res = requests.post(url=self.url, data=self.data, headers=self.header)
+        return res
+
+    def put_request(self):
+        if self.submit == CaseSubmitEnum.JSON.value:
+            res = requests.put(url=self.url, json=self.data, headers=self.header)
+        elif self.submit == CaseSubmitEnum.FORM.value:
+            res = requests.put(url=self.url, data=self.data, headers=self.header)
+        return res
+
+    def delete_request(self):
+        if self.submit == CaseSubmitEnum.JSON.value:
+            res = requests.delete(url=self.url, json=self.data, headers=self.header)
+        elif self.submit == CaseSubmitEnum.FORM.value:
+            res = requests.delete(url=self.url, data=self.data, headers=self.header)
+        return res
+
+    def method_request(self):
+        res = None
+        if self.method == CaseMethodEnum.GET.value:
+            res = self.get_request()
+        elif self.method == CaseMethodEnum.POST.value:
+            res = self.post_request()
+        elif self.method == CaseMethodEnum.PUT.value:
+            res = self.put_request()
+        elif self.method == CaseMethodEnum.DELETE.value:
+            res = self.delete_request()
+
+        return res
+
+    # 用例调试
+    def case_debug(self):
+        self.str_to_dict()
+        try:
+            res = self.method_request()
+        except Exception:
+            raise ParameterException(msg='参数错误')
+        status_code = res.status_code
+        try:
+            body = res.json()
+        except Exception:
+            body = res.text
+
+        result = {
+            'statusCode': status_code,
+            'body': body,
+            'headers': res.headers,
+            'cookies': res.cookies,
+            'encoding': res.encoding
+        }
+        return result

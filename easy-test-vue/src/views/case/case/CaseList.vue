@@ -67,10 +67,10 @@
                   <span>{{ props.row.expectResult }}</span>
                 </el-form-item>
                 <el-form-item label="data">
-                  <span>{{ props.row.data }}</span>
+                  <pre>{{ props.row.data }}</pre>
                 </el-form-item>
                 <el-form-item label="header">
-                  <span>{{ props.row.header }}</span>
+                  <pre>{{ props.row.header }}</pre>
                 </el-form-item>
               </el-form>
             </template>
@@ -80,12 +80,12 @@
             prop="name"
             label="用例名称"
             :show-overflow-tooltip="true"
-            min-width="150">
+            min-width="200">
           </el-table-column>
           <el-table-column
             label="请求方法"
             :show-overflow-tooltip="true"
-            width="130">
+            width="125">
             <template slot-scope="scope">
               <div :key="key" v-for="(val,key) in type.method" class="method">
                 <div v-if="scope.row.method === 1 && scope.row.method === parseInt(key)" class="get">{{val}}</div>
@@ -99,12 +99,12 @@
             prop="url"
             label="URL"
             :show-overflow-tooltip="true"
-            width="280">
+            min-width="280">
           </el-table-column>
           <el-table-column
             label="提交方式"
             :show-overflow-tooltip="true"
-            width="130">
+            width="125">
             <template slot-scope="scope">
               <div :key="key" v-for="(val,key) in type.submit" class="submit">
                 <div v-if="scope.row.submit === 1 && scope.row.submit === parseInt(key)" class="json">{{val}}</div>
@@ -116,12 +116,12 @@
             prop="groupName"
             label="用例组"
             :show-overflow-tooltip="true"
-            width="130">
+            min-width="160">
           </el-table-column>
           <el-table-column
             label="描述"
             align="center"
-            width="100">
+            width="70">
             <template slot-scope="scope">
               <el-tooltip effect="dark" placement="top-start" v-if="scope.row.info">
                 <div slot="content">{{scope.row.info}}</div>
@@ -155,7 +155,7 @@
                 type="info"
                 style="margin:auto"
                 plain=""
-                @click="handleStart(scope.$index, scope.row)">调试</el-button>
+                @click="handleDebug(scope.$index, scope.row)">调试</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -174,13 +174,70 @@
     </div>
     <!-- 编辑页面 -->
     <case-add-or-edit v-else @editClose="editClose" :editCase="editCase"></case-add-or-edit>
+    <!-- 調試框 -->
+    <el-drawer
+      title="用例调试"
+      :with-header="false"
+      :visible.sync="drawer"
+      direction="ltr"
+      ustom-class="drawer"
+      ref="drawer"
+      size='31%'
+      >
+      <div class="debug">
+        <div class="title">{{debugForm.name}}</div>
+        <div class="debugForm">
+          <el-form :model="debugForm" :rules="rules" ref="debugForm">
+            <el-form-item label="SERVER" label-width="80px" prop="server">
+              <el-input v-model="debugForm.server" autocomplete="off" placeholder="请输入服务地址"></el-input>
+            </el-form-item>
+            <el-form-item label="URL" label-width="80px" prop="url">
+              <el-input v-model="debugForm.url" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="请求方法" label-width="80px" prop="method">
+              <el-radio-group v-model="debugForm.method">
+                <label v-for="(val,key) in type.method" :key="key" class="el-radio">
+                  <el-radio :label="key">{{val}}</el-radio>
+                </label>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="header" prop="header" label-width="80px">
+              <el-input size="medium" type="textarea" :autosize="{ minRows: 3, maxRows: 5}" v-model="debugForm.header">
+              </el-input>
+            </el-form-item>
+            <el-form-item label="data" prop="data" label-width="80px">
+              <el-input size="medium" type="textarea" :autosize="{ minRows: 3, maxRows: 5}" v-model="debugForm.data">
+              </el-input>
+            </el-form-item>
+            <el-form-item label="请求方式" label-width="80px" prop="submit">
+              <el-radio-group v-model="debugForm.submit">
+                <label v-for="(val,key) in type.submit" :key="key" class="el-radio">
+                  <el-radio :label="key">{{val}}</el-radio>
+                </label>
+              </el-radio-group>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="result" ref="result" v-loading='debugLoding'>
+          <el-scrollbar style="height:100%" v-if="debugResult">
+            <el-tag v-if="this.statusCode>=400"  effect="plain" type="danger" class="code">{{statusCode}}</el-tag>
+            <el-tag v-else  effect="plain" type="success" class="code">{{statusCode}}</el-tag>
+            <i class="el-icon-copy-document" @click="copyText"></i>
+            <pre>{{debugResult}}</pre>
+          </el-scrollbar>
+        </div>
+        <div class="debugButton">
+          <el-button type="primary" @click="send" :loading='debugLoding'>{{ debugLoding ? 'sending...' : 'send' }}</el-button>
+        </div>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
 <script>
 import Utils from 'lin/utils/util'
 
-import { get, _delete } from '@/lin/plugins/axios'
+import { get, _delete, post } from '@/lin/plugins/axios'
 import CaseAddOrEdit from './CaseAddOrEdit'
 
 export default {
@@ -190,6 +247,25 @@ export default {
   inject: ['eventBus'],
   data() {
     return {
+      statusCode: 200,
+      debugLoding: false,
+      debugResultDiv: false,
+      debugResult: '',
+      drawer: false,
+      debugForm: {
+        url: '',
+        method: '',
+        data: '',
+        header: '',
+        submit: '',
+        server: '',
+        name: '',
+      },
+      rules: {
+        server: [
+          { required: true, message: '请输入服务地址', trigger: 'blur' },
+        ],
+      },
       editBookID: {},
       loading: false,
       caseGroup: null,
@@ -314,6 +390,15 @@ export default {
         }
       })
     },
+    handleDebug(index, row) {
+      this.drawer = true
+      this.debugForm.url = row.url
+      this.debugForm.method = row.method.toString()
+      this.debugForm.header = row.header
+      this.debugForm.data = row.data
+      this.debugForm.submit = row.submit.toString()
+      this.debugForm.name = row.name
+    },
     editClose() {
       this.showEdit = false
       this.getCases()
@@ -321,6 +406,51 @@ export default {
     handleCurrentChange(val) {
       this.page = val
       this.getCases()
+    },
+    copyText() {
+      const text = this.$refs.result.innerText
+      if (text) {
+        const input = document.createElement('input')
+        input.value = text
+        document.body.appendChild(input)
+        input.select()
+        document.execCommand('Copy')
+        document.body.removeChild(input)
+        this.$message({
+          type: 'success',
+          message: '复制文本成功',
+        })
+      }
+    },
+    send() {
+      this.$refs.debugForm.validate(async valid => {
+        if (valid) {
+          this.debugResultDiv = false
+          this.debugResult = ''
+          this.debugLoding = true
+          try {
+            const result = await post('/v1/case/debug', {
+              url: this.debugForm.server + this.debugForm.url,
+              method: parseInt(this.debugForm.method, 10),
+              submit: parseInt(this.debugForm.submit, 10),
+              data: this.debugForm.data,
+              header: this.debugForm.header,
+            }, { showBackend: true })
+            this.statusCode = result.statusCode
+            if (result.body.constructor === String) {
+              this.debugResult = result.body
+            } else {
+              this.debugResult = JSON.stringify(result.body, null, '\t')
+            }
+            this.debugResultDiv = true
+            this.debugLoding = false
+          } catch (error) {
+            this.debugLoding = false
+          }
+        } else {
+          return false
+        }
+      })
     },
   },
   watch: {
@@ -336,12 +466,9 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  padding: 0 30px;
+  padding: 30px;
 
   .header {
-    align-items: center;
-    height: 65px;
-    line-height: 65px;
     color: $parent-title-color;
     font-size: 16px;
     font-weight: 500;
@@ -357,7 +484,7 @@ export default {
   }
 
   .table{
-
+    margin-top: 30px;
     .method {
       .get {
         color: #67C23A;
@@ -425,5 +552,53 @@ export default {
     margin-bottom: 20px;
   }
 
+  .debug {
+    padding: 25px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    .title {
+      color: $parent-title-color;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .debugForm {
+      margin-top: 20px;
+    }
+
+    .result {
+      flex: 1;
+      overflow: auto;
+
+      .el-scrollbar__view {
+        position: relative;
+        i {
+          position: absolute;
+          right: 0;
+          top: 5px;
+        }
+        .code {
+          position: absolute;
+          right: 30px;
+          top: 0;
+        }
+      }
+
+    }
+
+    .debugButton {
+      display: flex;
+      button {
+        flex: 1;
+      }
+    }
+
+  }
+  .el-drawer .ltr {
+    left: 0;
+    overflow: scroll;
+  }
 }
 </style>

@@ -1,4 +1,4 @@
-""" 
+"""
 @Time    : 2020/3/14 11:00
 @Author  : 郭家兴
 @Email   : 302802003@qq.com
@@ -33,7 +33,7 @@ class CaseForm(Form):
     info = StringField(length(max=50, message='描述文字长度应小于50个字'),
                         validators=[Optional()])
     url = StringField(length(max=500, message='url长度应小于500个字'),
-                        validators=[Optional()])
+                        validators=[DataRequired(message='请输入url')])
     method = IntegerField(default=1)
     submit = IntegerField(default=1)
     header = StringField(length(max=500, message='header长度应小于500个字'),
@@ -75,3 +75,14 @@ class CaseSearchForm(Form):
 
 class EnumTypeForm(Form):
     type = StringField(validators=[DataRequired(message='请输入类型值')])
+
+#用例调试
+class CaseDebugForm(Form):
+    url = StringField(length(max=500, message='url长度应小于500个字'),
+                      validators=[DataRequired(message='请输入url')])
+    method = IntegerField(default=1)
+    header = StringField(length(max=500, message='header长度应小于500个字'),
+                         validators=[Optional()])
+    data = StringField(length(max=500, message='data长度应小于500个字'),
+                       validators=[Optional()])
+    submit = IntegerField(default=1)
