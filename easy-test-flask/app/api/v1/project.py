@@ -1,0 +1,61 @@
+from flask import jsonify
+from lin import login_required, route_meta, group_required
+from lin.exception import Success, ParameterException
+from lin.redprint import Redprint
+
+from app.libs.enums import ProjectTypeEnum
+from app.models.project import Project
+from app.validators.CaseForm import EnumTypeForm
+from app.validators.ProjectForm import ProjectForm
+
+project_api = Redprint('project')
+
+
+@project_api.route('', methods=['POST'])
+@login_required
+def create_project():
+    form = ProjectForm().validate_for_api()
+    Project.new_project(form)
+    return Success(msg='新建工程成功')
+
+
+@project_api.route('', methods=['GET'])
+@route_meta('工程列表', module='工程')
+@group_required
+def get_projects():
+    projects = Project.get_all()
+    return jsonify(projects)
+
+
+@project_api.route('/<pid>', methods=['PUT'])
+@login_required
+def update_project(pid):
+    form = ProjectForm().validate_for_api()
+    Project.edit_project(pid, form)
+    return Success(msg='更新工程成功')
+
+
+@project_api.route('/<pid>', methods=['DELETE'])
+@route_meta('删除工程', module='工程')
+@group_required
+def delete_project(pid):
+    Project.remove_project(pid)
+    return Success(msg='删除工程成功')
+
+
+@project_api.route('/auth', methods=['GET'])
+@login_required
+def get_auth_projects():
+    """获取当前登陆用户的授权工程"""
+    projects = Project.get_auth()
+    return jsonify(projects)
+
+
+@project_api.route('/type', methods=['GET'])
+@login_required
+def enum_type():
+    form = EnumTypeForm().validate_for_api()
+    if form.type.data == 'TYPE':
+        return ProjectTypeEnum.data()
+    else:
+        raise ParameterException(msg='无目标类型')

@@ -1,8 +1,8 @@
 <template>
   <div class="container">
     <div class="title">
-      测试用例分组信息
-      <el-select size="small" v-model="selectGroup" filterable placeholder="请输入分组名称查询" class="select" clearable>
+      工程信息
+      <el-select size="small" v-model="selectProject" filterable placeholder="请输入工程名称查询" class="select" clearable>
         <el-option
           v-for="item in selectData"
           :key="item.id"
@@ -25,6 +25,23 @@
       </el-table-column>
       <el-table-column
         fixed
+        prop="server"
+        label="服务地址"
+        :show-overflow-tooltip="true"
+        min-width="200">
+      </el-table-column>
+      <el-table-column
+        label="类型"
+        align="center"
+        width="70">
+        <template slot-scope="scope">
+          <div :key="key" v-for="(val,key) in projecType">
+            <div v-show="scope.row.type === parseInt(key)" style="margin:auto">{{val}}</div>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column
+        fixed
         prop="info"
         label="描述"
         :show-overflow-tooltip="true"
@@ -43,7 +60,7 @@
             style="margin:auto"
             @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button
-            v-auth="{ auth: '删除用例分组', type: 'disabled'}"
+            v-auth="{ auth: '删除工程', type: 'disabled'}"
             size="mini"
             type="danger"
             plain
@@ -71,11 +88,25 @@
               :rules="rules"
               style="margin-left:-35px;margin-bottom:-35px;margin-top:15px;"
             >
-              <el-form-item label="分组名称" prop="name">
+              <el-form-item label="工程名称" prop="name">
                 <el-input size="medium" clearable v-model="form.name"></el-input>
               </el-form-item>
-              <el-form-item label="分组描述" prop="info">
+              <el-form-item label="服务地址" prop="server">
+                <el-input size="medium" clearable v-model="form.server"></el-input>
+              </el-form-item>
+              <el-form-item label="header" prop="header">
+                <el-input size="medium" type="textarea" :autosize="{ minRows: 3, maxRows: 9}" placeholder="请输入公共请求头" v-model="form.header">
+                </el-input>
+              </el-form-item>
+              <el-form-item label="工程描述" prop="info">
                 <el-input size="medium" clearable v-model="form.info"></el-input>
+              </el-form-item>
+              <el-form-item label="工程类型" prop="type">
+                <el-radio-group v-model="form.type" aria-disabled="">
+                  <label v-for="(val,key) in projecType" :key="key" class="el-radio">
+                    <el-radio disabled :label="key">{{val}}</el-radio>
+                  </label>
+                </el-radio-group>
               </el-form-item>
             </el-form>
           </el-tab-pane>
@@ -102,7 +133,7 @@
 
 <script>
 import { get, put, _delete } from '@/lin/plugins/axios'
-import GroupUsers from '../../../components/GroupUsers'
+import GroupUsers from '../../components/GroupUsers'
 
 export default {
   components: {
@@ -112,49 +143,63 @@ export default {
   data() {
     return {
       id: 0, // 分组id
-      type: 1, // 类型为用例分组
+      type: 2, // 类型为工程
       tableData: [], // 表格数据
       selectData: [], // 拉框数据
-      selectGroup: '',
+      selectProject: '',
       dialogFormVisible: false, // 是否弹窗
       labelPosition: 'right', // 设置label位置
       form: {
         // 表单信息
-        name: '',
+        name: null,
+        server: null,
+        header: null,
         info: null,
         users: [],
+        type: '1',
       },
+      projecType: {},
       groupUsers: [], // 拥有的分组权限
       loading: false,
       editLoading: false,
       activeTab: '修改信息', // tab 标题
       rules: {
-        // 表单验证规则
-        name: [{ required: true, message: '请输入分组名称', trigger: 'blur' }],
+        server: [
+          { required: true, message: '请输入服务地址', trigger: 'blur' },
+          { max: 60, message: '服务地址需小于60字', trigger: 'blur' },
+        ],
+        name: [
+          { required: true, message: '请输入工程名称', trigger: 'blur' },
+          { max: 20, message: '工程名称需小于20字', trigger: 'blur' },
+        ],
         info: [],
       },
     }
   },
   watch: {
-    selectGroup() {
-      if (this.selectGroup === '') {
+    selectProject() {
+      if (this.selectProject === '') {
         this.tableData = this.selectData
       } else {
-        for (const group of this.selectData) {
-          if (group.name === this.selectGroup) {
+        for (const project of this.selectData) {
+          if (project.name === this.selectProject) {
             this.tableData = []
-            this.tableData.push(group)
+            this.tableData.push(project)
           }
         }
       }
     },
   },
   methods: {
+    async getType() {
+      const type = await get('/v1/project/type', { type: 'TYPE' }, { showBackend: true })
+      this.projecType = type
+    },
     // 获取所有分组并传给table渲染
-    async getAllGroups() {
+    async getAllProjects() {
       try {
         this.loading = true
-        this.tableData = await get('/v1/caseGroup', { showBackend: true })
+        this.tableData = await get('/v1/project', { showBackend: true })
         this.selectData = this.tableData
         this.loading = false
       } catch (e) {
@@ -185,11 +230,11 @@ export default {
       this.getAuths()
       let res
       try {
-        res = await put(`/v1/caseGroup/${this.id}`, this.form, { showBackend: true })
+        res = await put(`/v1/project/${this.id}`, this.form, { showBackend: true })
         if (res.error_code === 0) {
           this.$message.success(`${res.msg}`)
           this.dialogFormVisible = false
-          await this.getAllGroups()
+          await this.getAllProjects()
         } else {
           this.$message.error(`${res.msg}`)
         }
@@ -207,24 +252,27 @@ export default {
       this.id = val.id
       this.form.name = val.name
       this.form.info = val.info
+      this.form.server = val.server
+      this.form.header = val.header
+      this.form.type = val.type.toString()
       this.dialogFormVisible = true
     },
     handleDelete(index, val) {
       let res
-      this.$confirm('此操作将永久删除该分组, 是否继续?', '提示', {
+      this.$confirm('此操作将永久删除该工程, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       }).then(async () => {
         try {
           this.loading = true
-          res = await _delete(`/v1/caseGroup/${val.id}`, { showBackend: true })
+          res = await _delete(`/v1/project/${val.id}`, { showBackend: true })
         } catch (e) {
           this.loading = false
           console.log(e)
         }
         if (res.error_code === 0) {
-          await this.getAllGroups()
+          await this.getAllProjects()
           this.$message({
             type: 'success',
             message: `${res.msg}`,
@@ -251,19 +299,20 @@ export default {
       this.activeTab = tab.name
     },
     // 监听分组是否成功
-    async addGroup(flag) {
+    async addProject(flag) {
       if (flag === true) {
-        await this.getAllGroups()
+        await this.getAllProjects()
       }
     },
   },
   async created() {
-    await this.getAllGroups()
+    await this.getType()
+    await this.getAllProjects()
     // 监听分组是否成功
-    this.eventBus.$on('addGroup', this.addGroup)
+    this.eventBus.$on('addProject', this.addProject)
   },
   beforeDestroy() {
-    this.eventBus.$off('addGroup', this.addGroup)
+    this.eventBus.$off('addProject', this.addProject)
   },
 }
 </script>

@@ -4,7 +4,7 @@ const caseRouter = {
   title: '用例管理',
   type: 'folder',
   icon: 'iconfont icon-caseStore',
-  filePath: 'views/admin/',
+  filePath: 'views/case/',
   order: null,
   inNav: true,
   permission: ['测试用例'],

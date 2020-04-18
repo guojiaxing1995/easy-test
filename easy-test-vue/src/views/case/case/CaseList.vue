@@ -60,11 +60,11 @@
                 </el-form-item>
                 <el-form-item label="断言方式">
                   <div v-for="(val,key) in type.assert" :key="key">
-                    <span v-if="props.row.caseAssert === parseInt(key)">{{ val }}</span>
+                    <span v-if="props.row.assertion === parseInt(key)">{{ val }}</span>
                   </div>
                 </el-form-item>
                 <el-form-item label="预期结果">
-                  <span>{{ props.row.expectResult }}</span>
+                  <span>{{ props.row.expect_result }}</span>
                 </el-form-item>
                 <el-form-item label="data">
                   <pre>{{ props.row.data }}</pre>
@@ -113,7 +113,7 @@
             </template>
           </el-table-column>
           <el-table-column
-            prop="groupName"
+            prop="group_name"
             label="用例组"
             :show-overflow-tooltip="true"
             min-width="160">
@@ -325,14 +325,11 @@ export default {
       await this.getCases()
     },
     async getType() {
-      const method = await get('/v1/case/type', { type: 'METHOD' }, { showBackend: true })
-      const submit = await get('/v1/case/type', { type: 'SUBMIT' }, { showBackend: true })
-      const deal = await get('/v1/case/type', { type: 'DEAL' }, { showBackend: true })
-      const assert = await get('/v1/case/type', { type: 'ASSERT' }, { showBackend: true })
-      this.type.method = method
-      this.type.submit = submit
-      this.type.deal = deal
-      this.type.assert = assert
+      const type = await get('/v1/case/type', { showBackend: true })
+      this.type.method = type.METHOD
+      this.type.submit = type.SUBMIT
+      this.type.deal = type.DEAL
+      this.type.assert = type.ASSERT
     },
     async getAllGroups() {
       try {

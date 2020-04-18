@@ -3,6 +3,7 @@ import bookConfig from './book' // 引入图书管理路由文件
 import pluginsConfig from './plugins'
 import Utils from '@/lin/utils/util'
 import caseConfig from './case'
+import projectConfig from './project'
 
 // eslint-disable-next-line import/no-mutable-exports
 let homeRouter = [
@@ -38,7 +39,8 @@ let homeRouter = [
   },
   bookConfig,
   adminConfig,
-  caseConfig
+  caseConfig,
+  projectConfig
 ]
 
 const plugins = [...pluginsConfig]

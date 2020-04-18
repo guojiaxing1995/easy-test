@@ -60,14 +60,14 @@
               </el-input>
             </el-form-item>
             <el-form-item label="断言方式">
-              <el-radio-group v-model="form.caseAssert">
+              <el-radio-group v-model="form.assertion">
                 <label v-for="(val,key) in type.assert" :key="key" class="el-radio">
                   <el-radio :label="key">{{val}}</el-radio>
                 </label>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="期望结果" prop="expectResult">
-              <el-input size="medium" type="textarea" :autosize="{ minRows: 2, maxRows: 6}" placeholder="请输入期望结果" v-model="form.expectResult" maxlength="500" show-word-limit>
+            <el-form-item label="期望结果" prop="expect_result">
+              <el-input size="medium" type="textarea" :autosize="{ minRows: 2, maxRows: 6}" placeholder="请输入期望结果" v-model="form.expect_result" maxlength="500" show-word-limit>
               </el-input>
             </el-form-item>
             <el-form-item label="用例描述" prop="info">
@@ -110,8 +110,8 @@ export default {
         submit: '1',
         deal: '1',
         condition: null,
-        caseAssert: '1',
-        expectResult: null,
+        assertion: '1',
+        expect_result: null,
         caseGroup: '',
         type: 1
       },
@@ -145,7 +145,7 @@ export default {
       this.form.deal = this.editCase.deal.toString()
       this.form.method = this.editCase.method.toString()
       this.form.submit = this.editCase.submit.toString()
-      this.form.caseAssert = this.editCase.caseAssert.toString()
+      this.form.assertion = this.editCase.assertion.toString()
     }
     this.loading = false
   },
@@ -158,21 +158,18 @@ export default {
       }
     },
     async getType() {
-      const method = await get('/v1/case/type', { type: 'METHOD' }, { showBackend: true })
-      const submit = await get('/v1/case/type', { type: 'SUBMIT' }, { showBackend: true })
-      const deal = await get('/v1/case/type', { type: 'DEAL' }, { showBackend: true })
-      const assert = await get('/v1/case/type', { type: 'ASSERT' }, { showBackend: true })
-      this.type.method = method
-      this.type.submit = submit
-      this.type.deal = deal
-      this.type.assert = assert
+      const type = await get('/v1/case/type', { showBackend: true })
+      this.type.method = type.METHOD
+      this.type.submit = type.SUBMIT
+      this.type.deal = type.DEAL
+      this.type.assert = type.ASSERT
     },
     async create() {
       const newForm = this.form
       newForm.method = parseInt(this.form.method, 10)
       newForm.submit = parseInt(this.form.submit, 10)
       newForm.deal = parseInt(this.form.deal, 10)
-      newForm.caseAssert = parseInt(this.form.caseAssert, 10)
+      newForm.assertion = parseInt(this.form.assertion, 10)
       let res
       try {
         this.loading = true
@@ -195,7 +192,7 @@ export default {
       newForm.method = parseInt(this.form.method, 10)
       newForm.submit = parseInt(this.form.submit, 10)
       newForm.deal = parseInt(this.form.deal, 10)
-      newForm.caseAssert = parseInt(this.form.caseAssert, 10)
+      newForm.assertion = parseInt(this.form.assertion, 10)
       let res
       try {
         this.loading = true
@@ -239,13 +236,13 @@ export default {
         this.form.deal = form.deal.toString()
         this.form.method = form.method.toString()
         this.form.submit = form.submit.toString()
-        this.form.caseAssert = form.caseAssert.toString()
+        this.form.assertion = form.assertion.toString()
         this.loading = false
       } else {
         this.$refs[formName].resetFields()
         this.form.submit = '1'
         this.form.deal = '1'
-        this.form.caseAssert = '1'
+        this.form.assertion = '1'
         this.form.method = '1'
       }
     },

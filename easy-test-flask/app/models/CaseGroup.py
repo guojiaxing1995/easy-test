@@ -16,7 +16,7 @@ from app.models.case import Case
 class CaseGroup(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment='分组id')
-    name = Column(String(20), nullable=False, unique=True, comment='分组名称 全局唯一不可重复')
+    name = Column(String(20), nullable=False, comment='分组名称 全局唯一不可重复')
     info = Column(String(50), comment='分组描述')
 
     @classmethod
@@ -49,13 +49,11 @@ class CaseGroup(Base):
     @classmethod
     def get_all(cls):
         groups = cls.query.filter_by(delete_time=None).all()
-        if not groups:
-            raise NotFound(msg='暂无分组')
         return groups
 
     @classmethod
     def get_auth(cls):
-        '''获取当前用户授权的分组 如果登陆用户是管理员则返回多有用例组'''
+        """获取当前用户授权的分组 如果登陆用户是管理员则返回多有用例组"""
         if current_user.id == 1:
             groups = cls.get_all()
         else:
@@ -70,12 +68,12 @@ class CaseGroup(Base):
     def edit_group(cls, gid, form):
         gid = int(gid)
         group = cls.query.filter_by(id=gid, delete_time=None).first_or_404()
-        #name 组内唯一 此处判断不允许重复
+        # name 组内唯一 此处判断不允许重复
         group_by_name = CaseGroup.query.filter_by(name=form.name.data, delete_time=None).first()
-        #获取目标分组当前的授权人员
+        # 获取目标分组当前的授权人员
         old_user_auth = UserAuth.query.filter_by(auth_id=gid, _type=UserAuthEnum.GROUP.value).all()
         old_users = [user.user_id for user in old_user_auth]
-        #新的授权人员
+        # 新的授权人员
         new_users = form.users.data
         if group_by_name == group or group_by_name is None:
             try:
@@ -83,7 +81,7 @@ class CaseGroup(Base):
                 group.name = form.name.data
                 group.info = form.info.data
                 if form.users.data is not None:
-                    #旧人员列表中有 新人员列表中没有，这部分删除
+                    # 旧人员列表中有 新人员列表中没有，这部分删除
                     old = list(set(old_users).difference(set(new_users)))
                     if old:
                         for user_id in old:

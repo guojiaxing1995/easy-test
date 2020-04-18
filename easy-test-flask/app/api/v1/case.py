@@ -18,7 +18,8 @@ from app.validators.CaseForm import UserGroupAuthForm, CaseForm, CaseSearchForm,
 
 case_api = Redprint('case')
 
-#按照用户权限分组返回所有用户 并显示目标类型权限授权情况
+
+# 按照用户权限分组返回所有用户 并显示目标类型权限授权情况
 @case_api.route('/UserByGroup', methods=['GET'])
 @login_required
 def users_by_group():
@@ -45,21 +46,24 @@ def users_by_group():
                 else:
                     setattr(user, 'permission', False)
                     user._fields.append('permission')
-                user.hide('active','admin','group_id','update_time','create_time')
+                user.hide('active', 'admin', 'group_id', 'update_time', 'create_time')
             setattr(user_group, 'users', users)
             user_group._fields.append('users')
 
     return jsonify(user_groups)
+
 
 @case_api.route('', methods=['POST'])
 @route_meta('新增用例', module='用例')
 @group_required
 def create_case():
     form = CaseForm().validate_for_api()
-    case = Case(form.caseGroup.data,form.name.data,form.info.data,form.url.data,form.method.data,form.submit.data,
-                form.header.data,form.data.data,form.deal.data,form.condition.data,form.expectResult.data,form.caseAssert.data,form.type.data)
+    case = Case(form.caseGroup.data, form.name.data, form.info.data, form.url.data, form.method.data, form.submit.data,
+                form.header.data, form.data.data, form.deal.data, form.condition.data, form.expectResult.data,
+                form.assertion.data, form.type.data)
     case.new_case()
     return Success(msg='新增用例成功')
+
 
 @case_api.route('/<cid>', methods=['PUT'])
 @route_meta('编辑用例', module='用例')
@@ -67,9 +71,11 @@ def create_case():
 def update_case(cid):
     form = CaseForm().validate_for_api()
     case = Case.query.filter_by(id=cid, case_group=form.caseGroup.data, delete_time=None).first_or_404()
-    case.edit_case(form.name.data,form.info.data,form.url.data,form.method.data,form.submit.data,form.header.data,
-                   form.data.data,form.deal.data,form.condition.data,form.expectResult.data,form.caseAssert.data,form.type.data)
+    case.edit_case(form.name.data, form.info.data, form.url.data, form.method.data, form.submit.data, form.header.data,
+                   form.data.data, form.deal.data, form.condition.data, form.expectResult.data, form.assertion.data,
+                   form.type.data)
     return Success(msg='更新用例成功')
+
 
 @case_api.route('/<cid>', methods=['DELETE'])
 @route_meta('删除用例', module='用例')
@@ -79,14 +85,17 @@ def delete_case(cid):
     case.remove_case()
     return Success(msg='删除用例成功')
 
+
 @case_api.route('', methods=['GET'])
 @route_meta('测试用例', module='用例')
 @group_required
 def get_case():
     form = CaseSearchForm().validate_for_api()
-    result = Case.search_case(form.name.data,form.url.data,form.caseGroup.data,form.start.data,form.end.data,form.id.data,form.page.data,form.count.data)
+    result = Case.search_case(form.name.data, form.url.data, form.caseGroup.data, form.start.data, form.end.data,
+                              form.id.data, form.page.data, form.count.data)
 
     return jsonify(result)
+
 
 @case_api.route('/type', methods=['GET'])
 @login_required
@@ -103,12 +112,27 @@ def enum_type():
     elif form.type.data == 'ASSERT':
         return CaseAssertEnum.data()
     else:
-        raise ParameterException(msg='无目标类型')
+        return {
+            'METHOD': CaseMethodEnum.data(),
+            'SUBMIT': CaseSubmitEnum.data(),
+            'DEAL': CaseDealEnum.data(),
+            'TYPE': CaseTypeEnum.data(),
+            'ASSERT': CaseAssertEnum.data(),
+        }
+
 
 @case_api.route('/debug', methods=['POST'])
 @login_required
 def debug():
     form = CaseDebugForm().validate_for_api()
-    case = Case(None,None,None,form.url.data,form.method.data,form.submit.data,form.header.data,form.data.data)
+    case = Case(None, None, None, form.url.data, form.method.data, form.submit.data, form.header.data, form.data.data)
     result = case.case_debug()
     return jsonify(result)
+
+
+@case_api.route('/casesByGroup', methods=['GET'])
+# @login_required
+def cases_by_group():
+    form = CaseSearchForm().validate_for_api()
+    cases = Case.cases_by_group(form.caseGroup.data)
+    return jsonify(cases)
