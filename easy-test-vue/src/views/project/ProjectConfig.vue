@@ -16,7 +16,11 @@
         </el-option>
       </el-select>
     </div>
-    <el-divider>副本</el-divider>
+    <el-divider>
+      <div :key="key" v-for="(val,key) in type.project">
+        <div v-show="parseInt(currentProject.type)  === parseInt(key)">{{val}}</div>
+      </div>
+    </el-divider>
     <div class="transfer">
       <el-row type="flex" justify="space-around">
         <el-col :span="7">
@@ -34,7 +38,7 @@
         <el-col :span="7">
           <div class="config">
             <div class="switch"><el-switch v-model="editable" active-text="用例拖动"></el-switch></div>
-            <div class="submit"><el-button type="primary" plain>保存配置</el-button></div>
+            <div class="submit"><el-button type="primary" @click="saveConfig" plain v-loading="projectCaseLoading">保存配置</el-button></div>
           </div>
         </el-col>
       </el-row>
@@ -57,7 +61,7 @@
                 <el-popover
                   placement="right-end"
                   width="450"
-                  trigger="click">
+                  trigger="hover">
                   <project-case-info :caseDate="element" :caseTypeCode="type"></project-case-info>
                   <i slot="reference" class="el-icon-view"></i>
                 </el-popover>
@@ -67,9 +71,9 @@
         </el-col>
         <el-col :span="7">
           <!-- 工程用例列表 -->
-          <draggable v-model="projectCases" v-bind="dragOptions" @start="isDragging=true" @end="isDragging=false">
+          <draggable v-model="projectCases" v-bind="dragOptions" @start="isDragging=true" @end="isDragging=false" v-loading="projectCaseLoading">
             <transition-group type="transition" :name="'flip-list'" class="list-group" tag="ul">
-              <li class="list-group-item" v-bind:class="{ 'item-color-normal': element.run, 'item-color-stop': !element.run }"
+              <li class="list-group-item" v-bind:class="{ 'item-color-normal': element.is_run, 'item-color-stop': !element.is_run }"
               v-for="element in projectCases" :key="element.random" v-show="element.show">
                 <span class="name">{{element.name}}</span>
                 <el-popover
@@ -77,10 +81,10 @@
                   width="500"
                   trigger="click">
                   <!-- 编辑 -->
-                  <project-case-edit :caseDate="element" :caseTypeCode="type"></project-case-edit>
-                  <i slot="reference" class="el-icon-edit-outline"></i>
+                  <project-case-edit :caseDate="element" :caseTypeCode="type" :projectId="selectProject"></project-case-edit>
+                  <i slot="reference" class="el-icon-edit-outline" v-show="currentProject.type === 2"></i>
                 </el-popover>
-                <i class="el-icon-switch-button"  @click=" element.run=! element.run"></i>
+                <i class="el-icon-switch-button"  @click=" element.is_run=! element.is_run"></i>
               </li>
             </transition-group>
           </draggable>
@@ -94,7 +98,7 @@
 import draggable from 'vuedraggable'
 import ProjectCaseInfo from './ProjectCaseInfo'
 import ProjectCaseEdit from './ProjectCaseEdit'
-import { get } from '@/lin/plugins/axios'
+import { get, post } from '@/lin/plugins/axios'
 
 export default {
   components: {
@@ -105,24 +109,31 @@ export default {
   data() {
     return {
       groupCaseLoading: false,
+      projectCaseLoading: false,
       searchGroupCase: '',
       searchProjectCase: '',
       selectGroup: '',
       selecGroupData: [],
-      selectProject: '',
+      // 当前的工程id
+      selectProject: 0,
       selecProjectData: [],
       loading: false,
       editable: true,
       isDragging: false,
       delayedDragging: false,
+      // 左边用例列表
       groupCases: [],
+      // 右边工程配置列表
       projectCases: [],
       type: {
         method: {},
         submit: {},
         deal: {},
-        assert: {}
-      }
+        assert: {},
+        project: {}
+      },
+      // 当前的工程
+      currentProject: {}
     }
   },
   computed: {
@@ -143,15 +154,31 @@ export default {
       this.type.deal = type.DEAL
       this.type.assert = type.ASSERT
     },
+    async getProjectType() {
+      const type = await get('/v1/project/type', { type: 'TYPE' }, { showBackend: true })
+      this.type.project = type
+    },
     // 获取所有工程
     async getAllProjects() {
       try {
         this.selecProjectData = await get('/v1/project', { showBackend: true })
-        this.selectProject = this.selecProjectData[0].name
+        this.selectProject = this.selecProjectData[0].id
       } catch (error) {
         console.log(error)
       }
     },
+    // 获取工程配置
+    async getProjectConfig() {
+      try {
+        this.projectCaseLoading = true
+        const configs = await get(`/v1/project/getConfig/${this.selectProject}`, { showBackend: true })
+        this.projectCases = this.dealConfigs(configs)
+        this.projectCaseLoading = false
+      } catch (error) {
+        this.projectCaseLoading = false
+      }
+    },
+    // 获取所有的用例组
     async getAllGroups() {
       try {
         this.selecGroupData = await get('/v1/caseGroup', { showBackend: true })
@@ -164,10 +191,54 @@ export default {
     dealCases(testCases) {
       for (const testCase of testCases) {
         testCase.show = true
-        testCase.run = true
+        testCase.is_run = true
+        testCase.case_id = testCase.id
+        testCase.id = null
         testCase.random = Math.random().toString(36).substr(2)
       }
       return testCases
+    },
+    // 对工程用例列表进行处理，给列表添加 随机数 和 是否在列表中显示 属性
+    dealConfigs(testCases) {
+      for (const testCase of testCases) {
+        testCase.show = true
+        testCase.random = Math.random().toString(36).substr(2)
+      }
+      return testCases
+    },
+    // 生成工程配置入参
+    configParameterDeal(testCases) {
+      const configs = []
+      for (let i = 0; i < testCases.length; i++) {
+        const config = []
+        config.push(testCases[i].id)
+        config.push(testCases[i].case_id)
+        config.push(testCases[i].is_run)
+        config.push(i + 1)
+        configs.push(config)
+      }
+      return configs
+    },
+    // 保存配置
+    async saveConfig() {
+      const configsPara = this.configParameterDeal(this.projectCases)
+      let res
+      try {
+        this.projectCaseLoading = true
+        res = await post('/v1/project/saveConfig', {
+          projectId: this.selectProject,
+          configs: configsPara
+        }, { showBackend: true })
+        this.projectCaseLoading = false
+      } catch (e) {
+        this.projectCaseLoading = false
+      }
+      if (res.error_code === 0) {
+        this.$message.success(`${res.msg}`)
+        this.getProjectConfig()
+      } else {
+        this.$message.error(`${res.msg}`)
+      }
     },
   },
   watch: {
@@ -190,6 +261,14 @@ export default {
       } catch (e) {
         this.groupCases = []
         this.groupCaseLoading = false
+      }
+    },
+    async selectProject(value) {
+      this.getProjectConfig()
+      for (const project of this.selecProjectData) {
+        if (project.id === value) {
+          this.currentProject = project
+        }
       }
     },
     searchProjectCase(value) {
@@ -227,6 +306,7 @@ export default {
     await this.getAllProjects()
     await this.getAllGroups()
     await this.getType()
+    await this.getProjectType()
   },
 }
 </script>

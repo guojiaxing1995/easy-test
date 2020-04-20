@@ -56,6 +56,7 @@
       </el-form-item>
       <el-form-item class="submit">
         <el-button type="primary" @click="submitForm('form')" size="mini">保 存</el-button>
+        <el-button type="info" size="mini" @click="synchro">同 步</el-button>
         <el-button @click="resetForm()" size="mini">重 置</el-button>
       </el-form-item>
     </el-form>
@@ -63,6 +64,7 @@
 </template>
 
 <script>
+import { get, put } from '@/lin/plugins/axios'
 
 export default {
   props: {
@@ -71,6 +73,9 @@ export default {
     },
     caseTypeCode: {
       type: Object,
+    },
+    projectId: {
+      type: Number,
     },
   },
   data() {
@@ -103,13 +108,58 @@ export default {
       this.dataDeal()
     },
     async submitForm(formName) {
-      this.$refs[formName].validate(valid => {
+      this.$refs[formName].validate(async valid => {
         if (valid) {
-          console.log('rr')
+          try {
+            this.loading = true
+            const res = await put('/v1/project/copyConfig', {
+              id: this.element.id,
+              projectId: this.projectId,
+              url: this.element.url,
+              method: parseInt(this.element.method, 10),
+              submit: parseInt(this.element.submit, 10),
+              header: this.element.header,
+              data: this.element.data,
+              deal: parseInt(this.element.deal, 10),
+              condition: this.element.condition,
+              expectResult: this.element.expect_result,
+              assertion: parseInt(this.element.assertion, 10)
+            }, { showBackend: true })
+            this.loading = false
+            if (res.error_code === 0) {
+              this.$message.success(`${res.msg}`)
+            } else {
+              this.$message.error(`${res.msg}`)
+            }
+          } catch (error) {
+            this.loading = false
+          }
         } else {
           return false
         }
       })
+    },
+    async synchro() {
+      try {
+        this.loading = true
+        const data = await get('/v1/case', {
+          id: this.element.case_id
+        }, { showBackend: true })
+        this.element.url = data.data[0].url
+        this.element.method = data.data[0].method.toString()
+        this.element.data = data.data[0].data
+        this.element.header = data.data[0].header
+        this.element.submit = data.data[0].submit.toString()
+        this.element.deal = data.data[0].deal.toString()
+        this.element.condition = data.data[0].condition
+        this.element.assertion = data.data[0].assertion.toString()
+        this.element.expect_result = data.data[0].expect_result
+        this.loading = false
+        this.$message.success('成功同步用例数据')
+      } catch (error) {
+        this.loading = false
+        this.$message.error('同步失败请检查目标用例')
+      }
     },
   },
 }

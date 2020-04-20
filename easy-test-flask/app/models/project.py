@@ -8,11 +8,13 @@ from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, String, SmallInteger, Boolean
 
 from app.libs.enums import UserAuthEnum, ProjectTypeEnum
+from app.libs.error_code import ProjectConfigException
+from app.models.ConfigCopy import ConfigCopy
+from app.models.ConfigRelation import ConfigRelation
 from app.models.UserAuth import UserAuth
 
 
 class Project(Base):
-
     id = Column(Integer, primary_key=True, autoincrement=True, comment='工程id')
     name = Column(String(20), nullable=False, comment='工程名称 全局唯一不可重复')
     server = Column(String(60), nullable=False, comment='服务地址')
@@ -76,7 +78,7 @@ class Project(Base):
         else:
             auths = UserAuth.query.filter_by(user_id=current_user.id, _type=UserAuthEnum.PROJECT.value).all()
             pids = [auth.auth_id for auth in auths]
-            projects = cls.query.filter(cls.delete_time==None, cls.id.in_(pids)).all()
+            projects = cls.query.filter(cls.delete_time == None, cls.id.in_(pids)).all()
         if not projects:
             raise NotFound(msg='暂无工程')
         return projects
@@ -106,7 +108,8 @@ class Project(Base):
                     old = list(set(old_users).difference(set(new_users)))
                     if old:
                         for user_id in old:
-                            user = UserAuth.query.filter_by(user_id=user_id, _type=UserAuthEnum.PROJECT.value, auth_id=pid).first_or_404()
+                            user = UserAuth.query.filter_by(user_id=user_id, _type=UserAuthEnum.PROJECT.value,
+                                                            auth_id=pid).first_or_404()
                             db.session.delete(user)
                     # 新人员列表中有 旧人员列表中没有，这部分新增
                     new = list(set(new_users).difference(set(old_users)))
@@ -136,7 +139,7 @@ class Project(Base):
             if user_auth:
                 users = [user.user_id for user in user_auth]
                 for user in users:
-                    user = UserAuth.query.filter_by(user_id=user, _type=UserAuthEnum.PROJECT.value,auth_id=pid).first()
+                    user = UserAuth.query.filter_by(user_id=user, _type=UserAuthEnum.PROJECT.value, auth_id=pid).first()
                     db.session.delete(user)
             # 删除分组，逻辑删除
             project.delete_time = datetime.now()
@@ -145,3 +148,24 @@ class Project(Base):
             db.session.rollback()
             raise UnknownException(msg='删除异常请重试')
         return True
+
+    # 工程运行中无法更改配置
+    def is_running(self):
+        if self.running:
+            raise ProjectConfigException(msg='工程正在运行中无法更改配置')
+
+    # 保存工程配置
+    def save_config(self, configs):
+        self.is_running()
+
+        if self.type == ProjectTypeEnum.COPY.value:
+            ConfigCopy.copy_config(self.id, configs)
+        elif self.type == ProjectTypeEnum.RELATION.value:
+            ConfigRelation.relation_config(self.id, configs)
+
+    # 获取配置
+    def get_configs(self):
+        if self.type == ProjectTypeEnum.COPY.value:
+            return ConfigCopy.get_configs(self.id)
+        elif self.type == ProjectTypeEnum.RELATION.value:
+            return ConfigRelation.get_configs(self.id)

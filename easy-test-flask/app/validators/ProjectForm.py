@@ -6,7 +6,7 @@
 @Desc    :
 """
 from lin.forms import Form
-from wtforms import StringField, FieldList, IntegerField, DateTimeField
+from wtforms import StringField, FieldList, IntegerField, BooleanField, FormField, Field
 from wtforms.validators import DataRequired, length, Optional
 
 
@@ -31,3 +31,28 @@ class ProjectForm(Form):
     type = IntegerField(default=1)
 
     users = FieldList(IntegerField(validators=[Optional()]))
+
+
+class ProjectConfigForm(Form):
+    projectId = IntegerField(validators=[DataRequired(message='请输入工程id')])
+    # 配置 [[configId, caseId, isRun, order], []]
+    configs = FieldList(Field(validators=[Optional()]))
+
+
+class CopyConfigForm(Form):
+    id = IntegerField(validators=[Optional()])
+    projectId = IntegerField(validators=[DataRequired(message='请输入工程id')])
+    url = StringField(length(max=500, message='url长度应小于500个字'),
+                      validators=[DataRequired(message='请输入url')])
+    method = IntegerField(default=1)
+    submit = IntegerField(default=1)
+    header = StringField(length(max=500, message='header长度应小于500个字'),
+                         validators=[Optional()])
+    data = StringField(length(max=500, message='data长度应小于500个字'),
+                       validators=[Optional()])
+    deal = IntegerField(default=1)
+    condition = StringField(length(max=50, message='处理语句长度应小于50个字'),
+                            validators=[Optional()])
+    expectResult = StringField(length(max=500, message='预期结果长度应小于500个字'),
+                               validators=[Optional()])
+    assertion = IntegerField(default=1)

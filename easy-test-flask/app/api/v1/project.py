@@ -4,9 +4,10 @@ from lin.exception import Success, ParameterException
 from lin.redprint import Redprint
 
 from app.libs.enums import ProjectTypeEnum
+from app.models.ConfigCopy import ConfigCopy
 from app.models.project import Project
 from app.validators.CaseForm import EnumTypeForm
-from app.validators.ProjectForm import ProjectForm
+from app.validators.ProjectForm import ProjectForm, ProjectConfigForm, CopyConfigForm
 
 project_api = Redprint('project')
 
@@ -59,3 +60,38 @@ def enum_type():
         return ProjectTypeEnum.data()
     else:
         raise ParameterException(msg='无目标类型')
+
+
+@project_api.route('/saveConfig', methods=['POST'])
+# @login_required
+def save_config():
+    form = ProjectConfigForm().validate_for_api()
+    project = Project.query.filter_by(id=form.projectId.data).first()
+    project.save_config(form.configs.data)
+    return Success(msg='配置保存成功')
+
+
+@project_api.route('/getConfig/<pid>', methods=['GET'])
+# @login_required
+def get_config(pid):
+    project = Project.query.filter_by(id=pid).first()
+    configs = project.get_configs()
+    return jsonify(configs)
+
+
+# 修改副本类型工程的用例信息
+@project_api.route('/copyConfig', methods=['PUT'])
+# @login_required
+def copy_config():
+    form = CopyConfigForm().validate_for_api()
+    project = Project.query.filter_by(id=form.projectId.data).first_or_404()
+    # 工程运行中不允许修改
+    project.is_running()
+    # 判断配置存在
+    ConfigCopy.is_exist(form.id.data)
+    config = ConfigCopy.query.filter_by(id=form.id.data).first()
+    config.updateConfig(form.url.data, form.method.data, form.submit.data, form.header.data, form.data.data,
+                        form.deal.data, form.condition.data, form.expectResult.data, form.assertion.data)
+
+    return Success('修改配置成功')
+

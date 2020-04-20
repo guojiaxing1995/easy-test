@@ -44,7 +44,7 @@ class Case(Base):
     update_user = Column(Integer, nullable=False, comment='用例修改人')
 
     def __init__(self, case_group, name=None, info=None, url=None, method=1, submit=1, header=None, data=None, deal=1,
-                 condition=None, expect_result=None, assertion=1, type=1):
+                 condition=None, expect_result=None, assertion=1, case_type=1):
         super().__init__()
         self.name = name
         self.info = info
@@ -57,12 +57,10 @@ class Case(Base):
         self.condition = condition
         self.expect_result = expect_result
         self.assertion = CaseAssertEnum(assertion)
-        self.type = CaseTypeEnum(type)
+        self.type = CaseTypeEnum(case_type)
         self.case_group = case_group
         self.create_user = get_current_user().id if get_current_user() else None
         self.update_user = get_current_user().id if get_current_user() else None
-        self.create_user = 1
-        self.update_user = 1
 
     @property
     def method(self):
