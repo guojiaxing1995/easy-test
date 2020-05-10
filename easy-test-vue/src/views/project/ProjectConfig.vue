@@ -115,7 +115,7 @@ export default {
       selectGroup: '',
       selecGroupData: [],
       // 当前的工程id
-      selectProject: 0,
+      selectProject: null,
       selecProjectData: [],
       loading: false,
       editable: true,
@@ -158,10 +158,10 @@ export default {
       const type = await get('/v1/project/type', { type: 'TYPE' }, { showBackend: true })
       this.type.project = type
     },
-    // 获取所有工程
+    // 获取当前用户授权的所有工程并传给table渲染
     async getAllProjects() {
       try {
-        this.selecProjectData = await get('/v1/project', { showBackend: true })
+        this.selecProjectData = await get('/v1/project/auth', { showBackend: true })
         this.selectProject = this.selecProjectData[0].id
       } catch (error) {
         console.log(error)
@@ -181,7 +181,7 @@ export default {
     // 获取所有的用例组
     async getAllGroups() {
       try {
-        this.selecGroupData = await get('/v1/caseGroup', { showBackend: true })
+        this.selecGroupData = await get('/v1/caseGroup/auth', { showBackend: true })
         this.selectGroup = this.selecGroupData[0].id
       } catch (e) {
         this.selecGroupData = []
@@ -307,6 +307,15 @@ export default {
     await this.getAllGroups()
     await this.getType()
     await this.getProjectType()
+  },
+  activated() {
+    if (this.$route.query.pid) {
+      for (let index = 0; index < this.selecProjectData.length; index++) {
+        if (this.$route.query.pid === this.selecProjectData[index].id) {
+          this.selectProject = this.$route.query.pid
+        }
+      }
+    }
   },
 }
 </script>

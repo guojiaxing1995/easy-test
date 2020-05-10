@@ -34,3 +34,9 @@ class ConfigNotFound(APIException):
     code = 404
     msg = '配置不存在'
     error_code = 92002
+
+
+class CaseRemoveException(APIException):
+    code = 403
+    msg = '用例删除失败'
+    error_code = 93001

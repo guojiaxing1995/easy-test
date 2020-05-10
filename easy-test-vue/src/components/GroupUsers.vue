@@ -5,17 +5,17 @@
         <label>{{ title }}</label>
       </div>
       <div class="details">
-        <div class="permissions-box" v-for="(group, i) in allUsers" :key="i" v-show="group.users">
+        <div class="permissions-box" v-for="(group, i) in allUsers" :key="i" v-show="group.users.length > 0">
           <div class="module-box">
             <el-checkbox
-              @change="handleCheckAllChange($event,group.choose, group.users, group.id)"
+              @change="handleCheckAllChange($event,group.choose, group.users, group.name)"
               class="module"
               :label="group.name"
               :indeterminate="group.isIndeterminate"
               v-model="group.checkAll"
             ></el-checkbox>
           </div>
-          <el-checkbox-group v-model="group.choose" @change="handleCheckedUserChange($event, group.users, group.id)">
+          <el-checkbox-group v-model="group.choose" @change="handleCheckedUserChange($event, group.users, group.name)">
             <ul class="permissions-ul">
               <li class="permissions-li" v-for="(user, key) in group.users" :key="key">
                 <el-checkbox
@@ -45,7 +45,7 @@ export default {
     // 获取全部用户
     async getGroupAuths() {
       this.loading = true
-      this.allUsers = await get('/v1/case/UserByGroup',
+      this.allUsers = await get('/cms/user/userByInitials',
         {
           authId: this.groupId,
           authType: this.authType
@@ -85,7 +85,7 @@ export default {
         }
       }
     },
-    handleCheckAllChange(val, choose, users, groupId) {
+    handleCheckAllChange(val, choose, users, groupName) {
       let checked = choose
       const groupUsers = []
       for (const user of users) {
@@ -93,7 +93,7 @@ export default {
       }
       checked = val ? groupUsers : []
       for (const group of this.allUsers) {
-        if (groupId === group.id) {
+        if (groupName === group.name) {
           group.choose = checked
           if (val) {
             group.isIndeterminate = false
@@ -106,10 +106,10 @@ export default {
       }
       this.$emit('updateAuths', this.allUsers)
     },
-    handleCheckedUserChange(value, users, groupId) {
+    handleCheckedUserChange(value, users, groupName) {
       const checkedCount = value.length
       for (const group of this.allUsers) {
-        if (groupId === group.id) {
+        if (groupName === group.name) {
           group.checkAll = checkedCount === users.length
           group.isIndeterminate = checkedCount > 0 && checkedCount < users.length
         }

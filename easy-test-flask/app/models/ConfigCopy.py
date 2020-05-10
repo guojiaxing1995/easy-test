@@ -5,6 +5,7 @@
 @File    : ConfigCopy.py
 @Desc    : 工程配置-副本
 """
+from flask import current_app
 from lin import db
 from lin.exception import UnknownException
 from lin.interface import InfoCrud as Base
@@ -13,6 +14,7 @@ from sqlalchemy import Column, Integer, Boolean, String, SmallInteger
 from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseAssertEnum, CaseTypeEnum
 from app.libs.error_code import ConfigNotFound
 from app.models.case import Case
+from app.models.task import Task
 
 
 class ConfigCopy(Base):
@@ -32,13 +34,14 @@ class ConfigCopy(Base):
     _deal = Column('deal', SmallInteger, nullable=False,
                    comment='后置处理方法 ;  1 -> 不做处理 |  2 -> 默认处理 |  3 -> 指定key获取数据 |  4-> 正则表达')
     condition = Column(String(50), comment='后置处理方法的条件语句，在后置处理方法为指定key或正则表达时为必填')
-    expect_result = Column(String(500), comment='预期结果')
+    expect = Column(String(500), comment='预期结果')
     _assertion = Column('assertion', SmallInteger, nullable=False,
                         comment='断言类型 ;  1 -> key value 等于 |  2 -> key value 不等于 |  3 -> 包含|  4-> 不包含|  4-> http返回码200')
     _type = Column('type', SmallInteger, nullable=False, comment='用例类型 ;  1 -> 接口自动化 |  2 -> UI自动化')
 
-    def __init__(self, project_id, order, case_id, name, is_run=True, info=None, url=None, method=1, submit=1, header=None,
-                 data=None, deal=1, condition=None, expect_result=None, assertion=1, case_type=1):
+    def __init__(self, project_id, order, case_id, name, is_run=True, info=None, url=None, method=1, submit=1,
+                 header=None,
+                 data=None, deal=1, condition=None, expect=None, assertion=1, case_type=1):
         super().__init__()
         self.project_id = project_id
         self.order = order
@@ -53,7 +56,7 @@ class ConfigCopy(Base):
         self.data = data
         self.deal = CaseDealEnum(deal)
         self.condition = condition
-        self.expect_result = expect_result
+        self.expect = expect
         self.assertion = CaseAssertEnum(assertion)
         self.type = CaseTypeEnum(case_type)
 
@@ -131,7 +134,7 @@ class ConfigCopy(Base):
                     order = c[3]
                     case = Case.query.filter_by(id=case_id).first_or_404()
                     config = cls(project_id, order, case_id, case.name, is_run, case.info, case.url, case.method,
-                                 case.submit, case.header, case.data, case.deal, case.condition, case.expect_result,
+                                 case.submit, case.header, case.data, case.deal, case.condition, case.expect,
                                  case.assertion, case.type)
                     db.session.add(config)
                 db.session.flush()
@@ -159,7 +162,7 @@ class ConfigCopy(Base):
             raise ConfigNotFound(msg='配置不存在，请先保存配置')
 
     #  修改副本类型配置用例信息
-    def updateConfig(self, url, method, submit, header, data, deal, condition, expect_result, assertion):
+    def updateConfig(self, url, method, submit, header, data, deal, condition, expect, assertion):
         try:
             self.url = url
             self.method = CaseMethodEnum(method)
@@ -168,9 +171,33 @@ class ConfigCopy(Base):
             self.data = data
             self.deal = CaseDealEnum(deal)
             self.condition = condition
-            self.expect_result = expect_result
+            self.expect = expect
             self.assertion = CaseAssertEnum(assertion)
             db.session.commit()
         except Exception:
             db.session.rollback()
             raise UnknownException(msg='修改配置异常')
+
+    # 批量执行
+    @classmethod
+    def batch(cls, project):
+        project.var_dick = {}
+        configs = cls.query.filter_by(project_id=project.id, is_run=True).order_by(cls.order).all()
+        if not configs:
+            raise ConfigNotFound(msg='工程下无可运行用例')
+        # 执行用例总数
+        total = len(configs)
+        task = Task(project.id, 1, total)
+        task.new_task()
+        step = 100 / total
+        progress = 0
+        with db.session.no_autoflush:
+            for config in configs:
+                case = Case(0, config.name, config.info, config.url, config.method, config.submit, config.header,
+                            config.data, config.deal, config.condition, config.expect, config.assertion, config.type)
+                case.id = config.case_id
+                case.execute_one(project, task)
+                progress += step
+                # 更新工程进度
+                project.update_progress(progress)
+        project.update_progress(100)

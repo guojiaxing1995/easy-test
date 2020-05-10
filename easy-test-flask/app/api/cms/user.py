@@ -11,13 +11,16 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, get_curren
     create_refresh_token, verify_jwt_refresh_token_in_request
 from lin.core import manager, route_meta, Log
 from lin.db import db
+from lin.enums import UserAdmin
 from lin.exception import NotFound, Success, Failed, RepeatException, ParameterException
 from lin.jwt import login_required, admin_required, get_tokens
 from lin.log import Logger
 from lin.redprint import Redprint
 
 from app.libs.error_code import RefreshException
-from app.libs.utils import json_res
+from app.libs.utils import json_res, pinyin, group_by_initials
+from app.models.UserAuth import UserAuth
+from app.validators.CaseForm import UserGroupAuthForm
 from app.validators.forms import LoginForm, RegisterForm, ChangePasswordForm, UpdateInfoForm, \
     AvatarUpdateForm
 
@@ -161,10 +164,11 @@ def _register_user(form: RegisterForm):
         user.group_id = form.group_id.data
         db.session.add(user)
 
-#按照分组返回所有用户
-@user_api.route('/UserByGroup', methods=['GET'])
+
+# 按照分组返回所有用户
+@user_api.route('/userByGroup', methods=['GET'])
 @login_required
-def users_by_group():
+def user_by_group():
     groups = manager.group_model.get(one=False)
     if groups is None:
         raise NotFound(msg='不存在任何权限组')
@@ -173,8 +177,79 @@ def users_by_group():
         users = manager.user_model.query.filter().filter_by(group_id=group.id).all()
         if users:
             for user in users:
-                user.hide('active','admin','group_id','update_time','create_time')
+                user.hide('active', 'admin', 'group_id', 'update_time', 'create_time')
             setattr(group, 'users', users)
             group._fields.append('users')
 
     return jsonify(groups)
+
+
+# 按照用户权限分组返回所有用户 并显示目标类型权限授权情况
+@user_api.route('/userAuthByGroup', methods=['GET'])
+@login_required
+def user_auth_by_group():
+    form = UserGroupAuthForm().validate_for_api()
+
+    user_groups = manager.group_model.get(one=False)
+    if user_groups is None:
+        raise NotFound(msg='不存在任何用户组')
+
+    for user_group in user_groups:
+        users = manager.user_model.query.filter().filter_by(group_id=user_group.id).all()
+        if users:
+            for user in users:
+                # 如果传入权限分组和权限类型则返回对应用户是否获取到授权
+                if form.authId.data:
+                    # 查询权限表看当前循环用户是否有权限
+                    auth = UserAuth.get_user_auth(user.id, form.authId.data, form.authType.data)
+                    if auth:
+                        setattr(user, 'permission', True)
+                        user._fields.append('permission')
+                    else:
+                        setattr(user, 'permission', False)
+                        user._fields.append('permission')
+                else:
+                    setattr(user, 'permission', False)
+                    user._fields.append('permission')
+                user.hide('active', 'admin', 'group_id', 'update_time', 'create_time')
+            setattr(user_group, 'users', users)
+            user_group._fields.append('users')
+
+    return jsonify(user_groups)
+
+
+# 按照首字母分组返回用户以及对应用户目标权限的授权情况
+@user_api.route('/userByInitials', methods=['GET'])
+@login_required
+def user_by_initials():
+    form = UserGroupAuthForm().validate_for_api()
+    # 获取首字母列表以及 首字母分组模板列表
+    users_by_initials, letters = group_by_initials()
+    others = []
+    users = manager.user_model.query.filter_by(delete_time=None, admin=UserAdmin.COMMON.value).all()
+    for user in users:
+        # 如果传入权限分组和权限类型则返回对应用户是否获取到授权
+        if form.authId.data:
+            # 查询权限表看当前循环用户是否有权限
+            auth = UserAuth.get_user_auth(user.id, form.authId.data, form.authType.data)
+            if auth:
+                setattr(user, 'permission', True)
+                user._fields.append('permission')
+            else:
+                setattr(user, 'permission', False)
+                user._fields.append('permission')
+        else:
+            setattr(user, 'permission', False)
+            user._fields.append('permission')
+        user.hide('active', 'admin', 'group_id', 'update_time', 'create_time')
+        name_pinyin = pinyin(user.username)
+        first = name_pinyin[:1].upper()
+        if first not in letters:
+            others.append(user)
+        else:
+            for item in users_by_initials:
+                if item['name'] == first:
+                    item['users'].append(user)
+    users_by_initials.append({'name': '其他', 'users': others})
+
+    return jsonify(users_by_initials)

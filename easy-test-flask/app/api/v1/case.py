@@ -14,43 +14,10 @@ from lin import route_meta, group_required, login_required
 from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTypeEnum, CaseAssertEnum
 from app.models.UserAuth import UserAuth
 from app.models.case import Case
-from app.validators.CaseForm import UserGroupAuthForm, CaseForm, CaseSearchForm, EnumTypeForm, CaseDebugForm
+from app.validators.CaseForm import UserGroupAuthForm, CaseForm, CaseSearchForm, EnumTypeForm, CaseDebugForm, \
+    CaseLogsSearchForm
 
 case_api = Redprint('case')
-
-
-# 按照用户权限分组返回所有用户 并显示目标类型权限授权情况
-@case_api.route('/UserByGroup', methods=['GET'])
-@login_required
-def users_by_group():
-    form = UserGroupAuthForm().validate_for_api()
-
-    user_groups = manager.group_model.get(one=False)
-    if user_groups is None:
-        raise NotFound(msg='不存在任何用户组')
-
-    for user_group in user_groups:
-        users = manager.user_model.query.filter().filter_by(group_id=user_group.id).all()
-        if users:
-            for user in users:
-                # 如果传入权限分组和权限类型则返回对应用户是否获取到授权
-                if form.authId.data:
-                    # 查询权限表看当前循环用户是否有权限
-                    auth = UserAuth.get_user_auth(user.id, form.authId.data, form.authType.data)
-                    if auth:
-                        setattr(user, 'permission', True)
-                        user._fields.append('permission')
-                    else:
-                        setattr(user, 'permission', False)
-                        user._fields.append('permission')
-                else:
-                    setattr(user, 'permission', False)
-                    user._fields.append('permission')
-                user.hide('active', 'admin', 'group_id', 'update_time', 'create_time')
-            setattr(user_group, 'users', users)
-            user_group._fields.append('users')
-
-    return jsonify(user_groups)
 
 
 @case_api.route('', methods=['POST'])
@@ -59,7 +26,7 @@ def users_by_group():
 def create_case():
     form = CaseForm().validate_for_api()
     case = Case(form.caseGroup.data, form.name.data, form.info.data, form.url.data, form.method.data, form.submit.data,
-                form.header.data, form.data.data, form.deal.data, form.condition.data, form.expectResult.data,
+                form.header.data, form.data.data, form.deal.data, form.condition.data, form.expect.data,
                 form.assertion.data, form.type.data)
     case.new_case()
     return Success(msg='新增用例成功')
@@ -72,7 +39,7 @@ def update_case(cid):
     form = CaseForm().validate_for_api()
     case = Case.query.filter_by(id=cid, case_group=form.caseGroup.data, delete_time=None).first_or_404()
     case.edit_case(form.name.data, form.info.data, form.url.data, form.method.data, form.submit.data, form.header.data,
-                   form.data.data, form.deal.data, form.condition.data, form.expectResult.data, form.assertion.data,
+                   form.data.data, form.deal.data, form.condition.data, form.expect.data, form.assertion.data,
                    form.type.data)
     return Success(msg='更新用例成功')
 
@@ -92,7 +59,7 @@ def delete_case(cid):
 def get_case():
     form = CaseSearchForm().validate_for_api()
     result = Case.search_case(form.name.data, form.url.data, form.caseGroup.data, form.start.data, form.end.data,
-                              form.id.data, form.page.data, form.count.data)
+                              form.id.data, form.method.data, form.deal.data, form.page.data, form.count.data)
 
     return jsonify(result)
 
@@ -131,8 +98,27 @@ def debug():
 
 
 @case_api.route('/casesByGroup', methods=['GET'])
-# @login_required
+@login_required
 def cases_by_group():
     form = CaseSearchForm().validate_for_api()
     cases = Case.cases_by_group(form.caseGroup.data)
     return jsonify(cases)
+
+
+@case_api.route('/logs', methods=['POST'])
+def case_logs():
+    form = CaseLogsSearchForm().validate_for_api()
+    cases = Case.case_log_search(form.name.data, form.url.data, form.project.data, form.task.data,
+                                 form.result.data, form.start.data, form.end.data, form.count.data, form.page.data)
+    return jsonify(cases)
+
+
+@case_api.route('/logs/delete', methods=['DELETE'])
+def case_logs_delete():
+    form = CaseLogsSearchForm().validate_for_api()
+    count = Case.case_log_remove(form.name.data, form.url.data, form.project.data, form.task.data,
+                                 form.result.data, form.start.data, form.end.data)
+    if count == 0:
+        return Success(msg='无符合条件数据')
+    else:
+        return Success(msg='成功删除' + str(count) + '条数据')

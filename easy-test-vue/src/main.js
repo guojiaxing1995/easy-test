@@ -7,6 +7,7 @@ import '@/lin/filter'
 import '@/lin/plugins'
 import '@/lin/directives'
 
+import VueSocketIO from 'vue-socket.io'
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition'
 import router from '@/router'
 import store from '@/store'
@@ -30,6 +31,11 @@ Vue.component(CollapseTransition.name, CollapseTransition)
 Vue.component('sticky-top', StickyTop)
 Vue.component('l-icon', LIcon)
 Vue.component('source-code', SourceCode)
+
+Vue.use(new VueSocketIO({
+  debug: true,
+  connection: 'http://127.0.0.1:5000/',
+}))
 
 /* eslint no-unused-vars: 0 */
 const AppInstance = new Vue({

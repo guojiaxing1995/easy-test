@@ -2,14 +2,13 @@
     :copyright: © 2019 by the Lin team.
     :license: MIT, see LICENSE for more details.
 """
-from flask_pymongo import PyMongo
-
 from app.app import create_app
 
 app = create_app(environment='development')
 
-#集成flask-pyMongo
-mongo = PyMongo(app)
+from app.libs.init import celery
+
+celery.conf.update(imports='app.libs.tasks')
 
 
 @app.route('/', methods=['GET'], strict_slashes=False)

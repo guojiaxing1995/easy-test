@@ -8,6 +8,7 @@ from sqlalchemy import Column, String, Integer
 
 from app.libs.error_code import BookNotFound
 
+
 class Book(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(50), nullable=False)
@@ -74,4 +75,20 @@ class Book(Base):
             raise NotFound(msg='没有找到相关书籍')
         # 删除图书，软删除
         book.delete(commit=True)
+        return True
+
+    @classmethod
+    def edit_b(cls, bid, title):
+        book = Book.query.filter_by(id=bid).first()
+        if book is None:
+            raise NotFound(msg='没有找到相关书籍')
+
+        book.update(
+            id=bid,
+            title=title,
+            author=book.author,
+            summary=book.summary,
+            image=book.image,
+            commit=True
+        )
         return True

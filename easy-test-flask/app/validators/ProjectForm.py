@@ -33,6 +33,11 @@ class ProjectForm(Form):
     users = FieldList(IntegerField(validators=[Optional()]))
 
 
+class ProjectSearchForm(Form):
+    # 工程 name
+    name = StringField(validators=[Optional()])
+
+
 class ProjectConfigForm(Form):
     projectId = IntegerField(validators=[DataRequired(message='请输入工程id')])
     # 配置 [[configId, caseId, isRun, order], []]
@@ -40,7 +45,7 @@ class ProjectConfigForm(Form):
 
 
 class CopyConfigForm(Form):
-    id = IntegerField(validators=[Optional()])
+    id = IntegerField(validators=[DataRequired(message='请输入配置id')])
     projectId = IntegerField(validators=[DataRequired(message='请输入工程id')])
     url = StringField(length(max=500, message='url长度应小于500个字'),
                       validators=[DataRequired(message='请输入url')])
@@ -53,6 +58,6 @@ class CopyConfigForm(Form):
     deal = IntegerField(default=1)
     condition = StringField(length(max=50, message='处理语句长度应小于50个字'),
                             validators=[Optional()])
-    expectResult = StringField(length(max=500, message='预期结果长度应小于500个字'),
+    expect = StringField(length(max=500, message='预期结果长度应小于500个字'),
                                validators=[Optional()])
     assertion = IntegerField(default=1)

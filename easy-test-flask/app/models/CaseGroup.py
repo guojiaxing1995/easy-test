@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import current_app
 from flask_jwt_extended import current_user
 from lin.db import db
-from lin.exception import NotFound, ParameterException, UnknownException
+from lin.exception import NotFound, ParameterException, UnknownException, Forbidden
 from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, String
 
@@ -14,7 +14,6 @@ from app.models.case import Case
 
 
 class CaseGroup(Base):
-
     id = Column(Integer, primary_key=True, autoincrement=True, comment='分组id')
     name = Column(String(20), nullable=False, comment='分组名称 全局唯一不可重复')
     info = Column(String(50), comment='分组描述')
@@ -54,20 +53,29 @@ class CaseGroup(Base):
     @classmethod
     def get_auth(cls):
         """获取当前用户授权的分组 如果登陆用户是管理员则返回多有用例组"""
-        if current_user.id == 1:
+        if current_user.is_admin:
             groups = cls.get_all()
         else:
             auths = UserAuth.query.filter_by(user_id=current_user.id, _type=UserAuthEnum.GROUP.value).all()
             gids = [auth.auth_id for auth in auths]
-            groups = cls.query.filter(cls.delete_time==None, cls.id.in_(gids)).all()
+            groups = cls.query.filter(cls.delete_time == None, cls.id.in_(gids)).all()
         if not groups:
-            raise NotFound(msg='暂无分组')
+            raise NotFound(msg='暂无已授权的分组')
         return groups
+
+    # 判断用户是否有操作用例分组的权限
+    def user_id_auth(self):
+        if not current_user.is_admin:
+            auth = UserAuth.query.filter_by(user_id=current_user.id,
+                                            _type=UserAuthEnum.GROUP.value, auth_id=self.id).first()
+            if not auth:
+                raise Forbidden(msg='无操作此工程的权限')
 
     @classmethod
     def edit_group(cls, gid, form):
         gid = int(gid)
         group = cls.query.filter_by(id=gid, delete_time=None).first_or_404()
+        group.user_id_auth()
         # name 组内唯一 此处判断不允许重复
         group_by_name = CaseGroup.query.filter_by(name=form.name.data, delete_time=None).first()
         # 获取目标分组当前的授权人员
@@ -85,7 +93,8 @@ class CaseGroup(Base):
                     old = list(set(old_users).difference(set(new_users)))
                     if old:
                         for user_id in old:
-                            user = UserAuth.query.filter_by(user_id=user_id, _type=UserAuthEnum.GROUP.value, auth_id=gid).first_or_404()
+                            user = UserAuth.query.filter_by(user_id=user_id, _type=UserAuthEnum.GROUP.value,
+                                                            auth_id=gid).first_or_404()
                             db.session.delete(user)
                     # 新人员列表中有 旧人员列表中没有，这部分新增
                     new = list(set(new_users).difference(set(old_users)))
@@ -108,6 +117,7 @@ class CaseGroup(Base):
     @classmethod
     def remove_group(cls, gid):
         group = cls.query.filter_by(id=gid, delete_time=None).first_or_404()
+        group.user_id_auth()
         cases = Case.query.filter_by(case_group=gid, delete_time=None).all()
         if cases:
             raise CaseGroupDeleteException(msg='分组下存在用例无法删除')
@@ -118,7 +128,7 @@ class CaseGroup(Base):
             if user_auth:
                 users = [user.user_id for user in user_auth]
                 for user in users:
-                    user = UserAuth.query.filter_by(user_id=user, _type=UserAuthEnum.GROUP.value,auth_id=gid).first()
+                    user = UserAuth.query.filter_by(user_id=user, _type=UserAuthEnum.GROUP.value, auth_id=gid).first()
                     db.session.delete(user)
             # 删除分组，逻辑删除
             group.delete_time = datetime.now()

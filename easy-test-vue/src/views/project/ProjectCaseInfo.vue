@@ -40,7 +40,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column min-width="150" property="expect_result" label="预期结果" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column min-width="150" property="expect" label="预期结果" :show-overflow-tooltip="true"></el-table-column>
     </el-table>
     <el-table :data="element"
               size="mini"
@@ -52,7 +52,7 @@
           <pre style="color:#409EFF">{{scope.row.header}}</pre>
         </template>
       </el-table-column>
-      <el-table-column min-width="150" property="expect_result" label="请求头" :show-overflow-tooltip="true">请求头</el-table-column>
+      <el-table-column min-width="150" property="expect" label="请求头" :show-overflow-tooltip="true">请求头</el-table-column>
     </el-table>
     <el-table :data="element"
               size="mini"
@@ -64,7 +64,7 @@
           <pre style="color:#409EFF">{{scope.row.data}}</pre>
         </template>
       </el-table-column>
-      <el-table-column min-width="150" property="expect_result" label="请求体" :show-overflow-tooltip="true">请求体</el-table-column>
+      <el-table-column min-width="150" property="expect" label="请求体" :show-overflow-tooltip="true">请求体</el-table-column>
     </el-table>
   </div>
 </template>

@@ -195,7 +195,7 @@ export default {
       const type = await get('/v1/project/type', { type: 'TYPE' }, { showBackend: true })
       this.projecType = type
     },
-    // 获取所有分组并传给table渲染
+    // 获取所有工程并传给table渲染
     async getAllProjects() {
       try {
         this.loading = true
@@ -310,6 +310,9 @@ export default {
     await this.getAllProjects()
     // 监听分组是否成功
     this.eventBus.$on('addProject', this.addProject)
+    if (this.$route.query.pname) {
+      this.selectProject = this.$route.query.pname
+    }
   },
   beforeDestroy() {
     this.eventBus.$off('addProject', this.addProject)

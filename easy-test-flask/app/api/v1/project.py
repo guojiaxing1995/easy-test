@@ -1,4 +1,5 @@
-from flask import jsonify
+from flask import jsonify, current_app, request
+
 from lin import login_required, route_meta, group_required
 from lin.exception import Success, ParameterException
 from lin.redprint import Redprint
@@ -7,7 +8,7 @@ from app.libs.enums import ProjectTypeEnum
 from app.models.ConfigCopy import ConfigCopy
 from app.models.project import Project
 from app.validators.CaseForm import EnumTypeForm
-from app.validators.ProjectForm import ProjectForm, ProjectConfigForm, CopyConfigForm
+from app.validators.ProjectForm import ProjectForm, ProjectConfigForm, CopyConfigForm, ProjectSearchForm
 
 project_api = Redprint('project')
 
@@ -25,6 +26,14 @@ def create_project():
 @group_required
 def get_projects():
     projects = Project.get_all()
+    return jsonify(projects)
+
+
+@project_api.route('/search', methods=['GET'])
+@login_required
+def search_projects():
+    form = ProjectSearchForm().validate_for_api()
+    projects = Project.search(form.name.data)
     return jsonify(projects)
 
 
@@ -63,7 +72,8 @@ def enum_type():
 
 
 @project_api.route('/saveConfig', methods=['POST'])
-# @login_required
+@route_meta('工程配置', module='工程')
+@group_required
 def save_config():
     form = ProjectConfigForm().validate_for_api()
     project = Project.query.filter_by(id=form.projectId.data).first()
@@ -72,7 +82,8 @@ def save_config():
 
 
 @project_api.route('/getConfig/<pid>', methods=['GET'])
-# @login_required
+@route_meta('工程配置', module='工程')
+@group_required
 def get_config(pid):
     project = Project.query.filter_by(id=pid).first()
     configs = project.get_configs()
@@ -81,7 +92,8 @@ def get_config(pid):
 
 # 修改副本类型工程的用例信息
 @project_api.route('/copyConfig', methods=['PUT'])
-# @login_required
+@route_meta('工程配置', module='工程')
+@group_required
 def copy_config():
     form = CopyConfigForm().validate_for_api()
     project = Project.query.filter_by(id=form.projectId.data).first_or_404()
@@ -91,7 +103,6 @@ def copy_config():
     ConfigCopy.is_exist(form.id.data)
     config = ConfigCopy.query.filter_by(id=form.id.data).first()
     config.updateConfig(form.url.data, form.method.data, form.submit.data, form.header.data, form.data.data,
-                        form.deal.data, form.condition.data, form.expectResult.data, form.assertion.data)
+                        form.deal.data, form.condition.data, form.expect.data, form.assertion.data)
 
     return Success('修改配置成功')
-

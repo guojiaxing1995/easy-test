@@ -2,10 +2,14 @@
     :copyright: © 2019 by the Lin team.
     :license: MIT, see LICENSE for more details.
 """
+from time import sleep
+
 from lin.redprint import Redprint
-from flask import jsonify
+from flask import jsonify, request
 from lin.jwt import group_required
 from lin.core import route_meta
+
+from app.libs.init import mongo
 
 test_api = Redprint('test')
 
@@ -27,6 +31,7 @@ def info():
     return jsonify({
         'msg': 'Lin 是一套基于 Python-Flask 的一整套开箱即用的后台管理系统（CMS）。Lin 遵循简洁、高效的原则，通过核心库加插件的方式来驱动整个系统高效的运行'
     })
+
 
 # --------------------------------------------------
 # --------------------Test--------------------------
@@ -54,9 +59,48 @@ def info():
 
 @test_api.route('/mongo', methods=['GET'])
 def mongo_test():
-    from starter import mongo
     users = mongo.db.easy.find()
     users = list(users)
     for user in users:
         del user['_id']
     return jsonify(users)
+
+
+@test_api.route('/a/<aid>', methods=['GET'])
+def test_a(aid):
+    sleep(3)
+    return jsonify({
+        "name": "小明啊",
+        "id": int(aid) + 2
+    })
+
+
+@test_api.route('/b', methods=['POST'])
+def test_b():
+    sleep(3)
+    form = request.form
+    age = form['age']
+    return jsonify({
+        "id": int(age) + 5,
+        "time": 'now'
+    })
+
+
+@test_api.route('/c', methods=['PUT'])
+def test_c():
+    sleep(3)
+    form = request.json
+    address = form['address']
+    return jsonify({
+        "address_new": address,
+        "age": 10
+    })
+
+
+@test_api.route('/d', methods=['DELETE'])
+def test_d():
+    sleep(3)
+    return jsonify({
+        "success": True,
+        "msg": 'is ok !'
+    })

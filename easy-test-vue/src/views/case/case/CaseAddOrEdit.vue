@@ -66,8 +66,8 @@
                 </label>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="期望结果" prop="expect_result">
-              <el-input size="medium" type="textarea" :autosize="{ minRows: 2, maxRows: 6}" placeholder="请输入期望结果" v-model="form.expect_result" maxlength="500" show-word-limit>
+            <el-form-item label="期望结果" prop="expect">
+              <el-input size="medium" type="textarea" :autosize="{ minRows: 2, maxRows: 6}" placeholder="请输入期望结果" v-model="form.expect" maxlength="500" show-word-limit>
               </el-input>
             </el-form-item>
             <el-form-item label="用例描述" prop="info">
@@ -111,7 +111,7 @@ export default {
         deal: '1',
         condition: null,
         assertion: '1',
-        expect_result: null,
+        expect: null,
         caseGroup: '',
         type: 1
       },
@@ -146,6 +146,7 @@ export default {
       this.form.method = this.editCase.method.toString()
       this.form.submit = this.editCase.submit.toString()
       this.form.assertion = this.editCase.assertion.toString()
+      this.form.caseGroup = this.editCase.case_group
     }
     this.loading = false
   },

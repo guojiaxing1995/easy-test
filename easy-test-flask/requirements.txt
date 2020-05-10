@@ -22,3 +22,10 @@ urllib3==1.22
 Werkzeug==0.14.1
 WTForms==2.2.1
 oss2==2.6.1
+pypinyin==0.37.0
+pymongo==3.10.1
+Flask-PyMongo==2.3.0
+flask-socketio==4.3.0
+celery==4.4.2
+flask-celery-helper==1.1.0
+flask-apscheduler==2.22.0

@@ -2,7 +2,7 @@
   <div>
     <div class="container" v-if="!showEdit">
       <div class="header">
-        <el-row justify="space-between" type="flex">
+        <el-row>
         <el-col :span="5">
           <label class="label">用例分组</label>
           <el-select v-model="caseGroup" filterable placeholder="请选用例分组" clearable size="small" style="width:60%">
@@ -37,7 +37,29 @@
             end-placeholder="结束日期">
           </el-date-picker>
         </el-col>
-        <el-col :span="1"><i class="el-icon-refresh" @click="handleRefresh"></i></el-col>
+        <el-col :span="1"><i class="el-icon-refresh" @click="handleRefresh" style="font-size:1.6em"></i></el-col>
+      </el-row>
+      <el-row style="margin-top:30px">
+        <el-col :span="5">
+          <label class="label">请求方法</label>
+          <el-select v-model="method" filterable placeholder="请选择请求方法" clearable size="small" style="width:60%">
+            <el-option
+              :key="key" v-for="(val,key) in type.method"
+              :label="val"
+              :value="key">
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="5">
+          <label class="label">后置处理</label>
+          <el-select v-model="deal" filterable placeholder="请选择处理方法" clearable size="small" style="width:60%">
+            <el-option
+              :key="key" v-for="(val,key) in type.deal"
+              :label="val"
+              :value="key">
+            </el-option>
+          </el-select>
+        </el-col>
       </el-row>
       </div>
       <!-- 列表页面 -->
@@ -64,7 +86,7 @@
                   </div>
                 </el-form-item>
                 <el-form-item label="预期结果">
-                  <span>{{ props.row.expect_result }}</span>
+                  <span>{{ props.row.expect }}</span>
                 </el-form-item>
                 <el-form-item label="data">
                   <pre>{{ props.row.data }}</pre>
@@ -227,7 +249,7 @@
           </el-scrollbar>
         </div>
         <div class="debugButton">
-          <el-button type="primary" @click="send" :loading='debugLoding'>{{ debugLoding ? 'sending...' : 'send' }}</el-button>
+          <el-button type="primary" @click="send" icon="el-icon-s-promotion" :loading='debugLoding'>{{ debugLoding ? 'sending...' : 'send' }}</el-button>
         </div>
       </div>
     </el-drawer>
@@ -269,6 +291,8 @@ export default {
       editBookID: {},
       loading: false,
       caseGroup: null,
+      method: null,
+      deal: null,
       allGroup: null,
       name: '',
       url: '',
@@ -346,10 +370,20 @@ export default {
         this.startTime = null
         this.endTime = null
       }
+      let methodPara = null
+      let dealPara = null
+      if (this.method) {
+        methodPara = parseInt(this.method, 10)
+      }
+      if (this.deal) {
+        dealPara = parseInt(this.deal, 10)
+      }
       try {
         const data = await get('/v1/case', {
           caseGroup: this.caseGroup,
           name: this.name,
+          method: methodPara,
+          deal: dealPara,
           url: this.url,
           start: this.startTime,
           end: this.endTime,
@@ -457,6 +491,12 @@ export default {
     datetime() {
       this.getCases()
     },
+    method() {
+      this.getCases()
+    },
+    deal() {
+      this.getCases()
+    }
   },
 }
 </script>

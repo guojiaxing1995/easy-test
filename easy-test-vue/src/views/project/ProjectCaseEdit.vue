@@ -50,8 +50,8 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="期望结果" prop="expect_result">
-        <el-input size="mini" type="textarea" :autosize="{ minRows: 1, maxRows: 3}" placeholder="请输入期望结果" v-model="element.expect_result" maxlength="500" show-word-limit>
+      <el-form-item label="期望结果" prop="expect">
+        <el-input size="mini" type="textarea" :autosize="{ minRows: 1, maxRows: 3}" placeholder="请输入期望结果" v-model="element.expect" maxlength="500" show-word-limit>
         </el-input>
       </el-form-item>
       <el-form-item class="submit">
@@ -122,7 +122,7 @@ export default {
               data: this.element.data,
               deal: parseInt(this.element.deal, 10),
               condition: this.element.condition,
-              expectResult: this.element.expect_result,
+              expect: this.element.expect,
               assertion: parseInt(this.element.assertion, 10)
             }, { showBackend: true })
             this.loading = false
@@ -153,12 +153,12 @@ export default {
         this.element.deal = data.data[0].deal.toString()
         this.element.condition = data.data[0].condition
         this.element.assertion = data.data[0].assertion.toString()
-        this.element.expect_result = data.data[0].expect_result
+        this.element.expect = data.data[0].expect
         this.loading = false
         this.$message.success('成功同步用例数据')
       } catch (error) {
         this.loading = false
-        this.$message.error('同步失败请检查目标用例')
+        this.$message.error('同步失败目标用例已被删除')
       }
     },
   },

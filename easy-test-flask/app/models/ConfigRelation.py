@@ -10,7 +10,9 @@ from lin.interface import InfoCrud as Base
 from lin.db import db
 from sqlalchemy import Column, Integer, Boolean
 
+from app.libs.error_code import ConfigNotFound
 from app.models.case import Case
+from app.models.task import Task
 
 
 class ConfigRelation(Base):
@@ -48,7 +50,7 @@ class ConfigRelation(Base):
             Case._deal.label('deal'),
             Case.condition,
             Case._type.label('type'),
-            Case.expect_result.label('expect_result'),
+            Case.expect.label('expect'),
             Case._assertion.label('assertion')
         ).order_by(cls.order).all()
         configs = [dict(zip(result.keys(), result)) for result in results]
@@ -101,3 +103,34 @@ class ConfigRelation(Base):
         except Exception:
             db.session.rollback()
             raise UnknownException(msg='修改配置异常')
+
+    # 批量执行
+    @classmethod
+    def batch(cls, project):
+        project.var_dick = {}
+        configs = cls.query.filter_by(project_id=project.id, is_run=True).order_by(cls.order).all()
+        if not configs:
+            raise ConfigNotFound(msg='工程下无可运行用例')
+        # 执行用例总数
+        total = len(configs)
+        task = Task(project.id, 1, total)
+        task.new_task()
+        step = 100 / total
+        progress = 0
+        with db.session.no_autoflush:
+            for config in configs:
+                case_source = Case.query.filter_by(id=config.case_id, delete_time=None).first()
+                # 此处需实例化一个case用于执行 如果使用 case_source 则会自动更新数据库case表
+                case = Case(0, case_source.name, case_source.info, case_source.url, case_source.method,
+                            case_source.submit, case_source.header, case_source.data, case_source.deal,
+                            case_source.condition, case_source.expect, case_source.assertion, case_source.type)
+                case.id = config.case_id
+                case.actual_result = False
+                case.reason = None
+                case.result = {}
+                # 执行一条用例
+                case.execute_one(project, task)
+                progress += step
+                # 更新工程进度
+                project.update_progress(progress)
+        project.update_progress(100)

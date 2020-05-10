@@ -8,7 +8,7 @@
 import time
 
 from lin.forms import Form
-from wtforms import StringField, FieldList, IntegerField, DateTimeField
+from wtforms import StringField, FieldList, IntegerField, DateTimeField, Field
 from wtforms.validators import DataRequired, length, Optional
 
 
@@ -46,8 +46,8 @@ class CaseForm(Form):
     deal = IntegerField(default=1)
     condition = StringField(length(max=50, message='处理语句长度应小于50个字'),
                             validators=[Optional()])
-    expectResult = StringField(length(max=500, message='预期结果长度应小于500个字'),
-                               validators=[Optional()])
+    expect = StringField(length(max=500, message='预期结果长度应小于500个字'),
+                         validators=[Optional()])
     assertion = IntegerField(default=1)
     type = IntegerField(default=1)
     caseGroup = IntegerField(validators=[Optional()])
@@ -57,6 +57,8 @@ class CaseSearchForm(Form):
     id = IntegerField(validators=[Optional()])
     name = StringField(validators=[Optional()])
     url = StringField(validators=[Optional()])
+    method = IntegerField(validators=[Optional()])
+    deal = IntegerField(validators=[Optional()])
     caseGroup = IntegerField(validators=[Optional()])
     page = IntegerField(validators=[Optional()])
     count = IntegerField(validators=[Optional()])
@@ -92,3 +94,32 @@ class CaseDebugForm(Form):
     data = StringField(length(max=500, message='data长度应小于500个字'),
                        validators=[Optional()])
     submit = IntegerField(default=1)
+
+
+class CaseLogsSearchForm(Form):
+    name = StringField(validators=[Optional()])
+    url = StringField(validators=[Optional()])
+    # 工程名称
+    project = StringField(validators=[Optional()])
+    # 任务id
+    task = IntegerField(validators=[Optional()])
+    # 结果
+    result = Field(validators=[Optional()])
+    page = IntegerField(validators=[Optional()])
+    count = IntegerField(validators=[Optional()])
+    start = DateTimeField(validators=[])
+    end = DateTimeField(validators=[])
+
+    def validate_start(self, value):
+        if value.data:
+            try:
+                _ = time.strptime(value.data, '%Y-%m-%d %H:%M:%S')
+            except ValueError as e:
+                raise e
+
+    def validate_end(self, value):
+        if value.data:
+            try:
+                _ = time.strptime(value.data, '%Y-%m-%d %H:%M:%S')
+            except ValueError as e:
+                raise e

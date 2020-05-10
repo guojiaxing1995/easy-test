@@ -7,7 +7,6 @@ const projectRouter = {
   filePath: 'views/project/',
   order: null,
   inNav: true,
-  // permission: ['测试用例'],
   children: [
     {
       title: '工程配置',
@@ -18,7 +17,7 @@ const projectRouter = {
       inNav: true,
       icon: 'iconfont icon-caseGroup',
       keepAlive: true,
-      // permission: ['测试用例'],
+      permission: ['工程配置'],
     },
     {
       route: '/project/list',

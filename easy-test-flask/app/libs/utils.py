@@ -6,6 +6,7 @@
 import re
 import time
 
+import pypinyin
 from flask import current_app, jsonify, request
 from lin.exception import ParameterException
 
@@ -42,11 +43,12 @@ def camel2line(camel: str):
 
 
 def json_res(**kwargs):
-    '''
+    """
     将所有传入的关键字参数转变为dict后序列化为json格式的response
     count, items, page, total, total_page ...
-    '''
+    """
     return jsonify(kwargs)
+
 
 def paging(paginate):
     return {
@@ -56,3 +58,22 @@ def paging(paginate):
         'count': paginate.per_page,
         'total': paginate.total
     }
+
+
+# 汉字转拼音
+def pinyin(word):
+    s = ''
+    for i in pypinyin.pinyin(word, style=pypinyin.NORMAL):
+        s += ''.join(i)
+    return s
+
+
+# 生成首字母分组列表
+def group_by_initials():
+    letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+               'V', 'W', 'X', 'Y', 'Z']
+    users = []
+    for letter in letters:
+        users.append({'name': letter, 'users': []})
+
+    return users, letters
