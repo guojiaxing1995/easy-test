@@ -6,6 +6,7 @@
 @Desc    : 测试用例模型
 """
 import math
+import time
 from datetime import datetime
 import json
 import re
@@ -123,7 +124,8 @@ class Case(Base):
         if self.name != name:
             if Case.query.filter_by(name=name, case_group=self.case_group, delete_time=None).first():
                 raise ParameterException(msg='当前组已存在同名用例，请更改用例名称')
-        self.name = name
+        # 用例名称暂时不允许修改
+        # self.name = name
         self.info = info
         self.url = url
         self.method = CaseMethodEnum(method)
@@ -207,7 +209,7 @@ class Case(Base):
         return cases
 
     # 执行一条用例
-    def execute_one(self, project, task):
+    def execute_one(self, project, task, create_user):
         try:
             self.stitch_url(project.server)
             self.replace_header(project.header)
@@ -224,7 +226,7 @@ class Case(Base):
             current_app.logger.debug(self.reason)
 
         # 用例执行日志插入mongoDB数据库
-        case_log = log(self, project, task, current_user)
+        case_log = log(self, project, task, create_user)
         mongo.db.easy.insert(case_log)
 
     # 拼接请求地址
@@ -423,13 +425,17 @@ class Case(Base):
 
     @classmethod
     def case_log_search(cls, name, url, project, task, result, start, end, count=10, page=1):
+        start_timeStamp = int(time.mktime(time.strptime(start, "%Y-%m-%d %H:%M:%S"))) * 1000 if start else None
+        end_timeStamp = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M:%S"))) * 1000 if end else None
+
         cases = mongo.db.easy.find(
             {
                 'name': {'$regex': name} if name is not None else {'$regex': ''},
                 'url': {'$regex': url} if url is not None else {'$regex': ''},
                 'project_name': {'$regex': project} if project is not None else {'$regex': ''},
-                'task_id': task if task is not None else {'$gt': 0},
+                'task_no': {'$regex': task} if task is not None else {'$regex': ''},
                 'actual_result': result if result is not None else {'$type': 8},
+                'create_time': {'$gt': start_timeStamp, '$lt': end_timeStamp} if start is not None else {'$type': 18}
             },
             {"_id": 0}).sort([('_id', -1)]).skip((page - 1) * count).limit(count)
 
@@ -447,13 +453,16 @@ class Case(Base):
 
     @classmethod
     def case_log_remove(cls, name, url, project, task, result, start, end):
+        start_timeStamp = int(time.mktime(time.strptime(start, "%Y-%m-%d %H:%M:%S"))) * 1000 if start else None
+        end_timeStamp = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M:%S"))) * 1000 if end else None
         result = mongo.db.easy.delete_many(
             {
                 'name': {'$regex': name} if name is not None else {'$regex': ''},
                 'url': {'$regex': url} if url is not None else {'$regex': ''},
                 'project_name': {'$regex': project} if project is not None else {'$regex': ''},
-                'task_id': task if task is not None else {'$gt': 0},
+                'task_no': {'$regex': task} if task is not None else {'$regex': ''},
                 'actual_result': result if result is not None else {'$type': 8},
+                'create_time': {'$gt': start_timeStamp, '$lt': end_timeStamp} if start is not None else {'$type': 18}
             }
         )
 

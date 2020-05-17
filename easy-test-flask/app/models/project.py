@@ -3,6 +3,7 @@ from datetime import datetime
 import requests
 from flask import current_app
 from flask_jwt_extended import current_user, get_current_user
+from lin import manager
 from lin.db import db
 from lin.exception import NotFound, ParameterException, UnknownException, Forbidden
 from lin.interface import InfoCrud as Base
@@ -202,11 +203,13 @@ class Project(Base):
             return ConfigRelation.get_configs(self.id)
 
     # 批量执行用例
-    def batch(self):
+    def batch(self, create_user_id):
+        # 获取执行用户信息
+        create_user = manager.user_model.query.filter_by(id=create_user_id).first()
         if self.type == ProjectTypeEnum.COPY.value:
-            ConfigCopy.batch(self)
+            ConfigCopy.batch(self, create_user)
         elif self.type == ProjectTypeEnum.RELATION.value:
-            ConfigRelation.batch(self)
+            ConfigRelation.batch(self, create_user)
         # 执行完毕将结果广播给客户端
         res = requests.get(url='http://127.0.0.1:5000/v1/task/finish/' + str(self.id))
         current_app.logger.debug(res.text)

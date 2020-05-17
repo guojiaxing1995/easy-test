@@ -106,6 +106,8 @@ def cases_by_group():
 
 
 @case_api.route('/logs', methods=['POST'])
+@route_meta('用例日志列表', module='测试结果')
+@group_required
 def case_logs():
     form = CaseLogsSearchForm().validate_for_api()
     cases = Case.case_log_search(form.name.data, form.url.data, form.project.data, form.task.data,
@@ -114,6 +116,8 @@ def case_logs():
 
 
 @case_api.route('/logs/delete', methods=['DELETE'])
+@route_meta('删除用例日志', module='测试结果')
+@group_required
 def case_logs_delete():
     form = CaseLogsSearchForm().validate_for_api()
     count = Case.case_log_remove(form.name.data, form.url.data, form.project.data, form.task.data,

@@ -106,7 +106,7 @@ class CaseLogsSearchForm(Form):
     # 结果
     result = Field(validators=[Optional()])
     page = IntegerField(validators=[Optional()])
-    count = IntegerField(validators=[Optional()])
+    count = IntegerField(default=10, validators=[Optional()])
     start = DateTimeField(validators=[])
     end = DateTimeField(validators=[])
 

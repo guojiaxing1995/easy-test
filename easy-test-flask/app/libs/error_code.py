@@ -40,3 +40,9 @@ class CaseRemoveException(APIException):
     code = 403
     msg = '用例删除失败'
     error_code = 93001
+
+
+class RecordRemoveException(APIException):
+    code = 403
+    msg = '运行记录删除失败'
+    error_code = 94001

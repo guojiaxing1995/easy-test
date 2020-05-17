@@ -5,6 +5,7 @@ import Utils from '@/lin/utils/util'
 import caseConfig from './case'
 import projectConfig from './project'
 import executeConfig from './execute'
+import testConfig from './test'
 
 // eslint-disable-next-line import/no-mutable-exports
 let homeRouter = [
@@ -42,7 +43,8 @@ let homeRouter = [
   adminConfig,
   caseConfig,
   projectConfig,
-  executeConfig
+  executeConfig,
+  testConfig
 ]
 
 const plugins = [...pluginsConfig]

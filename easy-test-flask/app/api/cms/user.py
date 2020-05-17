@@ -189,7 +189,6 @@ def user_by_group():
 @login_required
 def user_auth_by_group():
     form = UserGroupAuthForm().validate_for_api()
-
     user_groups = manager.group_model.get(one=False)
     if user_groups is None:
         raise NotFound(msg='不存在任何用户组')

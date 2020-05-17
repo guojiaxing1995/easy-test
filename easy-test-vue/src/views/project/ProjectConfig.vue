@@ -84,13 +84,18 @@
                   <project-case-edit :caseDate="element" :caseTypeCode="type" :projectId="selectProject"></project-case-edit>
                   <i slot="reference" class="el-icon-edit-outline" v-show="currentProject.type === 2"></i>
                 </el-popover>
-                <i class="el-icon-switch-button"  @click=" element.is_run=! element.is_run"></i>
+                <!-- 调试 -->
+                <i class="el-icon-thumb" @click="handleDebug(element)"></i>
+                <!-- 是否运行开关 -->
+                <i class="el-icon-switch-button" @click=" element.is_run=! element.is_run"></i>
               </li>
             </transition-group>
           </draggable>
         </el-col>
       </el-row>
     </div>
+    <!-- 調試框 -->
+    <debug-case :case="debugCase" :drawerShow="drawer" :type="type" @closed="drawerClose" :ruleShow="ruleShow"></debug-case>
   </div>
 </template>
 
@@ -98,16 +103,30 @@
 import draggable from 'vuedraggable'
 import ProjectCaseInfo from './ProjectCaseInfo'
 import ProjectCaseEdit from './ProjectCaseEdit'
+import DebugCase from '../../components/DebugCase'
 import { get, post } from '@/lin/plugins/axios'
 
 export default {
   components: {
     draggable,
     ProjectCaseInfo,
-    ProjectCaseEdit
+    ProjectCaseEdit,
+    DebugCase
   },
   data() {
     return {
+      ruleShow: true,
+      debugCase: {
+        url: '',
+        method: '',
+        data: '',
+        header: '',
+        submit: '',
+        server: '',
+        name: '',
+      },
+      // 控制调试框是否显示
+      drawer: false,
       groupCaseLoading: false,
       projectCaseLoading: false,
       searchGroupCase: '',
@@ -240,6 +259,15 @@ export default {
         this.$message.error(`${res.msg}`)
       }
     },
+    // 打开调试框
+    handleDebug(val) {
+      this.drawer = true
+      this.debugCase = val
+    },
+    // 关闭调试框后父组件修改状态
+    drawerClose() {
+      this.drawer = false
+    },
   },
   watch: {
     isDragging(newValue) {
@@ -307,6 +335,13 @@ export default {
     await this.getAllGroups()
     await this.getType()
     await this.getProjectType()
+    if (this.$route.query.pid) {
+      for (let index = 0; index < this.selecProjectData.length; index++) {
+        if (this.$route.query.pid === this.selecProjectData[index].id) {
+          this.selectProject = this.$route.query.pid
+        }
+      }
+    }
   },
   activated() {
     if (this.$route.query.pid) {

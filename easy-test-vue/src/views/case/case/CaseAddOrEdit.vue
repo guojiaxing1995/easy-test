@@ -9,7 +9,7 @@
         <el-col :lg="16" :md="20" :sm="24" :xs="24">
           <el-form :model="form" status-icon ref="form" label-width="100px" v-loading="loading" @submit.native.prevent class="form" :rules="rules">
             <el-form-item label="用例名称" prop="name">
-              <el-input size="medium" v-model="form.name" placeholder="请填写用例名称"></el-input>
+              <el-input size="medium" v-model="form.name" placeholder="请填写用例名称" :disabled="Boolean(editCase)"></el-input>
             </el-form-item>
             <el-form-item label="所属分组" prop="caseGroup">
               <el-select v-model="form.caseGroup" filterable placeholder="请选用例分组" size="medium" :disabled="Boolean(editCase)">

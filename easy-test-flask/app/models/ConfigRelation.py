@@ -5,12 +5,14 @@
 @File    : ConfigRelation.py
 @Desc    : 工程配置-关联
 """
+from flask_jwt_extended import current_user
 from lin.exception import UnknownException
 from lin.interface import InfoCrud as Base
 from lin.db import db
 from sqlalchemy import Column, Integer, Boolean
 
 from app.libs.error_code import ConfigNotFound
+from app.models.CaseGroup import CaseGroup
 from app.models.case import Case
 from app.models.task import Task
 
@@ -106,15 +108,16 @@ class ConfigRelation(Base):
 
     # 批量执行
     @classmethod
-    def batch(cls, project):
+    def batch(cls, project, create_user):
         project.var_dick = {}
         configs = cls.query.filter_by(project_id=project.id, is_run=True).order_by(cls.order).all()
         if not configs:
             raise ConfigNotFound(msg='工程下无可运行用例')
         # 执行用例总数
         total = len(configs)
-        task = Task(project.id, 1, total)
+        task = Task(project.id, create_user.id, total)
         task.new_task()
+        task.update_task_no()
         step = 100 / total
         progress = 0
         with db.session.no_autoflush:
@@ -125,11 +128,17 @@ class ConfigRelation(Base):
                             case_source.submit, case_source.header, case_source.data, case_source.deal,
                             case_source.condition, case_source.expect, case_source.assertion, case_source.type)
                 case.id = config.case_id
+                case.case_group = case_source.case_group
+                group = CaseGroup.query.filter_by(id=case.case_group).first()
+                if group:
+                    case.case_group_name = group.name
+                else:
+                    case.case_group_name = None
                 case.actual_result = False
                 case.reason = None
                 case.result = {}
                 # 执行一条用例
-                case.execute_one(project, task)
+                case.execute_one(project, task, create_user)
                 progress += step
                 # 更新工程进度
                 project.update_progress(progress)

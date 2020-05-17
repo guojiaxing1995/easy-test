@@ -6,6 +6,7 @@
 @Desc    : 工程配置-副本
 """
 from flask import current_app
+from flask_jwt_extended import current_user
 from lin import db
 from lin.exception import UnknownException
 from lin.interface import InfoCrud as Base
@@ -180,15 +181,16 @@ class ConfigCopy(Base):
 
     # 批量执行
     @classmethod
-    def batch(cls, project):
+    def batch(cls, project, create_user):
         project.var_dick = {}
         configs = cls.query.filter_by(project_id=project.id, is_run=True).order_by(cls.order).all()
         if not configs:
             raise ConfigNotFound(msg='工程下无可运行用例')
         # 执行用例总数
         total = len(configs)
-        task = Task(project.id, 1, total)
+        task = Task(project.id, create_user.id, total)
         task.new_task()
+        task.update_task_no()
         step = 100 / total
         progress = 0
         with db.session.no_autoflush:
@@ -196,7 +198,10 @@ class ConfigCopy(Base):
                 case = Case(0, config.name, config.info, config.url, config.method, config.submit, config.header,
                             config.data, config.deal, config.condition, config.expect, config.assertion, config.type)
                 case.id = config.case_id
-                case.execute_one(project, task)
+                # 副本工程类型 不管理原用例分组
+                case.case_group = None
+                case.case_group_name = None
+                case.execute_one(project, task, create_user)
                 progress += step
                 # 更新工程进度
                 project.update_progress(progress)

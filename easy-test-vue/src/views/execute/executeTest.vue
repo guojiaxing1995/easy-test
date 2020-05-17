@@ -54,15 +54,14 @@
             type="primary"
             plain
             style="margin:auto"
-            @click="handleEdit(scope.$index, scope.row)">用例日志</el-button>
+            @click="toCaseLogList(scope.$index, scope.row)">用例日志</el-button>
           <el-button
             size="small"
             type="primary"
             plain
             style="margin:auto"
-            @click="handleEdit(scope.$index, scope.row)">运行记录</el-button>
+            @click="toRecordList(scope.$index, scope.row)">运行记录</el-button>
           <el-button
-            v-auth="{ auth: '删除工程', type: 'disabled'}"
             size="small"
             type="primary"
             plain
@@ -154,6 +153,12 @@ export default {
     },
     toProjectConfig(index, val) {
       this.$router.push({ path: '/project/config', query: { pid: val.id } })
+    },
+    toCaseLogList(index, val) {
+      this.$router.push({ path: '/test/log', query: { pname: val.name } })
+    },
+    toRecordList(index, val) {
+      this.$router.push({ path: '/test/record', query: { pid: val.id } })
     },
   },
   async created() {
