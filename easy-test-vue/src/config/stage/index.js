@@ -1,5 +1,5 @@
 import adminConfig from './admin'
-import bookConfig from './book' // 引入图书管理路由文件
+// import bookConfig from './book'
 import pluginsConfig from './plugins'
 import Utils from '@/lin/utils/util'
 import caseConfig from './case'
@@ -39,7 +39,7 @@ let homeRouter = [
     inNav: false,
     icon: 'iconfont icon-rizhiguanli',
   },
-  bookConfig,
+  // bookConfig,
   adminConfig,
   caseConfig,
   projectConfig,

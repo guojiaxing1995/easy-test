@@ -129,6 +129,8 @@
             <el-form-item label="请求头">
               <pre>{{ detail.header }}</pre>
             </el-form-item>
+            <el-form-item label="">
+            </el-form-item>
             <el-form-item label="请求体">
               <pre>{{ detail.data }}</pre>
             </el-form-item>

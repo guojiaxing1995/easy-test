@@ -126,3 +126,12 @@ def case_logs_delete():
         return Success(msg='无符合条件数据')
     else:
         return Success(msg='成功删除' + str(count) + '条数据')
+
+
+# 无分页返回按运行编号查询的所有日志
+@case_api.route('/logs/all', methods=['POST'])
+@login_required
+def case_logs_all():
+    form = CaseLogsSearchForm().validate_for_api()
+    cases = Case.case_log_search_all(form.task.data)
+    return jsonify(cases)

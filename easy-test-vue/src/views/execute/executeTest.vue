@@ -66,7 +66,7 @@
             type="primary"
             plain
             style="margin:auto"
-            @click="handleEdit(scope.$index, scope.row)">运行详情</el-button>
+            @click="toTestDetail(scope.$index, scope.row)">运行详情</el-button>
         </template>
       </el-table-column>
       <el-table-column
@@ -159,6 +159,9 @@ export default {
     },
     toRecordList(index, val) {
       this.$router.push({ path: '/test/record', query: { pid: val.id } })
+    },
+    toTestDetail(index, val) {
+      this.$router.push({ path: '/test/detail', query: { pid: val.id } })
     },
   },
   async created() {

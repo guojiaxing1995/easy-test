@@ -7,6 +7,8 @@ import '@/lin/filter'
 import '@/lin/plugins'
 import '@/lin/directives'
 
+import echarts from 'echarts'
+
 import VueSocketIO from 'vue-socket.io'
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition'
 import router from '@/router'
@@ -20,6 +22,8 @@ import SourceCode from '@/components/base/source-code/source-code'
 import '@/assets/styles/index.scss' // eslint-disable-line
 import '@/assets/styles/realize/element-variables.scss'
 import 'element-ui/lib/theme-chalk/display.css'
+
+Vue.prototype.$echarts = echarts
 
 Vue.config.productionTip = false
 

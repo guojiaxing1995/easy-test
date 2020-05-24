@@ -21,7 +21,7 @@
         </el-col>
         <el-col :span="6">
           <label class="label" >工程</label>
-          <el-select v-model="project" filterable placeholder="请选用例分组" clearable size="small" style="width:60%">
+          <el-select v-model="project" filterable placeholder="请选择分组" clearable size="small" style="width:60%">
             <el-option
               v-for="item in projectList"
               :key="item.id"
@@ -130,7 +130,7 @@
                 type="primary"
                 plain
                 v-auth="{ auth: '编辑用例', type: 'disabled'}"
-                @click="handleEdit(scope.$index, scope.row)">运行详情</el-button>
+                @click="toTestDetail(scope.$index, scope.row)">运行详情</el-button>
               <el-button
                 size="mini"
                 style="margin:auto"
@@ -292,6 +292,9 @@ export default {
     },
     toCaseLogList(index, val) {
       this.$router.push({ path: '/test/log', query: { no: val.task_no } })
+    },
+    toTestDetail(index, val) {
+      this.$router.push({ path: '/test/detail', query: { pid: val.project_id, taskNo: val.task_no } })
     },
     handleDelete() {
       this.$confirm('此操作将按当前查询条件永久删除记录及用例日志, 是否继续?', '提示', {

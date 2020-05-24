@@ -53,8 +53,8 @@
       <el-row type="flex" justify="space-around">
         <el-col :span="7">
           <!-- 分组用例列表 -->
-          <draggable v-model="groupCases" v-bind="dragOptions" @start="isDragging=true" @end="isDragging=false" v-loading="groupCaseLoading">
-            <transition-group name="no" class="list-group" tag="ul">
+          <draggable v-model="groupCases" v-bind="dragOptions" @start="isDragging=true" @end="isDragging=false">
+            <transition-group name="no" class="list-group" tag="ul" v-loading="groupCaseLoading" element-loading-background="rgba(236, 245, 255, 0.5">
               <li class="list-group-item item-color-normal" v-for="element in groupCases" :key="element.name" v-show="element.show">
                 <span class="name">{{element.name}}</span>
                 <!-- 鼠标移入查看按钮显示用例详情 -->
@@ -71,8 +71,8 @@
         </el-col>
         <el-col :span="7">
           <!-- 工程用例列表 -->
-          <draggable v-model="projectCases" v-bind="dragOptions" @start="isDragging=true" @end="isDragging=false" v-loading="projectCaseLoading">
-            <transition-group type="transition" :name="'flip-list'" class="list-group" tag="ul">
+          <draggable v-model="projectCases" v-bind="dragOptions" @start="isDragging=true" @end="isDragging=false">
+            <transition-group type="transition" :name="'flip-list'" class="list-group" tag="ul"  v-loading="projectCaseLoading" element-loading-background="rgba(236, 245, 255, 0.5">
               <li class="list-group-item" v-bind:class="{ 'item-color-normal': element.is_run, 'item-color-stop': !element.is_run }"
               v-for="element in projectCases" :key="element.random" v-show="element.show">
                 <span class="name">{{element.name}}</span>
@@ -384,8 +384,8 @@ export default {
   .transfer {
       /*修改滚动条样式*/
     .list-group::-webkit-scrollbar{
-      width:10px;
-      height:10px;
+      width:8px;
+      height:8px;
       /**/
     }
     .list-group::-webkit-scrollbar-track{

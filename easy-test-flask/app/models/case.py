@@ -228,6 +228,9 @@ class Case(Base):
         # 用例执行日志插入mongoDB数据库
         case_log = log(self, project, task, create_user)
         mongo.db.easy.insert(case_log)
+        # 向客户端广播用例日志
+        res = requests.get(url='http://127.0.0.1:5000/v1/task/log/' + str(task.task_no))
+        current_app.logger.debug(res.text)
 
     # 拼接请求地址
     def stitch_url(self, server):
@@ -450,6 +453,16 @@ class Case(Base):
             'count': count,
             'total': total
         }
+
+    @classmethod
+    def case_log_search_all(cls, task):
+        cases = mongo.db.easy.find(
+            {
+                'task_no': {'$regex': task} if task is not None else {'$regex': ''},
+            },
+            {"_id": 0}).sort([('_id', -1)])
+
+        return list(cases)
 
     @classmethod
     def case_log_remove(cls, name, url, project, task, result, start, end):

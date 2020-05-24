@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import requests
 from flask import current_app
 from lin import db, manager
 from lin.interface import InfoCrud as Base
@@ -41,8 +42,29 @@ class Task(Base):
             self.fail = fail
         db.session.commit()
 
+        # 将执行结果广播给客户端
+        res = requests.get(url='http://127.0.0.1:5000/v1/task/task/' + str(self.project_id))
+        current_app.logger.debug(res.text)
+
+
     @classmethod
-    def all_tasks(cls, user, project, no, start, end, page=None, count=None):
+    def all_tasks(cls, project):
+        tasks = cls.query.filter(
+            cls.project_id == project if project else '',
+            cls.delete_time == None,
+        ).order_by(
+            text('update_time desc')
+        ).all()
+
+        for task in tasks:
+            create_user = manager.user_model.query.filter_by(id=task.create_user).first()
+            setattr(task, 'create_user_name', create_user.username)
+            task._fields.append('create_user_name')
+
+        return tasks
+
+    @classmethod
+    def get_tasks(cls, user, project, no, start, end, page=None, count=None):
         count = int(count) if count else current_app.config.get('COUNT_DEFAULT')
         page = int(page) if page else current_app.config.get('PAGE_DEFAULT') + 1
         results = cls.query.filter(

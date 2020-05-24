@@ -37,3 +37,39 @@ def log(case, project, task, user):
         'task_no': task.task_no
     }
     return case_log
+
+
+def log_format(case_log):
+    return {
+        'id': case_log['id'],
+        'case_group': case_log['case_group'],
+        'case_group_name': case_log['case_group_name'],
+        'name': case_log['name'],
+        'actual_result': case_log['actual_result'],
+        'assertion_text': case_log['assertion_text'],
+        'assertion': case_log['assertion'],
+        'condition': case_log['condition'],
+        'create_time': case_log['create_time'],
+        'create_user': case_log['create_user'],
+        'username': case_log['username'],
+        'data': case_log['data'],
+        'deal_text': case_log['deal_text'],
+        'deal': case_log['deal'],
+        'expect': case_log['expect'],
+        'header': case_log['header'],
+        'info': case_log['info'],
+        'method_text': case_log['method_text'],
+        'method': case_log['method'],
+        'reason': case_log['reason'],
+        'submit_text': case_log['submit_text'],
+        'submit': case_log['submit'],
+        'type': case_log['type'],
+        'url': case_log['url'],
+        'result': case_log['result'],
+        'project_id': case_log['project_id'],
+        'project_name': case_log['project_name'],
+        'project_type': case_log['project_type'],
+        'project_type_name': case_log['project_type_name'],
+        'task_id': case_log['task_id'],
+        'task_no': case_log['task_no']
+    }
