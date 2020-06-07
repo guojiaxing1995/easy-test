@@ -50,7 +50,6 @@
         </el-row>
         <div class="btn">
           <el-button
-            style="margin-right:0"
             type="danger"
             @click="handleDelete"
             v-auth="{ auth: '删除用例日志', type: 'disabled'}"
@@ -278,6 +277,7 @@ export default {
       this.getCaseLogs()
     },
     search() {
+      this.page = 1
       this.getCaseLogs()
     },
     handleCurrentChange(val) {
@@ -353,12 +353,12 @@ export default {
     margin-top: 30px;
 
     .success {
-      color: #67C23A;
+      color: #00C292;
       font-weight: 500;
     }
 
     .fail {
-      color: #F56C6C;
+      color: #E46A76;
       font-weight: 500;
     }
 

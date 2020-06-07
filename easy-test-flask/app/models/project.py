@@ -26,7 +26,9 @@ class Project(Base):
     _type = Column('type', SmallInteger, nullable=False, comment='工程类型 ;  1 -> 关联用例 |  2 -> 用例副本')
     running = Column(Boolean, nullable=False, comment='是否在运行中')
     progress = Column(Integer, default=0, comment='运行进度')
-    user_id = Column(Integer, nullable=False, comment='维护人')
+    user = Column(Integer, nullable=False, comment='维护人员')
+    send_email = Column(Boolean, nullable=False, default=True, comment='是否发送邮件')
+    copy_person = Column(String(50), comment='邮件抄送人员')
 
     @property
     def type(self):
@@ -50,8 +52,10 @@ class Project(Base):
             project.info = form.info.data
             project.progress = 0
             project.type = ProjectTypeEnum(form.type.data)
-            project.user_id = get_current_user().id
+            project.user = form.user.data
             project.running = False
+            project.send_email = form.sendEmail.data
+            project.copy_person = form.copyPerson.data
             db.session.add(project)
             db.session.flush()
             if form.users.data:
@@ -72,6 +76,23 @@ class Project(Base):
     def get_all(cls):
         projects = cls.query.filter_by(delete_time=None) \
             .order_by(text('Project.running desc'), text('Project.update_time desc')).all()
+        for project in projects:
+            # 添加user_name属性
+            user_name = manager.user_model.query.filter_by(id=project.user).first().username
+            setattr(project, 'user_name', user_name)
+            project._fields.append('user_name')
+
+            # 抄送人
+            copy_users_name = []
+            if project.copy_person:
+                for u in project.copy_person.split(','):
+                    copy_user = manager.user_model.query.filter_by(id=int(u)).first().username if u else None
+                    # 如果用户存在则加入抄送人列表
+                    copy_users_name.append(copy_user) if copy_user else 1
+            setattr(project, 'copy_person_name', copy_users_name)
+            project._fields.append('copy_person_name')
+
+        # 清理查询查询缓存
         db.session.execute('reset query cache')
         return projects
 
@@ -123,8 +144,10 @@ class Project(Base):
                 project.server = form.server.data
                 project.header = form.header.data
                 project.info = form.info.data
+                project.send_email = form.sendEmail.data
+                project.copy_person = form.copyPerson.data
                 # 维护人
-                project.user_id = current_user.id
+                project.user = form.user.data
                 if form.users.data is not None:
                     # 旧人员列表中有 新人员列表中没有，这部分删除
                     old = list(set(old_users).difference(set(new_users)))
@@ -203,16 +226,22 @@ class Project(Base):
             return ConfigRelation.get_configs(self.id)
 
     # 批量执行用例
-    def batch(self, create_user_id):
+    def batch(self, create_user_id, scheduler_id):
         # 获取执行用户信息
+        task = None
         create_user = manager.user_model.query.filter_by(id=create_user_id).first()
         if self.type == ProjectTypeEnum.COPY.value:
-            ConfigCopy.batch(self, create_user)
+            task = ConfigCopy.batch(self, create_user)
         elif self.type == ProjectTypeEnum.RELATION.value:
-            ConfigRelation.batch(self, create_user)
+            task = ConfigRelation.batch(self, create_user)
+
         # 执行完毕将结果广播给客户端
         res = requests.get(url='http://127.0.0.1:5000/v1/task/finish/' + str(self.id))
         current_app.logger.debug(res.text)
+
+        # 发送邮件
+        from app.libs.tasks import send_text_email
+        send_text_email.delay(task.id, self.id, scheduler_id)
 
     # 更新进度
     def update_progress(self, progress, running=None):

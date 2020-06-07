@@ -11,7 +11,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, get_curren
     create_refresh_token, verify_jwt_refresh_token_in_request
 from lin.core import manager, route_meta, Log
 from lin.db import db
-from lin.enums import UserAdmin
+from lin.enums import UserAdmin, UserActive
 from lin.exception import NotFound, Success, Failed, RepeatException, ParameterException
 from lin.jwt import login_required, admin_required, get_tokens
 from lin.log import Logger
@@ -225,7 +225,8 @@ def user_by_initials():
     # 获取首字母列表以及 首字母分组模板列表
     users_by_initials, letters = group_by_initials()
     others = []
-    users = manager.user_model.query.filter_by(delete_time=None, admin=UserAdmin.COMMON.value).all()
+    users = manager.user_model.query.filter_by(delete_time=None, admin=UserAdmin.COMMON.value,
+                                               active=UserActive.ACTIVE.value).all()
     for user in users:
         # 如果传入权限分组和权限类型则返回对应用户是否获取到授权
         if form.authId.data:

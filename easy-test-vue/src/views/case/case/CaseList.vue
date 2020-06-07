@@ -275,12 +275,14 @@ export default {
     this.$watch(
       'name',
       Utils.debounce(() => {
+        this.page = 1
         this.getCases()
       }, 1000),
     )
     this.$watch(
       'url',
       Utils.debounce(() => {
+        this.page = 1
         this.getCases()
       }, 1000),
     )
@@ -307,10 +309,12 @@ export default {
     // 监听新增更新用例是否成功
     async case(flag) {
       if (flag === true) {
+        this.page = 1
         await this.getCases()
       }
     },
     async handleRefresh() {
+      this.page = 1
       await this.getCases()
     },
     async getType() {
@@ -378,6 +382,7 @@ export default {
       }).then(async () => {
         const res = await _delete(`/v1/case/${row.id}`, { showBackend: true })
         if (res.error_code === 0) {
+          this.page = 1
           this.getCases()
           this.$message({
             type: 'success',
@@ -404,15 +409,19 @@ export default {
   },
   watch: {
     caseGroup() {
+      this.page = 1
       this.getCases()
     },
     datetime() {
+      this.page = 1
       this.getCases()
     },
     method() {
+      this.page = 1
       this.getCases()
     },
     deal() {
+      this.page = 1
       this.getCases()
     }
   },
@@ -442,7 +451,7 @@ export default {
     margin-top: 30px;
     .method {
       .get {
-        color: #67C23A;
+        color: #00C292;
         font-weight: 500;
       }
       .post {
@@ -450,11 +459,11 @@ export default {
         font-weight: 500;
       }
       .put {
-        color: #409EFF;
+        color: #3963BC;
         font-weight: 500;
       }
       .delete {
-        color: #F56C6C;
+        color: #E46A76;
         font-weight: 500;
       }
     }

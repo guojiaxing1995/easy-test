@@ -4,12 +4,14 @@
 """
 from time import sleep
 
+from flask_mail import Message
+from lin.exception import Success
 from lin.redprint import Redprint
 from flask import jsonify, request
 from lin.jwt import group_required
 from lin.core import route_meta
 
-from app.libs.init import mongo
+from app.libs.init import mongo, mail
 
 test_api = Redprint('test')
 
@@ -104,3 +106,17 @@ def test_d():
         "success": True,
         "msg": 'is ok !'
     })
+
+
+@test_api.route('/mail', methods=['GET'])
+def test_mail():
+    msg = Message(
+        subject="Hello World!",
+        html="<b>testing</b>",
+        sender=("自动化测试平台", "15234093915@sina.cn"),
+        recipients=["302802003@qq.com"],
+        cc=['15234093915@163.com']
+    )
+
+    mail.send(msg)
+    return Success()

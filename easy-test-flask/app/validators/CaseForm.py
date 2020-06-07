@@ -60,8 +60,34 @@ class CaseSearchForm(Form):
     method = IntegerField(validators=[Optional()])
     deal = IntegerField(validators=[Optional()])
     caseGroup = IntegerField(validators=[Optional()])
-    page = IntegerField(validators=[Optional()])
-    count = IntegerField(validators=[Optional()])
+    page = IntegerField(default=1)
+    count = IntegerField(default=10)
+    start = DateTimeField(validators=[])
+    end = DateTimeField(validators=[])
+
+    def validate_start(self, value):
+        if value.data:
+            try:
+                _ = time.strptime(value.data, '%Y-%m-%d %H:%M:%S')
+            except ValueError as e:
+                raise e
+
+    def validate_end(self, value):
+        if value.data:
+            try:
+                _ = time.strptime(value.data, '%Y-%m-%d %H:%M:%S')
+            except ValueError as e:
+                raise e
+
+
+class CaseEditLogForm(Form):
+    id = IntegerField(validators=[DataRequired(message='请选择用例')])
+    name = StringField(validators=[Optional()])
+    url = StringField(validators=[Optional()])
+    method = IntegerField(validators=[Optional()])
+    deal = IntegerField(validators=[Optional()])
+    page = IntegerField(default=1)
+    count = IntegerField(default=10)
     start = DateTimeField(validators=[])
     end = DateTimeField(validators=[])
 

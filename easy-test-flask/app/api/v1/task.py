@@ -39,7 +39,8 @@ def get_tasks():
 
 
 @task_api.route('/all', methods=['GET'])
-@login_required
+@route_meta('运行详情', module='测试结果')
+@group_required
 def all_tasks():
     form = TaskSearchForm().validate_for_api()
     tasks = Task.all_tasks(form.project.data)

@@ -1,3 +1,7 @@
+import time
+
+from flask_jwt_extended import current_user
+
 from app.libs.enums import CaseAssertEnum, CaseTypeEnum, CaseDealEnum, CaseSubmitEnum, CaseMethodEnum, ProjectTypeEnum
 
 
@@ -72,4 +76,26 @@ def log_format(case_log):
         'project_type_name': case_log['project_type_name'],
         'task_id': case_log['task_id'],
         'task_no': case_log['task_no']
+    }
+
+
+def edit_log(id, name, info, url, method, submit, header, data, deal, condition, expect, assertion, type, case_group):
+    return {
+        'id': id,
+        'name': name,
+        'info': info,
+        'url': url,
+        'method': method,
+        'submit': submit,
+        'header': header,
+        'data': data,
+        'deal': deal,
+        'condition': condition,
+        'expect': expect,
+        'assertion': assertion,
+        'type': type,
+        'case_group': case_group,
+        'create_user': current_user.id,
+        'create_user_name': current_user.username,
+        'create_time': int(round(time.time() * 1000)),
     }

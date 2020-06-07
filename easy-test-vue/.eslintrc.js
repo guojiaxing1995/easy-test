@@ -6,7 +6,7 @@ module.exports = {
   plugins: ['vue'],
   extends: ['plugin:vue/essential', '@vue/airbnb'],
   rules: {
-    'linebreak-style': ['error', 'windows'],
+    'linebreak-style': [0, 'error', 'windows'],
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'import/extensions': 0, // import不需要写文件扩展名

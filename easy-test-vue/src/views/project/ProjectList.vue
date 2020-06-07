@@ -24,28 +24,53 @@
         min-width="200">
       </el-table-column>
       <el-table-column
-        fixed
         prop="server"
         label="服务地址"
         :show-overflow-tooltip="true"
         min-width="200">
       </el-table-column>
       <el-table-column
-        label="类型"
+        prop="user_name"
+        label="维护人员"
+        :show-overflow-tooltip="true"
+        min-width="100">
+      </el-table-column>
+      <el-table-column
+        prop="send_email"
+        label="发送邮件"
         align="center"
-        width="70">
+        :show-overflow-tooltip="true"
+        min-width="80">
         <template slot-scope="scope">
-          <div :key="key" v-for="(val,key) in projecType">
-            <div v-show="scope.row.type === parseInt(key)" style="margin:auto">{{val}}</div>
-          </div>
+          <div slot="content" v-if="scope.row.send_email" style="margin:auto">是</div>
+          <div slot="content" v-else style="margin:auto">否</div>
         </template>
       </el-table-column>
       <el-table-column
-        fixed
+        prop="copy_person_name"
+        label="邮件抄送人员"
+        :show-overflow-tooltip="true"
+        min-width="200">
+        <template slot-scope="scope">
+          <div slot="content">{{scope.row.copy_person_name.join(',')}}</div>
+        </template>
+      </el-table-column>
+      <el-table-column
         prop="info"
         label="描述"
         :show-overflow-tooltip="true"
         min-width="350">
+      </el-table-column>
+      <el-table-column
+        label="类型"
+        fixed="right"
+        align="center"
+        width="70">
+        <template slot-scope="scope">
+          <div :key="key" v-for="(val,key) in projecType">
+            <div v-if="scope.row.type === parseInt(key)">{{val}}</div>
+          </div>
+        </template>
       </el-table-column>
       <el-table-column
         width="180"
@@ -108,6 +133,31 @@
                   </label>
                 </el-radio-group>
               </el-form-item>
+              <el-form-item label="维护人员" prop="user">
+                <el-cascader
+                  style="width:60%"
+                  clearable
+                  filterable
+                  :show-all-levels="false"
+                  v-model="form.user"
+                  :options="users"
+                  :props="{ expandTrigger: 'hover' }"
+                  ></el-cascader>
+              </el-form-item>
+              <el-form-item label="发送邮件" prop="sendEmail">
+                <el-switch v-model="form.sendEmail"></el-switch>
+              </el-form-item>
+              <el-form-item label="抄送人员" prop="copyPerson">
+                <el-cascader
+                  style="width:60%"
+                  clearable
+                  filterable
+                  :show-all-levels="false"
+                  v-model="form.copyPerson"
+                  :options="users"
+                  :props="{ expandTrigger: 'hover', multiple: true }"
+                  ></el-cascader>
+              </el-form-item>
             </el-form>
           </el-tab-pane>
           <el-tab-pane label="配置权限" name="配置权限" style="margin-top:10px;">
@@ -124,7 +174,7 @@
         </el-tabs>
       </div>
       <div slot="footer" class="dialog-footer" style="padding-left:5px;">
-        <el-button type="primary" @click="confirmEdit">确 定</el-button>
+        <el-button type="primary" @click="confirmEdit('form')">确 定</el-button>
         <el-button @click="resetForm('form')">重 置</el-button>
       </div>
     </el-dialog>
@@ -155,9 +205,16 @@ export default {
         server: null,
         header: null,
         info: null,
+        // 授权人与
         users: [],
         type: '1',
+        sendEmail: true,
+        // 维护人
+        user: null,
+        copyPerson: [],
       },
+      // 人员树
+      users: [],
       projecType: {},
       groupUsers: [], // 拥有的分组权限
       loading: false,
@@ -168,6 +225,7 @@ export default {
           { required: true, message: '请输入服务地址', trigger: 'blur' },
           { max: 60, message: '服务地址需小于60字', trigger: 'blur' },
         ],
+        user: [{ required: true, message: '请选择维护人员', trigger: 'blur, change' }],
         name: [
           { required: true, message: '请输入工程名称', trigger: 'blur' },
           { max: 20, message: '工程名称需小于20字', trigger: 'blur' },
@@ -191,6 +249,61 @@ export default {
     },
   },
   methods: {
+    // 维护人数据处理
+    getUserData(userId) {
+      for (let i = 0; i < this.users.length; i++) {
+        for (let c = 0; c < this.users[i].children.length; c++) {
+          if (this.users[i].children[c].value === userId) {
+            return [this.users[i].label, userId]
+          }
+        }
+      }
+    },
+    // 抄送人数据处理
+    getCopyPersonData(copyPerson) {
+      const copy_person = []
+      let copyPersonArray = []
+      if (copyPerson !== null) {
+        copyPersonArray = copyPerson.split(',')
+      }
+      for (let p = 0; p < copyPersonArray.length; p++) {
+        for (let i = 0; i < this.users.length; i++) {
+          for (let c = 0; c < this.users[i].children.length; c++) {
+            if (this.users[i].children[c].value.toString() === copyPersonArray[p]) {
+              copy_person.push([this.users[i].label, copyPersonArray[p]])
+            }
+          }
+        }
+      }
+      return copy_person
+    },
+    async geUsers() {
+      const allUsers = await get('/cms/user/userByInitials',
+        {},
+        { showBackend: true })
+      this.groupDataDeal(allUsers)
+    },
+    groupDataDeal(allUsers) {
+      for (const group of allUsers) {
+        if (group.users.length > 0) {
+          group.value = group.name
+          group.label = group.name
+          group.children = group.users
+          for (const user of group.children) {
+            user.label = user.username
+            user.value = user.id
+          }
+          this.users.push(group)
+        }
+      }
+    },
+    copyPersonDeal() {
+      const copyPersonArray = []
+      for (let index = 0; index < this.form.copyPerson.length; index++) {
+        copyPersonArray.push(this.form.copyPerson[index][1])
+      }
+      return copyPersonArray.join(',')
+    },
     async getType() {
       const type = await get('/v1/project/type', { type: 'TYPE' }, { showBackend: true })
       this.projecType = type
@@ -216,32 +329,44 @@ export default {
       }
       this.form.users = allAuthsUsers
     },
-    async confirmEdit() {
-      // 修改分组信息
-      if (this.form.name === '') {
-        this.$message.warning('请将信息填写完整')
-        return
-      }
-      if (this.groupUsers === []) {
-        this.$message.warning('请等待数据加载完重试')
-        return
-      }
-      this.editLoading = true
-      this.getAuths()
-      let res
-      try {
-        res = await put(`/v1/project/${this.id}`, this.form, { showBackend: true })
-        if (res.error_code === 0) {
-          this.$message.success(`${res.msg}`)
-          this.dialogFormVisible = false
-          await this.getAllProjects()
+    async confirmEdit(form) {
+      this.$refs[form].validate(async valid => {
+        if (valid) {
+          if (this.groupUsers === []) {
+            this.$message.warning('请等待数据加载完重试')
+            return
+          }
+          this.editLoading = true
+          this.getAuths()
+          let res
+          try {
+            res = await put(`/v1/project/${this.id}`, {
+              name: this.form.name,
+              server: this.form.server,
+              header: this.form.header,
+              info: this.form.info,
+              users: this.form.users,
+              type: this.form.type,
+              sendEmail: this.form.sendEmail,
+              user: this.form.user[1],
+              copyPerson: this.copyPersonDeal(),
+            }, { showBackend: true })
+            if (res.error_code === 0) {
+              this.$message.success(`${res.msg}`)
+              this.dialogFormVisible = false
+              await this.getAllProjects()
+            } else {
+              this.$message.error(`${res.msg}`)
+            }
+            this.editLoading = false
+          } catch (error) {
+            this.editLoading = false
+          }
         } else {
-          this.$message.error(`${res.msg}`)
+          this.$message.error('请将信息填写完整')
+          return false
         }
-        this.editLoading = false
-      } catch (error) {
-        this.editLoading = false
-      }
+      })
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
@@ -255,6 +380,9 @@ export default {
       this.form.server = val.server
       this.form.header = val.header
       this.form.type = val.type.toString()
+      this.form.sendEmail = val.send_email
+      this.form.user = this.getUserData(val.user)
+      this.form.copyPerson = this.getCopyPersonData(val.copy_person)
       this.dialogFormVisible = true
     },
     handleDelete(index, val) {
@@ -308,6 +436,7 @@ export default {
   async created() {
     await this.getType()
     await this.getAllProjects()
+    await this.geUsers()
     // 监听分组是否成功
     this.eventBus.$on('addProject', this.addProject)
     if (this.$route.query.pname) {

@@ -4,9 +4,9 @@
 """
 from app.app import create_app
 
-app = create_app(environment='development')
-
 from app.libs.init import celery
+
+app = create_app(environment='development')
 
 celery.conf.update(imports='app.libs.tasks')
 
@@ -21,4 +21,4 @@ def lin_slogan():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

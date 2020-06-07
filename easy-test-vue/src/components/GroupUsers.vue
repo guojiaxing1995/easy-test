@@ -51,12 +51,12 @@ export default {
           authType: this.authType
         },
         { showBackend: true })
-      this.GroupDataDeal()
+      this.groupDataDeal()
       this.$emit('updateAuths', this.allUsers)
       this.loading = false
     },
     // 用户权限数据处理
-    GroupDataDeal() {
+    groupDataDeal() {
       for (const group of this.allUsers) {
         if (typeof group.users !== 'undefined') {
           const groupUsers = []

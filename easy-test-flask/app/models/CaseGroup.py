@@ -69,7 +69,7 @@ class CaseGroup(Base):
             auth = UserAuth.query.filter_by(user_id=current_user.id,
                                             _type=UserAuthEnum.GROUP.value, auth_id=self.id).first()
             if not auth:
-                raise Forbidden(msg='无操作此工程的权限')
+                raise Forbidden(msg='无操作此分组的权限')
 
     @classmethod
     def edit_group(cls, gid, form):

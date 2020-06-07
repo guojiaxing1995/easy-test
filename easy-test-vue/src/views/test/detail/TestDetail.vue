@@ -43,11 +43,11 @@
         <el-col :span="6">
           <div style="height: 20vh;" class="box">
             <div style="height: 100px;line-height: 100px">
-              <span style="margin-left:10px" class="label">总计</span><span style="font-size:30px;margin-left:10px;color: #409EFF">{{ currentTask.total }}</span>
+              <span style="margin-left:10px" class="label">总计</span><span style="font-size:30px;margin-left:10px;color: #3963BC">{{ currentTask.total }}</span>
             </div>
             <div class="result">
-              <div style="width:50%"><span class="label">成功</span><span style="font-size:30px;color: #67C23A">{{ currentTask.success }}</span></div>
-              <div style="width:50%"><span class="label">失败</span><span style="font-size:30px;color: #F56C6C">{{ currentTask.fail }}</span></div>
+              <div style="width:50%"><span class="label">成功</span><span style="font-size:30px;color: #00C292">{{ currentTask.success }}</span></div>
+              <div style="width:50%"><span class="label">失败</span><span style="font-size:30px;color: #E46A76">{{ currentTask.fail }}</span></div>
             </div>
           </div>
         </el-col>
@@ -193,8 +193,8 @@
                 v-bind:class="{ 'item-color-normal': !element.is_choose, 'item-color-choose': element.is_choose }"
                 @click="handleChoose(element)">
                 <i class="el-icon-check" v-if="element.actual_result && element.is_choose"></i>
-                <i class="el-icon-success" v-else-if="element.actual_result" style="color: #67C23A"></i>
-                <i class="el-icon-error" v-else-if="!element.actual_result && !element.is_choose" style="color: #F56C6C"></i>
+                <i class="el-icon-success" v-else-if="element.actual_result" style="color: #00C292"></i>
+                <i class="el-icon-error" v-else-if="!element.actual_result && !element.is_choose" style="color: #E46A76"></i>
                 <i class="el-icon-close" v-else-if="!element.actual_result && element.is_choose"></i>
                 <span class="name">{{element.name}}</span>
                 <!-- 调试 -->
@@ -219,7 +219,7 @@
 </template>
 
 <script>
-import { get, post } from '@/lin/plugins/axios'
+import { get } from '@/lin/plugins/axios'
 import ProjectCaseInfo from '../../project/ProjectCaseInfo'
 import DebugCase from '../../../components/DebugCase'
 
@@ -434,7 +434,7 @@ export default {
     async getCaseLogs() {
       this.logsLoading = true
       try {
-        const data = await post('/v1/case/logs/all', {
+        const data = await get('/v1/case/logs/all', {
           task: this.task,
         }, { showBackend: true })
         this.CaseLogData = data
@@ -555,8 +555,8 @@ export default {
             radius: '80%',
             center: ['50%', '50%'],
             data: [
-              { value: that.currentTask.success, name: '成功', itemStyle: { color: '#67C23A' } },
-              { value: that.currentTask.fail, name: '失败', itemStyle: { color: '#F56C6C' } },
+              { value: that.currentTask.success, name: '成功', itemStyle: { color: '#00C292' } },
+              { value: that.currentTask.fail, name: '失败', itemStyle: { color: '#E46A76' } },
             ],
             emphasis: {
               itemStyle: {
@@ -585,7 +585,7 @@ export default {
         tooltip: {
           trigger: 'axis',
         },
-        color: ['#67C23A', '#F56C6C'],
+        color: ['#00C292', '#E46A76'],
         legend: {
           data: ['成功', '失败']
         },
@@ -611,7 +611,7 @@ export default {
             data: that.lineSuccess,
             lineStyle: {
               normal: {
-                color: '#67C23A'
+                color: '#00C292'
               }
             },
           },
@@ -622,7 +622,7 @@ export default {
             data: that.lineFail,
             lineStyle: {
               normal: {
-                color: '#F56C6C'
+                color: '#E46A76'
               }
             },
             markPoint: {

@@ -31,6 +31,17 @@ const caseRouter = {
       permission: ['新增用例'],
     },
     {
+      title: '修改记录',
+      type: 'view',
+      inNav: true,
+      route: '/case/modify/log',
+      icon: 'iconfont icon-add',
+      name: 'CaseAdd',
+      keepAlive: true,
+      filePath: 'views/case/modify/ModifyLog.vue',
+      permission: ['修改记录'],
+    },
+    {
       route: '/case/group/list',
       name: null,
       title: '分组管理',

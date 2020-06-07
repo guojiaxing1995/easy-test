@@ -5,7 +5,7 @@
 import json
 import time
 
-from app.libs.init import mongo, socket_io, celery
+from app.libs.init import mongo, socket_io, celery, scheduler, mail
 from app.libs.lin_flask import LinFlask
 from flask import request, g
 from flask_cors import CORS
@@ -87,5 +87,9 @@ def create_app(register_all=True, environment='production'):
         mongo.init_app(app)
         celery.init_app(app)
         socket_io.init_app(app, cors_allowed_origins='*')
+        # 启动scheduler
+        scheduler.init_app(app)
+        scheduler.start()
+        mail.init_app(app)
 
     return app

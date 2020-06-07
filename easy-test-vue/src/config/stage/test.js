@@ -39,7 +39,7 @@ const testRouter = {
       inNav: true,
       icon: 'iconfont icon-caseGroup',
       keepAlive: true,
-      // permission: ['运行记录'],
+      permission: ['运行详情'],
     },
   ],
 }

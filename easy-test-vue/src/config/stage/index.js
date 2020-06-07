@@ -6,6 +6,7 @@ import caseConfig from './case'
 import projectConfig from './project'
 import executeConfig from './execute'
 import testConfig from './test'
+import schedulerConfig from './scheduler'
 
 // eslint-disable-next-line import/no-mutable-exports
 let homeRouter = [
@@ -44,7 +45,8 @@ let homeRouter = [
   caseConfig,
   projectConfig,
   executeConfig,
-  testConfig
+  testConfig,
+  schedulerConfig
 ]
 
 const plugins = [...pluginsConfig]

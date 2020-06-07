@@ -6,6 +6,7 @@
 @Desc    : 测试用例模型
 """
 import math
+import operator
 import time
 from datetime import datetime
 import json
@@ -18,7 +19,7 @@ from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, String, SmallInteger
 from lin.db import db
 
-from app.libs.case_log import log
+from app.libs.case_log import log, edit_log
 from app.libs.deal import deal_default, get_target_value
 from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTypeEnum, CaseAssertEnum, UserAuthEnum
 from app.libs.error_code import CaseRemoveException
@@ -121,6 +122,11 @@ class Case(Base):
 
     def edit_case(self, name, info, url, method, submit, header, data, deal, condition, expect, assertion,
                   type):
+
+        old_case = Case(self.case_group, self.name, self.info, self.url, self.method, self.submit, self.header,
+                        self.data, self.deal, self.condition, self.expect, self.assertion, self.type)
+        old_case.id = self.id
+
         if self.name != name:
             if Case.query.filter_by(name=name, case_group=self.case_group, delete_time=None).first():
                 raise ParameterException(msg='当前组已存在同名用例，请更改用例名称')
@@ -139,6 +145,40 @@ class Case(Base):
         self.type = CaseTypeEnum(type)
         self.update_user = get_current_user().id
         db.session.commit()
+
+        self.edit_log(old_case)
+
+    # 记录修改日志
+    def edit_log(self, old_case):
+        id = self.id
+        name = {'val': self.name, 'modify': True} if self.name != old_case.name else {'val': self.name, 'modify': False}
+        info = {'val': self.info, 'modify': True} if self.info != old_case.info else {'val': self.info, 'modify': False}
+        url = {'val': self.url, 'modify': True} if self.url != old_case.url else {'val': self.url, 'modify': False}
+        method = {'val': self.method, 'modify': True} if self.method != old_case.method \
+            else {'val': self.method, 'modify': False}
+        submit = {'val': self.submit, 'modify': True} if self.submit != old_case.submit \
+            else {'val': self.submit, 'modify': False}
+        header = {'val': self.header, 'modify': True} if self.header != old_case.header \
+            else {'val': self.header, 'modify': False}
+        data = {'val': self.data, 'modify': True} if self.data != old_case.data else {'val': self.data, 'modify': False}
+        deal = {'val': self.deal, 'modify': True} if self.deal != old_case.deal else {'val': self.deal, 'modify': False}
+        condition = {'val': self.condition, 'modify': True} if self.condition != old_case.condition \
+            else {'val': self.condition, 'modify': False}
+        expect = {'val': self.expect, 'modify': True} if self.expect != old_case.expect \
+            else {'val': self.expect, 'modify': False}
+        assertion = {'val': self.assertion, 'modify': True} if self.assertion != old_case.assertion \
+            else {'val': self.assertion, 'modify': False}
+        type = {'val': self.type, 'modify': True} if self.type != old_case.type else {'val': self.type, 'modify': False}
+        case_group = {'val': self.case_group, 'modify': True} if self.case_group != old_case.case_group \
+            else {'val': self.case_group, 'modify': False}
+
+        if name['modify'] or info['modify'] or url['modify'] or method['modify'] or submit['modify'] \
+                or header['modify'] or data['modify'] or deal['modify'] or condition['modify'] or expect['modify'] \
+                or assertion['modify'] or type['modify'] or case_group['modify']:
+            log = edit_log(id, name, info, url, method, submit, header, data, deal, condition, expect, assertion, type,
+                           case_group)
+
+            mongo.db.modify.insert(log)
 
     def remove_case(self):
         from app.models.ConfigRelation import ConfigRelation
@@ -475,6 +515,65 @@ class Case(Base):
                 'project_name': {'$regex': project} if project is not None else {'$regex': ''},
                 'task_no': {'$regex': task} if task is not None else {'$regex': ''},
                 'actual_result': result if result is not None else {'$type': 8},
+                'create_time': {'$gt': start_timeStamp, '$lt': end_timeStamp} if start is not None else {'$type': 18}
+            }
+        )
+
+        return result.deleted_count
+
+    @classmethod
+    def group_by_case_group(cls):
+        from app.models.CaseGroup import CaseGroup
+        groups = CaseGroup.query.filter_by(delete_time=None).all()
+        for group in groups:
+            group.hide('info', 'create_time', 'update_time')
+            cases = cls.query.filter_by(case_group=group.id, delete_time=None).all()
+            for case in cases:
+                case.hide('info', 'url', 'method', 'submit', 'header', 'data', 'deal', 'condition', 'expect',
+                          'type', 'assertion', 'case_group', 'create_user', 'update_user', 'create_time', 'update_time')
+            setattr(group, 'cases', cases)
+            group._fields.append('cases')
+
+        return groups
+
+    @classmethod
+    def search_edit_logs(cls, cid, url, method, deal, start, end, count=10, page=1):
+        start_timeStamp = int(time.mktime(time.strptime(start, "%Y-%m-%d %H:%M:%S"))) * 1000 if start else None
+        end_timeStamp = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M:%S"))) * 1000 if end else None
+
+        edit_logs = mongo.db.modify.find(
+            {
+                'id': int(cid),
+                'url.val': {'$regex': url} if url is not None else {'$regex': ''},
+                'method.val': int(method) if method is not None else {'$type': 16},
+                'deal.val': int(deal) if deal is not None else {'$type': 16},
+                'create_time': {'$gt': start_timeStamp, '$lt': end_timeStamp} if start is not None else {'$type': 18}
+            },
+            {"_id": 0}).sort([('_id', -1)]).skip((page - 1) * count).limit(count)
+
+        total = edit_logs.count()
+
+        edit_logs = list(edit_logs)
+
+        return {
+            'data': edit_logs,
+            'page': page,
+            'pages': math.ceil(total / count),
+            'count': count,
+            'total': total
+        }
+
+    @classmethod
+    def edit_logs_remove(cls, cid, url, method, deal, start, end):
+        start_timeStamp = int(time.mktime(time.strptime(start, "%Y-%m-%d %H:%M:%S"))) * 1000 if start else None
+        end_timeStamp = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M:%S"))) * 1000 if end else None
+
+        result = mongo.db.modify.delete_many(
+            {
+                'id': int(cid),
+                'url.val': {'$regex': url} if url is not None else {'$regex': ''},
+                'method.val': int(method) if method is not None else {'$type': 16},
+                'deal.val': int(deal) if deal is not None else {'$type': 16},
                 'create_time': {'$gt': start_timeStamp, '$lt': end_timeStamp} if start is not None else {'$type': 18}
             }
         )

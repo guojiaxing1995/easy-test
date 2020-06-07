@@ -206,3 +206,5 @@ class ConfigCopy(Base):
                 # 更新工程进度
                 project.update_progress(progress)
         project.update_progress(100)
+
+        return task

@@ -86,7 +86,7 @@
             :show-overflow-tooltip="true"
             min-width="130">
             <template slot-scope="scope">
-              <span style="margin: auto;color: #67C23A">{{ scope.row.success }}</span>
+              <span style="margin: auto;color: #00C292">{{ scope.row.success }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -96,7 +96,7 @@
             :show-overflow-tooltip="true"
             min-width="130">
             <template slot-scope="scope">
-              <span style="margin: auto;color: #F56C6C">{{ scope.row.fail }}</span>
+              <span style="margin: auto;color: #E46A76">{{ scope.row.fail }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -106,7 +106,7 @@
             :show-overflow-tooltip="true"
             min-width="130">
             <template slot-scope="scope">
-              <span style="margin: auto;color: #409EFF">{{ scope.row.total }}</span>
+              <span style="margin: auto;color: #3963BC">{{ scope.row.total }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -222,6 +222,7 @@ export default {
     this.$watch(
       'no',
       Utils.debounce(() => {
+        this.page = 1
         this.getTasks()
       }, 1000),
     )
@@ -231,11 +232,12 @@ export default {
       const allUsers = await get('/cms/user/userByInitials',
         {},
         { showBackend: true })
-      this.GroupDataDeal(allUsers)
+      this.groupDataDeal(allUsers)
     },
-    GroupDataDeal(allUsers) {
+    groupDataDeal(allUsers) {
       for (const group of allUsers) {
         if (group.users.length > 0) {
+          group.value = group.name
           group.label = group.name
           group.children = group.users
           for (const user of group.children) {
@@ -254,6 +256,7 @@ export default {
       }
     },
     async handleRefresh() {
+      this.page = 1
       await this.getTasks()
     },
     async getTasks() {
@@ -310,6 +313,7 @@ export default {
           end: this.endTime,
         }, { showBackend: true })
         if (res.error_code === 0) {
+          this.page = 1
           this.getTasks()
           this.$message({
             type: 'success',
@@ -321,12 +325,15 @@ export default {
   },
   watch: {
     project() {
+      this.page = 1
       this.getTasks()
     },
     tester() {
+      this.page = 1
       this.getTasks()
     },
     datetime() {
+      this.page = 1
       this.getTasks()
     },
   },

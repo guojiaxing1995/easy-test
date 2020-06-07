@@ -30,7 +30,17 @@ class ProjectForm(Form):
     # 工程类型
     type = IntegerField(default=1)
 
+    # 授权人员
     users = FieldList(IntegerField(validators=[Optional()]))
+
+    # 维护人员
+    user = IntegerField(validators=[DataRequired(message='请输入维护人员')])
+
+    # 是否发送邮件
+    sendEmail = BooleanField(validators=[Optional()])
+
+    # 邮件抄送人
+    copyPerson = StringField(length(max=50, message='抄送人需小于50字符'), validators=[Optional()])
 
 
 class ProjectSearchForm(Form):
@@ -45,7 +55,7 @@ class ProjectConfigForm(Form):
 
 
 class CopyConfigForm(Form):
-    id = IntegerField(validators=[DataRequired(message='请输入配置id')])
+    id = IntegerField()
     projectId = IntegerField(validators=[DataRequired(message='请输入工程id')])
     url = StringField(length(max=500, message='url长度应小于500个字'),
                       validators=[DataRequired(message='请输入url')])

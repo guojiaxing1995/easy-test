@@ -15,7 +15,7 @@ from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTyp
 from app.models.UserAuth import UserAuth
 from app.models.case import Case
 from app.validators.CaseForm import UserGroupAuthForm, CaseForm, CaseSearchForm, EnumTypeForm, CaseDebugForm, \
-    CaseLogsSearchForm
+    CaseLogsSearchForm, CaseEditLogForm
 
 case_api = Redprint('case')
 
@@ -129,9 +129,41 @@ def case_logs_delete():
 
 
 # 无分页返回按运行编号查询的所有日志
-@case_api.route('/logs/all', methods=['POST'])
-@login_required
+@case_api.route('/logs/all', methods=['GET'])
+@route_meta('运行详情', module='测试结果')
+@group_required
 def case_logs_all():
     form = CaseLogsSearchForm().validate_for_api()
     cases = Case.case_log_search_all(form.task.data)
     return jsonify(cases)
+
+
+@case_api.route('/groupByCaseGroup', methods=['GET'])
+@login_required
+def group_by_case_group():
+    result = Case.group_by_case_group()
+    return jsonify(result)
+
+
+@case_api.route('/search/editLogs', methods=['POST'])
+@route_meta('修改记录', module='用例')
+@group_required
+def search_edit_logs():
+    form = CaseEditLogForm().validate_for_api()
+    edit_logs = Case.search_edit_logs(form.id.data, form.url.data, form.method.data, form.deal.data, form.start.data,
+                                      form.end.data, form.count.data, form.page.data)
+
+    return jsonify(edit_logs)
+
+
+@case_api.route('/editLogs/delete', methods=['DELETE'])
+@route_meta('删除修改记录', module='用例')
+@group_required
+def edit_logs_delete():
+    form = CaseEditLogForm().validate_for_api()
+    count = Case.edit_logs_remove(form.id.data, form.url.data, form.method.data, form.deal.data, form.start.data,
+                                  form.end.data)
+    if count == 0:
+        return Success(msg='无符合条件数据')
+    else:
+        return Success(msg='成功删除' + str(count) + '条数据')

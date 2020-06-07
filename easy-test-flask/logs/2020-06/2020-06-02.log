@@ -1,0 +1,559 @@
+2020-06-02 12:16:48,783 INFO 5092   ---  [Thread-2] - 62b034e4dc984fd6b8fe10dea8c7b750 is connect
+2020-06-02 12:16:50,309 DEBUG 5092   ---  [Thread-5] - [OPTIONS] -> [/v1/scheduler/start] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"schedulerId": "test_关联_scheduler_5"}, 
+	body: {}
+} 
+2020-06-02 12:17:03,019 INFO 2096   ---  [Thread-2] - 9056e9dad86246929f17648d6d75b3d1 is connect
+2020-06-02 12:17:06,055 DEBUG 2096   ---  [Thread-6] - [OPTIONS] -> [/v1/scheduler/start] from:127.0.0.1 costs:1.000 ms data:{
+	param: {"schedulerId": "test_关联_scheduler_5"}, 
+	body: {}
+} 
+2020-06-02 12:17:41,183 INFO 3112   ---  [Thread-2] - 08931649637641dc88e51e6410240ff5 is connect
+2020-06-02 12:18:39,740 DEBUG 3112   ---  [Thread-10] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:599.550 ms data:{
+	param: {}, 
+	body: {'id': 25}
+} 
+2020-06-02 12:19:33,353 INFO 18028   ---  [Thread-2] - 6f9de3b9f8b946ae8d923ba39efa4e84 is connect
+2020-06-02 12:20:05,762 INFO 9288   ---  [Thread-2] - 72a5936c724a40f8b26ed8db8fc3278b is connect
+2020-06-02 12:21:39,019 INFO 16060   ---  [Thread-2] - 29f80f8cb17c44c7af16bfdceff35c5c is connect
+2020-06-02 12:22:03,354 ERROR 14604   ---  [Thread-2] - Traceback (most recent call last):
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\api\v1\scheduler.py", line 38, in start_job
+    scheduler.start_job()
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\models\scheduler.py", line 130, in start_job
+    scheduler.resume_job(self.scheduler_id)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 262, in resume_job
+    self._scheduler.resume_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 535, in resume_job
+    job, jobstore = self._lookup_job(job_id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 816, in _lookup_job
+    raise JobLookupError(job_id)
+apscheduler.jobstores.base.JobLookupError: 'No job by the id of test_关联_scheduler_5 was found'
+
+2020-06-02 12:22:03,355 DEBUG 14604   ---  [Thread-2] - [GET] -> [/v1/scheduler/start] from:127.0.0.1 costs:28.960 ms data:{
+	param: {"schedulerId": "test_关联_scheduler_5"}, 
+	body: {}
+} 
+2020-06-02 12:22:04,762 INFO 14604   ---  [Thread-1] - 89e3e1e80e374164a59c8bb5a44608c2 is connect
+2020-06-02 12:22:33,417 ERROR 13460   ---  [Thread-1] - Traceback (most recent call last):
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\api\v1\scheduler.py", line 38, in start_job
+    scheduler.start_job()
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\models\scheduler.py", line 130, in start_job
+    scheduler.resume_job(self.scheduler_id)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 262, in resume_job
+    self._scheduler.resume_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 535, in resume_job
+    job, jobstore = self._lookup_job(job_id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 816, in _lookup_job
+    raise JobLookupError(job_id)
+apscheduler.jobstores.base.JobLookupError: 'No job by the id of test_关联_scheduler_5 was found'
+
+2020-06-02 12:22:33,418 DEBUG 13460   ---  [Thread-1] - [GET] -> [/v1/scheduler/start] from:127.0.0.1 costs:24.930 ms data:{
+	param: {"schedulerId": "test_关联_scheduler_5"}, 
+	body: {}
+} 
+2020-06-02 12:22:33,765 INFO 13460   ---  [Thread-2] - de7d8f4675a942169ca57de050c6843e is connect
+2020-06-02 12:22:35,234 ERROR 13460   ---  [Thread-5] - Traceback (most recent call last):
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\api\v1\scheduler.py", line 38, in start_job
+    scheduler.start_job()
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\models\scheduler.py", line 130, in start_job
+    scheduler.resume_job(self.scheduler_id)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 262, in resume_job
+    self._scheduler.resume_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 535, in resume_job
+    job, jobstore = self._lookup_job(job_id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 816, in _lookup_job
+    raise JobLookupError(job_id)
+apscheduler.jobstores.base.JobLookupError: 'No job by the id of test_关联_scheduler_5 was found'
+
+2020-06-02 12:22:35,235 DEBUG 13460   ---  [Thread-5] - [GET] -> [/v1/scheduler/start] from:127.0.0.1 costs:26.890 ms data:{
+	param: {"schedulerId": "test_关联_scheduler_5"}, 
+	body: {}
+} 
+2020-06-02 12:23:19,983 ERROR 13460   ---  [Thread-8] - Traceback (most recent call last):
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\api\v1\scheduler.py", line 38, in start_job
+    scheduler.start_job()
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\models\scheduler.py", line 130, in start_job
+    scheduler.resume_job(self.scheduler_id)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 262, in resume_job
+    self._scheduler.resume_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 535, in resume_job
+    job, jobstore = self._lookup_job(job_id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 816, in _lookup_job
+    raise JobLookupError(job_id)
+apscheduler.jobstores.base.JobLookupError: 'No job by the id of test_关联_scheduler_5 was found'
+
+2020-06-02 12:23:19,984 DEBUG 13460   ---  [Thread-8] - [GET] -> [/v1/scheduler/start] from:127.0.0.1 costs:16.950 ms data:{
+	param: {"schedulerId": "test_关联_scheduler_5"}, 
+	body: {}
+} 
+2020-06-02 12:23:44,242 DEBUG 11824   ---  [Thread-2] - [OPTIONS] -> [/v1/scheduler/start] from:127.0.0.1 costs:0.970 ms data:{
+	param: {"schedulerId": "test_关联_scheduler_5"}, 
+	body: {}
+} 
+2020-06-02 12:23:44,313 INFO 11824   ---  [Thread-1] - 247f4415ee26428ca382fd3ed36543ae is connect
+2020-06-02 12:23:44,516 ERROR 11824   ---  [Thread-5] - Traceback (most recent call last):
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\api\v1\scheduler.py", line 38, in start_job
+    scheduler.start_job()
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\models\scheduler.py", line 130, in start_job
+    scheduler.resume_job(self.scheduler_id)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 262, in resume_job
+    self._scheduler.resume_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 535, in resume_job
+    job, jobstore = self._lookup_job(job_id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 816, in _lookup_job
+    raise JobLookupError(job_id)
+apscheduler.jobstores.base.JobLookupError: 'No job by the id of test_关联_scheduler_5 was found'
+
+2020-06-02 12:23:44,517 DEBUG 11824   ---  [Thread-5] - [GET] -> [/v1/scheduler/start] from:127.0.0.1 costs:25.940 ms data:{
+	param: {"schedulerId": "test_关联_scheduler_5"}, 
+	body: {}
+} 
+2020-06-02 12:24:11,379 ERROR 11824   ---  [Thread-9] - Traceback (most recent call last):
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\api\v1\scheduler.py", line 38, in start_job
+    scheduler.start_job()
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\models\scheduler.py", line 130, in start_job
+    scheduler.resume_job(self.scheduler_id)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 262, in resume_job
+    self._scheduler.resume_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 535, in resume_job
+    job, jobstore = self._lookup_job(job_id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 816, in _lookup_job
+    raise JobLookupError(job_id)
+apscheduler.jobstores.base.JobLookupError: 'No job by the id of test_关联_scheduler_5 was found'
+
+2020-06-02 12:24:11,380 DEBUG 11824   ---  [Thread-9] - [GET] -> [/v1/scheduler/start] from:127.0.0.1 costs:11.970 ms data:{
+	param: {"schedulerId": "test_关联_scheduler_5"}, 
+	body: {}
+} 
+2020-06-02 13:09:19,480 INFO 15452   ---  [Thread-1] - ff4f7773a0204e48901ae4b3db42bee4 is connect
+2020-06-02 13:09:23,948 DEBUG 15452   ---  [Thread-4] - [OPTIONS] -> [/v1/scheduler/remove/1] from:127.0.0.1 costs:1.030 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:09:24,299 ERROR 15452   ---  [Thread-5] - Traceback (most recent call last):
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\api\v1\scheduler.py", line 69, in remove_job
+    scheduler.remove_job()
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\models\scheduler.py", line 158, in remove_job
+    scheduler.delete_job(self.scheduler_id)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 173, in delete_job
+    self.remove_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 196, in remove_job
+    self._scheduler.remove_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 621, in remove_job
+    raise JobLookupError(job_id)
+apscheduler.jobstores.base.JobLookupError: 'No job by the id of test_副本_scheduler_1 was found'
+
+2020-06-02 13:09:24,302 DEBUG 15452   ---  [Thread-5] - [DELETE] -> [/v1/scheduler/remove/1] from:127.0.0.1 costs:102.030 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:09:30,674 DEBUG 15452   ---  [Thread-6] - [OPTIONS] -> [/v1/project/auth] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:09:31,026 DEBUG 15452   ---  [Thread-7] - [GET] -> [/v1/project/auth] from:127.0.0.1 costs:43.230 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:09:31,236 DEBUG 15452   ---  [Thread-8] - [OPTIONS] -> [/cms/user/userByInitials] from:127.0.0.1 costs:0.000 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:09:31,447 DEBUG 15452   ---  [Thread-9] - [GET] -> [/cms/user/userByInitials] from:127.0.0.1 costs:66.470 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:09:43,487 DEBUG 15452   ---  [Thread-11] - [OPTIONS] -> [/v1/scheduler/add] from:127.0.0.1 costs:1.030 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:09:43,864 DEBUG 15452   ---  [Thread-12] - [POST] -> [/v1/scheduler/add] from:127.0.0.1 costs:125.250 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {'project': 7, 'sendEmail': True, 'user': 6, 'copyPerson': '', 'cron': '* * * ? * * 2024-2026'}
+} 
+2020-06-02 13:09:44,007 DEBUG 15452   ---  [Thread-13] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:44,317 DEBUG 15452   ---  [Thread-14] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:2.990 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:44,318 DEBUG 15452   ---  [Thread-15] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:2.990 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:44,319 DEBUG 15452   ---  [Thread-16] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:2.990 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:44,324 DEBUG 15452   ---  [Thread-17] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:4.990 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:44,785 DEBUG 15452   ---  [Thread-18] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:463.400 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:45,399 DEBUG 15452   ---  [Thread-21] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:294.950 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:45,977 DEBUG 15452   ---  [Thread-22] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:257.380 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:46,660 DEBUG 15452   ---  [Thread-23] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:352.100 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:47,266 DEBUG 15452   ---  [Thread-24] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:284.910 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:51,515 DEBUG 15452   ---  [Thread-25] - [OPTIONS] -> [/v1/scheduler/remove/8] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:09:51,913 DEBUG 15452   ---  [Thread-26] - [DELETE] -> [/v1/scheduler/remove/8] from:127.0.0.1 costs:146.600 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:09:51,936 DEBUG 15452   ---  [Thread-27] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:1.000 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:52,412 DEBUG 15452   ---  [Thread-28] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:166.770 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:56,625 DEBUG 15452   ---  [Thread-29] - [OPTIONS] -> [/v1/scheduler/remove/5] from:127.0.0.1 costs:0.960 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:09:57,012 ERROR 15452   ---  [Thread-30] - Traceback (most recent call last):
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\api\v1\scheduler.py", line 69, in remove_job
+    scheduler.remove_job()
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\models\scheduler.py", line 158, in remove_job
+    scheduler.delete_job(self.scheduler_id)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 173, in delete_job
+    self.remove_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 196, in remove_job
+    self._scheduler.remove_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 621, in remove_job
+    raise JobLookupError(job_id)
+apscheduler.jobstores.base.JobLookupError: 'No job by the id of test_关联_scheduler_5 was found'
+
+2020-06-02 13:09:57,012 DEBUG 15452   ---  [Thread-30] - [DELETE] -> [/v1/scheduler/remove/5] from:127.0.0.1 costs:78.240 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:09:59,444 DEBUG 15452   ---  [Thread-31] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:1.050 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:09:59,832 DEBUG 15452   ---  [Thread-32] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:80.350 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:10:02,137 DEBUG 15452   ---  [Thread-33] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:92.550 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:10:05,562 DEBUG 15452   ---  [Thread-34] - [OPTIONS] -> [/v1/scheduler/remove/4] from:127.0.0.1 costs:2.000 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:10:05,875 ERROR 15452   ---  [Thread-35] - Traceback (most recent call last):
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\api\v1\scheduler.py", line 69, in remove_job
+    scheduler.remove_job()
+  File "D:\pythonProgram\easy-test\easy-test-flask\app\models\scheduler.py", line 158, in remove_job
+    scheduler.delete_job(self.scheduler_id)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 173, in delete_job
+    self.remove_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\flask_apscheduler\scheduler.py", line 196, in remove_job
+    self._scheduler.remove_job(id, jobstore)
+  File "C:\Users\30280\.virtualenvs\lin-cms-flask-lUL6uL8-\lib\site-packages\apscheduler\schedulers\base.py", line 621, in remove_job
+    raise JobLookupError(job_id)
+apscheduler.jobstores.base.JobLookupError: 'No job by the id of test_副本_scheduler_4 was found'
+
+2020-06-02 13:10:05,876 DEBUG 15452   ---  [Thread-35] - [DELETE] -> [/v1/scheduler/remove/4] from:127.0.0.1 costs:62.890 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:10:06,629 DEBUG 15452   ---  [Thread-36] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:10:07,005 DEBUG 15452   ---  [Thread-37] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:66.990 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:11:47,180 DEBUG 15452   ---  [Thread-47] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:1.000 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:11:53,452 DEBUG 15452   ---  [Thread-48] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:6019.320 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:11:58,074 DEBUG 15452   ---  [Thread-52] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:12:04,048 DEBUG 15452   ---  [Thread-53] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:5722.280 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:12:04,620 DEBUG 15452   ---  [Thread-54] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:1.030 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:12:06,793 DEBUG 15452   ---  [Thread-55] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:1865.540 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:12:22,853 DEBUG 15452   ---  [Thread-59] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:0.950 ms data:{
+	param: {"page": "2"}, 
+	body: {}
+} 
+2020-06-02 13:12:23,430 DEBUG 15452   ---  [Thread-60] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:325.350 ms data:{
+	param: {"page": "2"}, 
+	body: {}
+} 
+2020-06-02 13:12:25,246 DEBUG 15452   ---  [Thread-61] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:0.940 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:12:28,523 DEBUG 15452   ---  [Thread-62] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:2968.370 ms data:{
+	param: {"page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:13:55,858 DEBUG 15452   ---  [Thread-72] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"count": "12", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:13:59,590 DEBUG 15452   ---  [Thread-73] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:3481.650 ms data:{
+	param: {"count": "12", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:13:59,727 DEBUG 15452   ---  [Thread-74] - [OPTIONS] -> [/cms/user/userByInitials] from:127.0.0.1 costs:1.000 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:14:00,037 DEBUG 15452   ---  [Thread-75] - [GET] -> [/cms/user/userByInitials] from:127.0.0.1 costs:1.000 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:14:00,288 DEBUG 15452   ---  [Thread-76] - [OPTIONS] -> [/cms/user/refresh] from:127.0.0.1 costs:0.000 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:14:00,393 DEBUG 15452   ---  [Thread-77] - [GET] -> [/cms/user/refresh] from:127.0.0.1 costs:44.460 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:14:00,660 DEBUG 15452   ---  [Thread-78] - [GET] -> [/cms/user/userByInitials] from:127.0.0.1 costs:63.070 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:14:00,831 DEBUG 15452   ---  [Thread-79] - [OPTIONS] -> [/v1/project/auth] from:127.0.0.1 costs:1.000 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:14:01,227 DEBUG 15452   ---  [Thread-80] - [GET] -> [/v1/project/auth] from:127.0.0.1 costs:87.340 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:14:04,165 DEBUG 15452   ---  [Thread-81] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"count": "12", "page": "2"}, 
+	body: {}
+} 
+2020-06-02 13:14:04,725 DEBUG 15452   ---  [Thread-82] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:252.550 ms data:{
+	param: {"count": "12", "page": "2"}, 
+	body: {}
+} 
+2020-06-02 13:14:06,044 DEBUG 15452   ---  [Thread-83] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"count": "12", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:08,200 DEBUG 15452   ---  [Thread-84] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:1845.830 ms data:{
+	param: {"count": "12", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:18,787 DEBUG 15452   ---  [Thread-86] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:1.000 ms data:{
+	param: {"count": "10", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:20,998 DEBUG 15452   ---  [Thread-87] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:1959.980 ms data:{
+	param: {"count": "10", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:21,115 DEBUG 15452   ---  [Thread-88] - [OPTIONS] -> [/cms/user/userByInitials] from:127.0.0.1 costs:1.000 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:14:21,490 DEBUG 15452   ---  [Thread-91] - [GET] -> [/cms/user/userByInitials] from:127.0.0.1 costs:65.030 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:14:21,677 DEBUG 15452   ---  [Thread-92] - [OPTIONS] -> [/v1/project/auth] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:14:21,977 DEBUG 15452   ---  [Thread-93] - [GET] -> [/v1/project/auth] from:127.0.0.1 costs:133.480 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:14:32,558 DEBUG 15452   ---  [Thread-95] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:1.000 ms data:{
+	param: {"count": "11", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:37,266 DEBUG 15452   ---  [Thread-97] - [OPTIONS] -> [/cms/user/userByInitials] from:127.0.0.1 costs:1.000 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:14:38,522 DEBUG 15452   ---  [Thread-98] - [GET] -> [/cms/user/userByInitials] from:127.0.0.1 costs:947.490 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:14:38,745 DEBUG 15452   ---  [Thread-99] - [OPTIONS] -> [/v1/project/auth] from:127.0.0.1 costs:1.000 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:14:39,501 DEBUG 15452   ---  [Thread-96] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:6691.060 ms data:{
+	param: {"count": "11", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:39,514 DEBUG 15452   ---  [Thread-101] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:1.000 ms data:{
+	param: {"count": "11", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:40,472 DEBUG 15452   ---  [Thread-100] - [GET] -> [/v1/project/auth] from:127.0.0.1 costs:1420.690 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:14:46,060 DEBUG 15452   ---  [Thread-102] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:6238.000 ms data:{
+	param: {"count": "11", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:46,699 DEBUG 15452   ---  [Thread-105] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:0.000 ms data:{
+	param: {"count": "11", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:52,067 DEBUG 15452   ---  [Thread-106] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:5117.060 ms data:{
+	param: {"count": "11", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:55,676 DEBUG 15452   ---  [Thread-107] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:1.000 ms data:{
+	param: {"count": "11", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:14:59,972 DEBUG 15452   ---  [Thread-108] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:3988.620 ms data:{
+	param: {"count": "11", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:15:15,276 DEBUG 15452   ---  [Thread-112] - [OPTIONS] -> [/v1/scheduler/search] from:127.0.0.1 costs:1.030 ms data:{
+	param: {"count": "10", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:15:17,169 DEBUG 15452   ---  [Thread-113] - [GET] -> [/v1/scheduler/search] from:127.0.0.1 costs:1643.270 ms data:{
+	param: {"count": "10", "page": "1"}, 
+	body: {}
+} 
+2020-06-02 13:15:17,269 DEBUG 15452   ---  [Thread-114] - [OPTIONS] -> [/cms/user/userByInitials] from:127.0.0.1 costs:1.000 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:15:17,634 DEBUG 15452   ---  [Thread-115] - [GET] -> [/cms/user/userByInitials] from:127.0.0.1 costs:56.890 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:15:17,828 DEBUG 15452   ---  [Thread-116] - [OPTIONS] -> [/v1/project/auth] from:127.0.0.1 costs:1.040 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:15:18,101 DEBUG 15452   ---  [Thread-117] - [GET] -> [/v1/project/auth] from:127.0.0.1 costs:117.860 ms data:{
+	param: {"showBackend": "true"}, 
+	body: {}
+} 
+2020-06-02 13:17:28,298 DEBUG 15452   ---  [Thread-129] - [OPTIONS] -> [/cms/admin/group/all] from:127.0.0.1 costs:1.030 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:17:28,760 DEBUG 15452   ---  [Thread-130] - [GET] -> [/cms/admin/group/all] from:127.0.0.1 costs:210.550 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:17:30,500 DEBUG 15452   ---  [Thread-131] - [OPTIONS] -> [/cms/admin/users] from:127.0.0.1 costs:1.000 ms data:{
+	param: {"count": "10", "page": "0"}, 
+	body: {}
+} 
+2020-06-02 13:17:31,026 DEBUG 15452   ---  [Thread-132] - [GET] -> [/cms/admin/users] from:127.0.0.1 costs:217.420 ms data:{
+	param: {"count": "10", "page": "0"}, 
+	body: {}
+} 
+2020-06-02 13:17:31,488 DEBUG 15452   ---  [Thread-133] - [GET] -> [/cms/admin/group/all] from:127.0.0.1 costs:320.310 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:17:40,414 DEBUG 15452   ---  [Thread-136] - [OPTIONS] -> [/cms/admin/group/all] from:127.0.0.1 costs:1.030 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:17:40,698 DEBUG 15452   ---  [Thread-137] - [GET] -> [/cms/admin/group/all] from:127.0.0.1 costs:33.250 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:17:43,179 DEBUG 15452   ---  [Thread-138] - [OPTIONS] -> [/cms/admin/authority] from:127.0.0.1 costs:1.000 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:17:43,511 DEBUG 15452   ---  [Thread-139] - [GET] -> [/cms/admin/authority] from:127.0.0.1 costs:23.930 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:17:43,740 DEBUG 15452   ---  [Thread-140] - [OPTIONS] -> [/cms/admin/group/11] from:127.0.0.1 costs:1.000 ms data:{
+	param: {}, 
+	body: {}
+} 
+2020-06-02 13:17:44,113 DEBUG 15452   ---  [Thread-141] - [GET] -> [/cms/admin/group/11] from:127.0.0.1 costs:269.350 ms data:{
+	param: {}, 
+	body: {}
+} 
