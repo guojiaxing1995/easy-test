@@ -14,6 +14,7 @@ import re
 import requests
 from flask import current_app
 from flask_jwt_extended import current_user, get_current_user
+from lin import manager
 from lin.exception import ParameterException, AuthFailed
 from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, String, SmallInteger
@@ -202,7 +203,8 @@ class Case(Base):
         auths = UserAuth.query.filter_by(user_id=current_user.id, _type=UserAuthEnum.GROUP.value).all()
         gids = [auth.auth_id for auth in auths]
         from app.models.CaseGroup import CaseGroup
-        results = cls.query.join(CaseGroup, CaseGroup.id == cls.case_group).filter(
+        results = cls.query.join(CaseGroup, CaseGroup.id == cls.case_group).\
+            join(manager.user_model, manager.user_model.id == cls.create_user).filter(
             cls.id == cid if cid else '',
             cls._method == method if method else '',
             cls._deal == deal if deal else '',
@@ -227,7 +229,8 @@ class Case(Base):
             cls.expect.label('expect'),
             cls._assertion.label('assertion'),
             cls.case_group.label('case_group'),
-            CaseGroup.name.label('group_name')
+            CaseGroup.name.label('group_name'),
+            manager.user_model.username.label('create_user'),
         ).order_by(
             text('Case.update_time desc')
         ).paginate(page, count)
@@ -460,7 +463,8 @@ class Case(Base):
         # res = self.method_request()
         try:
             res = self.method_request()
-        except Exception:
+        except Exception as e:
+            current_app.logger.debug(e)
             raise ParameterException(msg='参数错误')
         result = self.get_result(res)
 
@@ -579,3 +583,42 @@ class Case(Base):
         )
 
         return result.deleted_count
+
+    # 获取某个用户的数据, 未指定用户则获取当前用户
+    @classmethod
+    def user_case(cls, uid, name, page, count):
+        count = int(count) if count else current_app.config.get('COUNT_DEFAULT')
+        page = int(page) if page else current_app.config.get('PAGE_DEFAULT') + 1
+        from app.models.CaseGroup import CaseGroup
+        if not uid:
+            uid = current_user.id
+        results = cls.query.join(CaseGroup, CaseGroup.id == cls.case_group).\
+            join(manager.user_model, manager.user_model.id == cls.create_user).filter(
+            cls.create_user == uid,
+            cls.name.like(f'%{name}%') if name is not None else '',
+            cls.delete_time == None,
+        ).with_entities(
+            cls.id,
+            cls.name,
+            cls.info,
+            cls.url,
+            cls._method.label('method'),
+            cls._submit.label('submit'),
+            cls.header,
+            cls.data,
+            cls._deal.label('deal'),
+            cls.condition,
+            cls._type.label('type'),
+            cls.expect.label('expect'),
+            cls._assertion.label('assertion'),
+            cls.case_group.label('case_group'),
+            CaseGroup.name.label('group_name'),
+            manager.user_model.username.label('create_user'),
+        ).order_by(
+            text('Case.update_time desc')
+        ).paginate(page, count)
+
+        items = [dict(zip(result.keys(), result)) for result in results.items]
+        results.items = items
+        data = paging(results)
+        return data

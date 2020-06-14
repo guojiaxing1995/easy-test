@@ -2,6 +2,7 @@ from datetime import datetime
 
 import requests
 from flask import current_app
+from flask_jwt_extended import current_user
 from lin import db, manager
 from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, String, text
@@ -45,7 +46,6 @@ class Task(Base):
         # 将执行结果广播给客户端
         res = requests.get(url='http://127.0.0.1:5000/v1/task/task/' + str(self.project_id))
         current_app.logger.debug(res.text)
-
 
     @classmethod
     def all_tasks(cls, project):
@@ -122,3 +122,42 @@ class Task(Base):
             raise RecordRemoveException()
 
         return len(tasks)
+
+    @classmethod
+    def user_task(cls, uid, name, start, end, page=None, count=None):
+        count = int(count) if count else current_app.config.get('COUNT_DEFAULT')
+        page = int(page) if page else current_app.config.get('PAGE_DEFAULT') + 1
+        from app.models.project import Project
+        if not uid:
+            uid = current_user.id
+        results = cls.query.join(Project, Project.id == cls.project_id).filter(
+            cls.create_user == uid,
+            Project.name.like(f'%{name}%') if name is not None else '',
+            cls._create_time.between(start, end) if start and end else '',
+            cls.delete_time == None,
+        ).with_entities(
+            cls.id,
+            cls.task_no,
+            cls.project_id,
+            cls.create_user,
+            cls.total,
+            cls.success,
+            cls.fail,
+            cls._create_time.label('create_time')
+        ).order_by(
+            text('Task.update_time desc')
+        ).paginate(page, count)
+
+        items = [dict(zip(result.keys(), result)) for result in results.items]
+        for item in items:
+            # 获取工程名称
+            from app.models.project import Project
+            project_name = Project.query.filter_by(id=item['project_id']).first()
+            item['project_name'] = project_name.name
+            # 获取执行人名称
+            user = manager.user_model.query.filter_by(id=item['create_user']).first()
+            item['username'] = user.username
+            item['create_time'] = int(round(item['create_time'].timestamp() * 1000))
+        results.items = items
+        data = paging(results)
+        return data

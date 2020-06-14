@@ -1,99 +1,107 @@
 <template>
   <div class="container">
-    <div class="title">
-      工程信息
-      <el-select size="small" v-model="selectProject" filterable placeholder="请输入工程名称查询" class="select" clearable>
-        <el-option
-          v-for="item in selectData"
-          :key="item.id"
-          :label="item.name"
-          :value="item.name">
-        </el-option>
-      </el-select>
+    <div class="header">
+      <div class="title">工程信息</div>
+      <div class="search">
+        <el-input placeholder="请输入工程名称查询" v-model="name" clearable size="small"></el-input>
+      </div>
     </div>
-    <el-table
-      :data="tableData"
-      stripe
-      v-loading="loading"
-      style="width: 100%">
-      <el-table-column
-        fixed
-        prop="name"
-        label="名称"
-        :show-overflow-tooltip="true"
-        min-width="200">
-      </el-table-column>
-      <el-table-column
-        prop="server"
-        label="服务地址"
-        :show-overflow-tooltip="true"
-        min-width="200">
-      </el-table-column>
-      <el-table-column
-        prop="user_name"
-        label="维护人员"
-        :show-overflow-tooltip="true"
-        min-width="100">
-      </el-table-column>
-      <el-table-column
-        prop="send_email"
-        label="发送邮件"
-        align="center"
-        :show-overflow-tooltip="true"
-        min-width="80">
-        <template slot-scope="scope">
-          <div slot="content" v-if="scope.row.send_email" style="margin:auto">是</div>
-          <div slot="content" v-else style="margin:auto">否</div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="copy_person_name"
-        label="邮件抄送人员"
-        :show-overflow-tooltip="true"
-        min-width="200">
-        <template slot-scope="scope">
-          <div slot="content">{{scope.row.copy_person_name.join(',')}}</div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="info"
-        label="描述"
-        :show-overflow-tooltip="true"
-        min-width="350">
-      </el-table-column>
-      <el-table-column
-        label="类型"
-        fixed="right"
-        align="center"
-        width="70">
-        <template slot-scope="scope">
-          <div :key="key" v-for="(val,key) in projecType">
-            <div v-if="scope.row.type === parseInt(key)">{{val}}</div>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        width="180"
-        align="center"
-        fixed="right"
-        label="操作">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="primary"
-            plain
-            style="margin:auto"
-            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button
-            v-auth="{ auth: '删除工程', type: 'disabled'}"
-            size="mini"
-            type="danger"
-            plain
-            style="margin:auto"
-            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div class="table">
+      <el-table
+        :data="tableData"
+        stripe
+        v-loading="loading"
+        style="width: 100%">
+        <el-table-column
+          fixed
+          prop="name"
+          label="名称"
+          :show-overflow-tooltip="true"
+          min-width="200">
+        </el-table-column>
+        <el-table-column
+          prop="server"
+          label="服务地址"
+          :show-overflow-tooltip="true"
+          min-width="200">
+        </el-table-column>
+        <el-table-column
+          prop="user_name"
+          label="维护人员"
+          :show-overflow-tooltip="true"
+          min-width="100">
+        </el-table-column>
+        <el-table-column
+          prop="send_email"
+          label="发送邮件"
+          align="center"
+          :show-overflow-tooltip="true"
+          min-width="80">
+          <template slot-scope="scope">
+            <div slot="content" v-if="scope.row.send_email" style="margin:auto">是</div>
+            <div slot="content" v-else style="margin:auto">否</div>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="copy_person_name"
+          label="邮件抄送人员"
+          :show-overflow-tooltip="true"
+          min-width="200">
+          <template slot-scope="scope">
+            <div slot="content">{{scope.row.copy_person_name.join(',')}}</div>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="info"
+          label="描述"
+          :show-overflow-tooltip="true"
+          min-width="350">
+        </el-table-column>
+        <el-table-column
+          label="类型"
+          fixed="right"
+          align="center"
+          width="70">
+          <template slot-scope="scope">
+            <div :key="key" v-for="(val,key) in projecType">
+              <div v-if="scope.row.type === parseInt(key)">{{val}}</div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column
+          width="180"
+          align="center"
+          fixed="right"
+          label="操作">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="primary"
+              plain
+              style="margin:auto"
+              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            <el-button
+              v-auth="{ auth: '删除工程', type: 'disabled'}"
+              size="mini"
+              type="danger"
+              plain
+              style="margin:auto"
+              @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <div class="pagination">
+        <el-pagination
+          background
+          :hide-on-single-page=true
+          @current-change="handleCurrentChange"
+          layout="prev, pager, next"
+          :current-page="page"
+          :page-size=10
+          :total="total">
+        </el-pagination>
+      </div>
     <el-dialog
       :append-to-body="true"
       :visible.sync="dialogFormVisible"
@@ -182,6 +190,7 @@
 </template>
 
 <script>
+import Utils from 'lin/utils/util'
 import { get, put, _delete } from '@/lin/plugins/axios'
 import GroupUsers from '../../components/GroupUsers'
 
@@ -195,8 +204,7 @@ export default {
       id: 0, // 分组id
       type: 2, // 类型为工程
       tableData: [], // 表格数据
-      selectData: [], // 拉框数据
-      selectProject: '',
+      name: '',
       dialogFormVisible: false, // 是否弹窗
       labelPosition: 'right', // 设置label位置
       form: {
@@ -233,20 +241,6 @@ export default {
         info: [],
       },
     }
-  },
-  watch: {
-    selectProject() {
-      if (this.selectProject === '') {
-        this.tableData = this.selectData
-      } else {
-        for (const project of this.selectData) {
-          if (project.name === this.selectProject) {
-            this.tableData = []
-            this.tableData.push(project)
-          }
-        }
-      }
-    },
   },
   methods: {
     // 维护人数据处理
@@ -310,10 +304,14 @@ export default {
     },
     // 获取所有工程并传给table渲染
     async getAllProjects() {
+      let res
       try {
         this.loading = true
-        this.tableData = await get('/v1/project', { showBackend: true })
-        this.selectData = this.tableData
+        res = await get('/v1/project/list', { page: this.page, name: this.name }, { showBackend: true })
+        this.tableData = res.data
+        this.total = res.total
+        this.page = res.page
+        this.pages = res.pages
         this.loading = false
       } catch (e) {
         this.loading = false
@@ -414,6 +412,10 @@ export default {
         }
       })
     },
+    handleCurrentChange(val) {
+      this.page = val
+      this.getAllProjects()
+    },
     // 获取拥有的权限
     updateAuths(groupUsers) {
       this.groupUsers = groupUsers
@@ -440,8 +442,16 @@ export default {
     // 监听分组是否成功
     this.eventBus.$on('addProject', this.addProject)
     if (this.$route.query.pname) {
-      this.selectProject = this.$route.query.pname
+      this.name = this.$route.query.pname
     }
+    // 节流搜素
+    this.$watch(
+      'name',
+      Utils.debounce(() => {
+        this.page = 1
+        this.getAllProjects()
+      }, 1000),
+    )
   },
   beforeDestroy() {
     this.eventBus.$off('addProject', this.addProject)
@@ -451,20 +461,34 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  padding: 0 30px;
+  padding: 15px 30px;
 
-  .title {
-    height: 59px;
-    line-height: 59px;
-    color: $parent-title-color;
-    font-size: 16px;
-    font-weight: 500;
-    position: relative;
-    width: 100%;
-    .select {
-      position: absolute;
-      right: 0;
+  .header{
+    display: flex;
+    height: 65px;
+    line-height: 65px;
+    justify-content: space-between;
+
+    .title {
+      color: $parent-title-color;
+      font-size: 18px;
+      font-weight: 500;
     }
+    .search {
+      width: 15%;
+    }
+
+  }
+
+  .table {
+    margin-top: 15px;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+    margin-bottom: 20px;
   }
 }
 .groupListInfoDialog /deep/ .el-dialog__footer {

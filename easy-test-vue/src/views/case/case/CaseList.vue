@@ -141,6 +141,12 @@
             min-width="160">
           </el-table-column>
           <el-table-column
+            prop="create_user"
+            label="创建人员"
+            :show-overflow-tooltip="true"
+            min-width="90">
+          </el-table-column>
+          <el-table-column
             label="描述"
             align="center"
             width="70">

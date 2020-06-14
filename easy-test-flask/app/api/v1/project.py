@@ -8,7 +8,8 @@ from app.libs.enums import ProjectTypeEnum
 from app.models.ConfigCopy import ConfigCopy
 from app.models.project import Project
 from app.validators.CaseForm import EnumTypeForm
-from app.validators.ProjectForm import ProjectForm, ProjectConfigForm, CopyConfigForm, ProjectSearchForm
+from app.validators.ProjectForm import ProjectForm, ProjectConfigForm, CopyConfigForm, ProjectSearchForm, \
+    ProjectPaginateForm
 
 project_api = Redprint('project')
 
@@ -26,6 +27,15 @@ def create_project():
 @group_required
 def get_projects():
     projects = Project.get_all()
+    return jsonify(projects)
+
+
+@project_api.route('/list', methods=['GET'])
+@route_meta('工程列表', module='工程')
+@group_required
+def get_projects_paginate():
+    form = ProjectPaginateForm().validate_for_api()
+    projects = Project.get_all_paginate(form.name.data, form.page.data, form.count.data)
     return jsonify(projects)
 
 

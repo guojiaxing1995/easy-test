@@ -48,6 +48,13 @@ class ProjectSearchForm(Form):
     name = StringField(validators=[Optional()])
 
 
+class ProjectPaginateForm(Form):
+    # 工程 name
+    name = StringField(validators=[Optional()])
+    page = IntegerField(default=1)
+    count = IntegerField(default=10)
+
+
 class ProjectConfigForm(Form):
     projectId = IntegerField(validators=[DataRequired(message='请输入工程id')])
     # 配置 [[configId, caseId, isRun, order], []]

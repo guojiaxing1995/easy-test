@@ -7,6 +7,7 @@ import projectConfig from './project'
 import executeConfig from './execute'
 import testConfig from './test'
 import schedulerConfig from './scheduler'
+import mineConfig from './mine'
 
 // eslint-disable-next-line import/no-mutable-exports
 let homeRouter = [
@@ -46,7 +47,9 @@ let homeRouter = [
   projectConfig,
   executeConfig,
   testConfig,
-  schedulerConfig
+  schedulerConfig,
+  mineConfig
+
 ]
 
 const plugins = [...pluginsConfig]

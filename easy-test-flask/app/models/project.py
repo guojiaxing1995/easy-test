@@ -12,6 +12,7 @@ from sqlalchemy import Column, Integer, String, SmallInteger, Boolean, text
 from app.libs.enums import UserAuthEnum, ProjectTypeEnum
 from app.libs.error_code import ProjectConfigException
 from app.libs.init import socket_io
+from app.libs.utils import paging
 from app.models.ConfigCopy import ConfigCopy
 from app.models.ConfigRelation import ConfigRelation
 from app.models.UserAuth import UserAuth
@@ -97,9 +98,50 @@ class Project(Base):
         return projects
 
     @classmethod
+    def get_all_paginate(cls, name, page, count):
+        count = int(count) if count else current_app.config.get('COUNT_DEFAULT')
+        page = int(page) if page else current_app.config.get('PAGE_DEFAULT') + 1
+        results = cls.query.filter(
+            cls.name.like(f'%{name}%') if name is not None else '',
+            cls.delete_time == None,
+        ).with_entities(
+            cls.id,
+            cls.name,
+            cls.server,
+            cls.header,
+            cls.info,
+            cls._type.label('type'),
+            cls.running,
+            cls.progress,
+            cls.user,
+            cls.send_email,
+            cls.copy_person,
+        ).order_by(text('Project.running desc'), text('Project.update_time desc')).paginate(page, count)
+
+        projects = [dict(zip(result.keys(), result)) for result in results.items]
+
+        for project in projects:
+            # 添加user_name属性
+            user_name = manager.user_model.query.filter_by(id=project['user']).first().username
+            project['user_name'] = user_name
+
+            # 抄送人
+            copy_users_name = []
+            if project['copy_person']:
+                for u in project['copy_person'].split(','):
+                    copy_user = manager.user_model.query.filter_by(id=int(u)).first().username if u else None
+                    # 如果用户存在则加入抄送人列表
+                    copy_users_name.append(copy_user) if copy_user else 1
+            project['copy_person_name'] = copy_users_name
+
+        results.items = projects
+        data = paging(results)
+        return data
+
+    @classmethod
     def search(cls, name):
         projects = cls.query.filter(cls.name.like(f'%{name}%') if name is not None else '',
-                                    cls.delete_time == None)\
+                                    cls.delete_time == None) \
             .order_by(text('Project.running desc'), text('Project.update_time desc')).all()
         return projects
 
@@ -252,3 +294,48 @@ class Project(Base):
         # 将执行进度广播给客户端
         res = requests.get(url='http://127.0.0.1:5000/v1/task/progress')
         current_app.logger.debug(res.text)
+
+    # 查询指定用户的工程数据，如果不指定，则查询当前用户
+    @classmethod
+    def user_project(cls, uid, name, page, count):
+        count = int(count) if count else current_app.config.get('COUNT_DEFAULT')
+        page = int(page) if page else current_app.config.get('PAGE_DEFAULT') + 1
+        if not uid:
+            uid = current_user.id
+        results = cls.query.filter(
+            cls.user == uid,
+            cls.name.like(f'%{name}%') if name is not None else '',
+            cls.delete_time == None,
+        ).with_entities(
+            cls.id,
+            cls.name,
+            cls.server,
+            cls.header,
+            cls.info,
+            cls._type.label('type'),
+            cls.running,
+            cls.progress,
+            cls.user,
+            cls.send_email,
+            cls.copy_person,
+        ).order_by(text('Project.running desc'), text('Project.update_time desc')).paginate(page, count)
+
+        projects = [dict(zip(result.keys(), result)) for result in results.items]
+
+        for project in projects:
+            # 添加user_name属性
+            user_name = manager.user_model.query.filter_by(id=project['user']).first().username
+            project['user_name'] = user_name
+
+            # 抄送人
+            copy_users_name = []
+            if project['copy_person']:
+                for u in project['copy_person'].split(','):
+                    copy_user = manager.user_model.query.filter_by(id=int(u)).first().username if u else None
+                    # 如果用户存在则加入抄送人列表
+                    copy_users_name.append(copy_user) if copy_user else 1
+            project['copy_person_name'] = copy_users_name
+
+        results.items = projects
+        data = paging(results)
+        return data

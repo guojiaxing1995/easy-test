@@ -159,3 +159,57 @@ class Scheduler(Base):
         db.session.commit()
         scheduler.delete_job(self.scheduler_id)
 
+    # 获取所有任务
+    @classmethod
+    def user_scheduler(cls, uid, name, page=None, count=None):
+        count = int(count) if count else current_app.config.get('COUNT_DEFAULT')
+        page = int(page) if page else current_app.config.get('PAGE_DEFAULT') + 1
+        if not uid:
+            uid = current_user.id
+        results = cls.query.join(Project, Project.id == cls.project_id).filter(
+            cls.user == uid,
+            Project.name.like(f'%{name}%') if name is not None else '',
+            cls.delete_time == None,
+        ).with_entities(
+            cls.id,
+            cls.scheduler_id,
+            cls.project_id,
+            cls.user,
+            cls.copy_person,
+            cls.send_email,
+            cls.cron,
+        ).order_by(
+            text('Scheduler.update_time desc')
+        ).paginate(page, count)
+
+        jobs = [dict(zip(result.keys(), result)) for result in results.items]
+
+        # 为job添加next_run_time 和 state 属性
+        job_id_list, next_run_time_dict = cls.get_job_detail()
+        for job in jobs:
+            if job['scheduler_id'] in job_id_list:
+                job['state'] = True
+                job['next_run_time'] = next_run_time_dict[job['scheduler_id']]
+                # 如果任务被暂停，置状态为未运行
+                if job['next_run_time'] is None:
+                    job['state'] = False
+            else:
+                job['state'] = False
+                job['next_run_time'] = None
+            # 工程名称
+            job['project_name'] = Project.query.filter_by(id=job['project_id']).first().name
+            # 维护人名称
+            job['user_name'] = manager.user_model.query.filter_by(id=job['user']).first().username
+            # 抄送人
+            copy_users_name = []
+            if job['copy_person']:
+                for u in job['copy_person'].split(','):
+                    copy_user = manager.user_model.query.filter_by(id=int(u)).first().username if u else None
+                    # 如果用户存在则加入抄送人列表
+                    copy_users_name.append(copy_user) if copy_user else 1
+            job['copy_person_name'] = copy_users_name
+
+        results.items = jobs
+        data = paging(results)
+
+        return data
