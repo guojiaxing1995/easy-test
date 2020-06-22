@@ -5,7 +5,7 @@ const schedulerRouter = {
   type: 'tab',
   icon: 'iconfont icon-caseStore',
   filePath: 'views/scheduler/',
-  order: null,
+  order: 6,
   inNav: true,
   permission: ['定时任务列表'],
   children: [

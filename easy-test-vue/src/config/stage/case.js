@@ -5,7 +5,7 @@ const caseRouter = {
   type: 'folder',
   icon: 'iconfont icon-caseStore',
   filePath: 'views/case/',
-  order: null,
+  order: 3,
   inNav: true,
   permission: ['测试用例'],
   children: [

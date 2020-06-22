@@ -123,6 +123,7 @@ class CaseDebugForm(Form):
 
 
 class CaseLogsSearchForm(Form):
+    id = IntegerField(validators=[Optional()])
     name = StringField(validators=[Optional()])
     url = StringField(validators=[Optional()])
     # 工程名称
@@ -131,7 +132,7 @@ class CaseLogsSearchForm(Form):
     task = IntegerField(validators=[Optional()])
     # 结果
     result = Field(validators=[Optional()])
-    page = IntegerField(validators=[Optional()])
+    page = IntegerField(default=1)
     count = IntegerField(default=10, validators=[Optional()])
     start = DateTimeField(validators=[])
     end = DateTimeField(validators=[])

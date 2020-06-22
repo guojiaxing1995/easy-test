@@ -22,7 +22,8 @@ from lin.db import db
 
 from app.libs.case_log import log, edit_log
 from app.libs.deal import deal_default, get_target_value
-from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTypeEnum, CaseAssertEnum, UserAuthEnum
+from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTypeEnum, CaseAssertEnum, UserAuthEnum, \
+    ProjectTypeEnum
 from app.libs.error_code import CaseRemoveException
 from app.libs.init import mongo
 from app.libs.utils import paging
@@ -203,7 +204,7 @@ class Case(Base):
         auths = UserAuth.query.filter_by(user_id=current_user.id, _type=UserAuthEnum.GROUP.value).all()
         gids = [auth.auth_id for auth in auths]
         from app.models.CaseGroup import CaseGroup
-        results = cls.query.join(CaseGroup, CaseGroup.id == cls.case_group).\
+        results = cls.query.join(CaseGroup, CaseGroup.id == cls.case_group). \
             join(manager.user_model, manager.user_model.id == cls.create_user).filter(
             cls.id == cid if cid else '',
             cls._method == method if method else '',
@@ -471,12 +472,13 @@ class Case(Base):
         return result
 
     @classmethod
-    def case_log_search(cls, name, url, project, task, result, start, end, count=10, page=1):
+    def case_log_search(cls, cid, name, url, project, task, result, start, end, count=10, page=1):
         start_timeStamp = int(time.mktime(time.strptime(start, "%Y-%m-%d %H:%M:%S"))) * 1000 if start else None
         end_timeStamp = int(time.mktime(time.strptime(end, "%Y-%m-%d %H:%M:%S"))) * 1000 if end else None
 
         cases = mongo.db.easy.find(
             {
+                'id': cid if cid is not None else {'$type': 16},
                 'name': {'$regex': name} if name is not None else {'$regex': ''},
                 'url': {'$regex': url} if url is not None else {'$regex': ''},
                 'project_name': {'$regex': project} if project is not None else {'$regex': ''},
@@ -592,7 +594,7 @@ class Case(Base):
         from app.models.CaseGroup import CaseGroup
         if not uid:
             uid = current_user.id
-        results = cls.query.join(CaseGroup, CaseGroup.id == cls.case_group).\
+        results = cls.query.join(CaseGroup, CaseGroup.id == cls.case_group). \
             join(manager.user_model, manager.user_model.id == cls.create_user).filter(
             cls.create_user == uid,
             cls.name.like(f'%{name}%') if name is not None else '',
@@ -622,3 +624,70 @@ class Case(Base):
         results.items = items
         data = paging(results)
         return data
+
+    # 用例统计
+    def log_collect(self):
+        true_count = mongo.db.easy.find(
+            {
+                'id': self.id,
+                'actual_result': True
+            },
+            {"_id": 0}).sort([('_id', -1)]).count()
+
+        false_count = mongo.db.easy.find(
+            {
+                'id': self.id,
+                'actual_result': False
+            },
+            {"_id": 0}).sort([('_id', -1)]).count()
+
+        last_modify_log = mongo.db.modify.find(
+            {
+                'id': self.id,
+            },
+            {"_id": 0, 'create_time': 1}).sort([('_id', -1)]).limit(1)
+
+        last_modify_time = None
+        last_modify_log = list(last_modify_log)
+        if last_modify_log:
+            last_modify_time = last_modify_log[0]['create_time']
+
+        edit_count = mongo.db.modify.find(
+            {
+                'id': self.id,
+            },
+            {"_id": 0}).sort([('_id', -1)]).count()
+
+        return {
+            'true_count': true_count,
+            'false_count': false_count,
+            'count': true_count + false_count,
+            'last_modify_time': last_modify_time,
+            'edit_count': edit_count
+        }
+
+    def used_by_project(self):
+        from app.models.ConfigCopy import ConfigCopy
+        from app.models.ConfigRelation import ConfigRelation
+        pid_list = []
+        copy_configs = ConfigCopy.query.filter_by(case_id=self.id, delete_time=None).all()
+        for config in copy_configs:
+            pid_list.append(config.project_id)
+
+        relation_configs = ConfigRelation.query.filter_by(case_id=self.id, delete_time=None).all()
+        for config in relation_configs:
+            pid_list.append(config.project_id)
+
+        project_list = []
+        for pid in pid_list:
+            from app.models.project import Project
+            project = Project.query.filter_by(id=pid).first()
+            p = {
+                'name': project.name,
+                'id': pid,
+                'type': project.type,
+                'type_name': ProjectTypeEnum.data()[project.type],
+            }
+            project_list.append(p)
+
+        return project_list

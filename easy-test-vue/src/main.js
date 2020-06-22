@@ -2,6 +2,9 @@ import '@babel/polyfill'
 import Vue from 'vue'
 import ElementUI from 'element-ui'
 
+import VueCodemirror from 'vue-codemirror'
+
+
 import '@/lin/mixin'
 import '@/lin/filter'
 import '@/lin/plugins'
@@ -23,11 +26,16 @@ import '@/assets/styles/index.scss' // eslint-disable-line
 import '@/assets/styles/realize/element-variables.scss'
 import 'element-ui/lib/theme-chalk/display.css'
 
+/* eslint-disable*/
+import 'codemirror/lib/codemirror.css'
+
 Vue.prototype.$echarts = echarts
 
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
+
+Vue.use(VueCodemirror)
 
 Vue.component(CollapseTransition.name, CollapseTransition)
 

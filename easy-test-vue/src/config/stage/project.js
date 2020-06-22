@@ -5,7 +5,7 @@ const projectRouter = {
   type: 'folder',
   icon: 'iconfont icon-caseStore',
   filePath: 'views/project/',
-  order: null,
+  order: 4,
   inNav: true,
   children: [
     {

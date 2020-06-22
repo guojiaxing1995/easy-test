@@ -34,6 +34,7 @@
     <div>
       <el-radio v-model="type" label="4" size="mini" border>指定</el-radio>
       <el-checkbox-group v-model="appoint">
+        <!-- eslint-disable -->
         <div  v-for="i in 4" :key="i" style="margin-left: 10px;  line-height: 25px;">
           <el-checkbox @change="type = '4'"  v-for="j in 10" v-if="parseInt((i - 1) + '' + (j - 1)) < 32 && !(i === 1 && j === 1)" :key="j" :label="(i - 1) + '' + (j - 1)"></el-checkbox>
         </div>
@@ -43,6 +44,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 export default {
   props: {
     value: {

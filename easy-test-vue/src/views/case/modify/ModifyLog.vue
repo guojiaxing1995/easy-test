@@ -395,7 +395,7 @@ export default {
   }
 
   .tree {
-    height: 80vh;
+    height: 60vh;
     width: 100%;
     margin-top:30px;
     overflow-y: auto;

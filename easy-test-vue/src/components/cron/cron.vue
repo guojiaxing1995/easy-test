@@ -68,6 +68,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 import SecondAndMinute from './cron/secondAndMinute'
 import hour from './cron/hour'
 import day from './cron/day'

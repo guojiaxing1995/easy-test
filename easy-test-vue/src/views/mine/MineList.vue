@@ -589,7 +589,7 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  padding: 30px;
+  padding: 45px 30px 30px 30px;
 
   .header {
     color: $parent-title-color;

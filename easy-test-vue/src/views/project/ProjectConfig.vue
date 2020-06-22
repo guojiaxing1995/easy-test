@@ -137,7 +137,7 @@ export default {
       selectProject: null,
       selecProjectData: [],
       loading: false,
-      editable: true,
+      editable: false,
       isDragging: false,
       delayedDragging: false,
       // 左边用例列表

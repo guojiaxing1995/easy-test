@@ -110,7 +110,7 @@ def cases_by_group():
 @group_required
 def case_logs():
     form = CaseLogsSearchForm().validate_for_api()
-    cases = Case.case_log_search(form.name.data, form.url.data, form.project.data, form.task.data,
+    cases = Case.case_log_search(form.id.data, form.name.data, form.url.data, form.project.data, form.task.data,
                                  form.result.data, form.start.data, form.end.data, form.count.data, form.page.data)
     return jsonify(cases)
 
@@ -167,3 +167,25 @@ def edit_logs_delete():
         return Success(msg='无符合条件数据')
     else:
         return Success(msg='成功删除' + str(count) + '条数据')
+
+
+# 用例统计
+@case_api.route('/collect/<cid>', methods=['GET'])
+@route_meta('用例分析', module='测试分析')
+@group_required
+def case_collect(cid):
+    case = Case.query.filter_by(id=cid, delete_time=None).first_or_404()
+    collect = case.log_collect()
+
+    return jsonify(collect)
+
+
+# 用例被哪些工程使用了
+@case_api.route('/usedByProject/<cid>', methods=['GET'])
+@route_meta('用例分析', module='测试分析')
+@group_required
+def used_by_project(cid):
+    case = Case.query.filter_by(id=cid, delete_time=None).first_or_404()
+    project = case.used_by_project()
+
+    return project

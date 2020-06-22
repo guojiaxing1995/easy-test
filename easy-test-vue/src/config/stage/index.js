@@ -8,11 +8,13 @@ import executeConfig from './execute'
 import testConfig from './test'
 import schedulerConfig from './scheduler'
 import mineConfig from './mine'
+import analysisConfig from './analysis'
+import postmanConfig from './postman'
 
 // eslint-disable-next-line import/no-mutable-exports
 let homeRouter = [
   {
-    title: '数据概览',
+    title: '测试总览',
     type: 'view',
     name: Symbol('about'),
     route: '/about',
@@ -29,7 +31,7 @@ let homeRouter = [
     filePath: 'views/log/Log.vue',
     inNav: true,
     icon: 'iconfont icon-rizhiguanli',
-    order: 1,
+    order: 21,
     permission: ['查询所有日志'],
   },
   {
@@ -48,7 +50,9 @@ let homeRouter = [
   executeConfig,
   testConfig,
   schedulerConfig,
-  mineConfig
+  mineConfig,
+  analysisConfig,
+  postmanConfig
 
 ]
 

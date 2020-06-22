@@ -5,7 +5,7 @@ const testRouter = {
   type: 'folder',
   icon: 'iconfont icon-caseStore',
   filePath: 'views/test/',
-  order: null,
+  order: 5,
   inNav: true,
   children: [
     {
