@@ -232,6 +232,11 @@ class Project(Base):
                     db.session.delete(user)
             # 删除工程，逻辑删除
             project.delete_time = datetime.now()
+            # 删除工程对应的定时任务
+            from app.models.scheduler import Scheduler
+            schedulers = Scheduler.query.filter_by(project_id=project.id, delete_time=None).all()
+            for scheduler in schedulers:
+                scheduler.remove_job()
             # 删除副本工程配置表 物理删除
             copyConfigs = ConfigCopy.query.filter_by(project_id=pid).all()
             for config in copyConfigs:
