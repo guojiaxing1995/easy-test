@@ -46,3 +46,21 @@ class RecordRemoveException(APIException):
     code = 403
     msg = '运行记录删除失败'
     error_code = 94001
+
+
+class AddMockException(APIException):
+    code = 400
+    msg = '新增mock数据失败'
+    error_code = 95001
+
+
+class EditMockException(APIException):
+    code = 400
+    msg = '编辑mock数据失败'
+    error_code = 95002
+
+
+class MethodMockException(APIException):
+    code = 405
+    msg = '请求方法错误'
+    error_code = 95003

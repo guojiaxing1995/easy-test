@@ -63,6 +63,8 @@ import { get, post } from '@/lin/plugins/axios'
 /* eslint-disable*/
 import 'codemirror/mode/javascript/javascript.js'
 import 'codemirror/theme/erlang-dark.css'
+import 'codemirror/addon/scroll/simplescrollbars.css'
+import 'codemirror/addon/scroll/simplescrollbars'
 
 
 export default {
@@ -108,17 +110,41 @@ export default {
         lineNumbers: true,
         line: true,
         matchBrackets: true,
-        autoRefresh: true
-      }
+        autoRefresh: true,
+        scrollbarStyle: 'overlay'
+      },
     }
   },
   activated() {
+    if (this.$route.query.mid) {
+      this.searchMock(this.$route.query.mid, this.$route.query.mockServer)
+    }
   },
   async created() {
     await this.getType()
     await this.groupByCaseGroup()
+    if (this.$route.query.mid) {
+      this.searchMock(this.$route.query.mid, this.$route.query.mockServer)
+    }
   },
   methods: {
+    async searchMock(mid, mockServer) {
+      let mockData
+      try {
+        mockData =  await get('/v1/mock', {'mid': mid}, { showBackend: true })
+        this.testCase.url = mockServer + mockData[0].url
+        this.testCase.method = mockData[0].method
+        this.testCase.header = mockData[0].request_header
+        this.testCase.data = mockData[0].request_body
+        this.testCase.submit = '1'
+        this.reponse.body = ''
+        this.reponse.headers = ''
+        this.reponse.statusCode = 0
+        this.reponse.totalSeconds = 0
+        this.cid = 0
+      } catch (error) {
+      }
+    },
     filterNode(value, data) {
       if (!value) return true
       return data.name.indexOf(value) !== -1

@@ -51,7 +51,7 @@ def stop_job():
     return Success(msg='停止成功')
 
 
-@scheduler_api.route('/edit/<sid>', methods=['POST'])
+@scheduler_api.route('/edit/<sid>', methods=['PUT'])
 @route_meta('编辑定时任务', module='定时任务')
 @group_required
 def edit_job(sid):

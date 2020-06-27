@@ -236,7 +236,7 @@
 
 <script>
 import cron from '../../components/cron/cron'
-import { get, post, _delete } from '@/lin/plugins/axios'
+import { get, put, _delete } from '@/lin/plugins/axios'
 
 export default {
   components: {
@@ -468,7 +468,7 @@ export default {
             let res
             try {
               this.editLoading = true
-              res = await post(`/v1/scheduler/edit/${this.currentEditId}`, {
+              res = await put(`/v1/scheduler/edit/${this.currentEditId}`, {
                 sendEmail: this.form.sendEmail,
                 user: this.form.user[1],
                 copyPerson: this.copyPersonDeal(),

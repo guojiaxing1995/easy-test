@@ -10,6 +10,7 @@ import schedulerConfig from './scheduler'
 import mineConfig from './mine'
 import analysisConfig from './analysis'
 import postmanConfig from './postman'
+import mockConfig from './mock'
 
 // eslint-disable-next-line import/no-mutable-exports
 let homeRouter = [
@@ -52,7 +53,8 @@ let homeRouter = [
   schedulerConfig,
   mineConfig,
   analysisConfig,
-  postmanConfig
+  postmanConfig,
+  mockConfig
 
 ]
 
