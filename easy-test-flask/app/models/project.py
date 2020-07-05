@@ -344,3 +344,195 @@ class Project(Base):
         results.items = projects
         data = paging(results)
         return data
+
+    # 工程总数
+    @classmethod
+    def total(cls):
+        return cls.query.filter_by(delete_time=None).count()
+
+    @classmethod
+    def rate_top(cls):
+        # 工程总成功率top5  总失败率top5
+
+        success_rate = db.session.execute("SELECT project.NAME AS name,FORMAT( AVG( rate ) * 100, 2 ) AS success_rate "
+                                          "FROM ( SELECT project_id, success / total AS rate FROM `task` "
+                                          "WHERE delete_time IS NULL GROUP BY project_id, success / total ) AS "
+                                          "success_rate_first,`project` WHERE project.id = "
+                                          "success_rate_first.project_id GROUP BY project_id ORDER BY success_rate "
+                                          "DESC LIMIT 5")
+
+        fail_rate = db.session.execute("SELECT project.NAME AS name,FORMAT( AVG( rate ) * 100, 2 ) AS fail_rate "
+                                       "FROM( SELECT project_id, fail / total AS rate FROM `task` WHERE delete_time IS "
+                                       "NULL GROUP BY project_id, fail / total ) AS fail_rate_first,`project` WHERE "
+                                       "project.id = fail_rate_first.project_id GROUP BY project_id ORDER BY fail_rate "
+                                       "DESC LIMIT 5")
+        return {
+            'success_rate': list(success_rate),
+            'fail_rate': list(fail_rate),
+        }
+
+    def collect(self):
+        # 执行总数
+        execute_total = db.session.execute("SELECT count( * ) AS total FROM `task` WHERE delete_time IS NULL AND "
+                                           "project_id = " + str(self.id))
+        try:
+            execute_total = list(execute_total)[0]['total']
+        except Exception:
+            execute_total = 0
+
+        # 成功数
+        success_total = db.session.execute("SELECT count( * ) AS total FROM `task` WHERE delete_time IS NULL AND "
+                                           "total =success AND success != 0 AND project_id =" + str(self.id))
+        try:
+            success_total = list(success_total)[0]['total']
+        except Exception:
+            success_total = 0
+        # 当前成功率
+        current_success_rate = db.session.execute(text("SELECT FORMAT( success / total * 100, 2 ) AS rate FROM `task` "
+                                                       "WHERE delete_time IS NULL AND project_id = :pid ORDER BY "
+                                                       "create_time DESC LIMIT 1"),
+                                                  {'pid': self.id})
+        try:
+            current_success_rate = float(list(current_success_rate)[0]['rate'])
+        except Exception:
+            current_success_rate = 0
+        # 上一次成功率
+        last_success_rate = db.session.execute(text("SELECT FORMAT( success / total * 100, 2 ) AS rate FROM `task` "
+                                                    "WHERE delete_time IS NULL AND project_id = :pid ORDER BY "
+                                                    "create_time DESC LIMIT 1,1"),
+                                               {'pid': self.id})
+        try:
+            last_success_rate = float(list(last_success_rate)[0]['rate'])
+        except Exception:
+            last_success_rate = 0
+        # 同比增长
+        try:
+            yoy_growth = float(format((current_success_rate - last_success_rate) / last_success_rate * 100, '.2f'))
+        except Exception:
+            yoy_growth = 0
+
+        # 以天为单位的近7次执行记录
+        day_execute = []
+        # 最近有过执行记录的日期
+        last_seven_days = []
+        test_date = db.session.execute(text("SELECT DATE_FORMAT( create_time, '%Y-%m-%d' ) as test_date FROM "
+                                            "`task` WHERE delete_time IS NULL AND project_id = :pid GROUP BY "
+                                            "DATE_FORMAT( create_time, '%Y-%m-%d' ) ORDER BY "
+                                            "DATE_FORMAT( create_time, '%Y-%m-%d' ) DESC LIMIT 7"),
+                                       {'pid': self.id})
+        for i in list(test_date):
+            last_seven_days.append(i['test_date'])
+
+        for day in last_seven_days:
+            task = db.session.execute(text("SELECT (UNIX_TIMESTAMP(create_time) * 1000) AS create_time,success,fail,"
+                                           "total FROM `task` WHERE delete_time IS NULL AND project_id = :pid AND "
+                                           "DATE_FORMAT( create_time, '%Y-%m-%d' ) = :day ORDER BY create_time "
+                                           "DESC LIMIT 1"),
+                                      {'pid': self.id, 'day': day})
+            day_execute.append(list(task)[0])
+            # 排序
+            length = len(day_execute)
+            for index in range(length):
+                # 标志位
+                flag = True
+                for j in range(1, length - index):
+                    if day_execute[j - 1]['create_time'] > day_execute[j]['create_time']:
+                        day_execute[j - 1], day_execute[j] = day_execute[j], day_execute[j - 1]
+                        flag = False
+                if flag:
+                    # 没有发生交换，直接返回list
+                    break
+
+        # 雷达图
+
+        # 成功率
+        success_rate = db.session.execute(text("SELECT project.NAME,FORMAT( AVG( rate ) * 100, 2 ) AS success_rate "
+                                               "FROM( SELECT project_id, success / total AS rate FROM `task` WHERE "
+                                               "delete_time IS NULL GROUP BY project_id, success / total ) AS "
+                                               "success_rate_first,`project` WHERE project.id = "
+                                               "success_rate_first.project_id AND project_id = :pid GROUP BY "
+                                               "project_id ORDER BY success_rate DESC"),
+                                          {'pid': self.id})
+        try:
+            success_rate = float(list(success_rate)[0]['success_rate'])
+        except Exception:
+            success_rate = 0
+
+        # 用例数
+        case_count = []
+        if self.type == ProjectTypeEnum.COPY.value:
+            case_count = db.session.execute(text("SELECT count( * ) AS case_count FROM config_copy WHERE delete_time "
+                                                 "IS NULL AND project_id = :pid"),
+                                            {'pid': self.id})
+        elif self.type == ProjectTypeEnum.RELATION.value:
+            case_count = db.session.execute(text("SELECT count( * ) AS case_count FROM config_relation WHERE "
+                                                 "delete_time IS NULL AND project_id = :pid"),
+                                            {'pid': self.id})
+        try:
+            case_count = list(case_count)[0]['case_count']
+        except Exception:
+            case_count = 0
+
+        # 执行天数
+        execute_day = db.session.execute(text("SELECT DATE_FORMAT( create_time, '%Y-%m-%d' ) as test_date FROM `task` "
+                                              "WHERE delete_time IS NULL AND project_id = :pid GROUP BY "
+                                              "DATE_FORMAT( create_time, '%Y-%m-%d' ) "),
+                                         {'pid': self.id})
+        try:
+            execute_day = list(execute_day)[0]['test_date']
+        except Exception:
+            case_count = 0
+
+        # 执行频率
+        try:
+            frequency = float(execute_total) / len(execute_day)
+        except Exception:
+            frequency = 0
+
+        # 定时任务
+        scheduler_count = db.session.execute(text("SELECT * FROM scheduler WHERE delete_time IS NULL AND "
+                                                  "project_id = :pid"),
+                                             {'pid': self.id})
+        scheduler_count = len(list(scheduler_count))
+
+        # 执行人数
+        tester_count = db.session.execute(text("SELECT create_user FROM `task` WHERE delete_time IS NULL AND "
+                                               "project_id = :pid GROUP BY create_user"),
+                                          {'pid': self.id})
+        tester_count = len(list(tester_count))
+
+        max_success_rate = 100
+
+        max_case_count = 30
+        if max_case_count < case_count:
+            max_case_count = case_count
+
+        max_frequency = 2
+        if max_frequency < frequency:
+            max_frequency = frequency
+
+        max_scheduler_count = 1
+        if max_scheduler_count < scheduler_count:
+            max_scheduler_count = scheduler_count
+
+        max_tester_count = 2
+        if max_tester_count < tester_count:
+            max_tester_count = tester_count
+
+        radar_chart = {
+            'indicator': [{'text': '成功率', 'max': max_success_rate},
+                          {'text': '用例数', 'max': max_case_count},
+                          {'text': '执行频率', 'max': max_frequency},
+                          {'text': '定时任务', 'max': max_scheduler_count},
+                          {'text': '测试人数', 'max': max_tester_count}],
+            'value': [success_rate, case_count, frequency, scheduler_count, tester_count]
+        }
+
+        return {
+            'execute_total': execute_total,
+            'success_total': success_total,
+            'current_success_rate': current_success_rate,
+            'yoy_growth': yoy_growth,
+            'day_execute': day_execute,
+            'radar_chart': radar_chart
+        }

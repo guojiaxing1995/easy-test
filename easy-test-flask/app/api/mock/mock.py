@@ -27,6 +27,7 @@ def mock(path):
         {"_id": 0}).sort([('_id', -1)])
 
     mocks = list(mocks)
+    # mock数据不存在 返回405
     if not mocks:
         raise MethodMockException()
 

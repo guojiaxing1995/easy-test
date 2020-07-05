@@ -104,3 +104,11 @@ class Mock:
         mocks = list(mocks)
 
         return mocks
+
+    @classmethod
+    def total(cls):
+        return mongo.db.mock.find(
+            {
+                'delete_time': None
+            },
+            {"_id": 0}).sort([('_id', -1)]).count()

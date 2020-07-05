@@ -213,3 +213,8 @@ class Scheduler(Base):
         data = paging(results)
 
         return data
+
+    # 定时任务总数
+    @classmethod
+    def total(cls):
+        return cls.query.filter_by(delete_time=None).count()

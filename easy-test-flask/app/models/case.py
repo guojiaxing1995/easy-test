@@ -17,7 +17,7 @@ from flask_jwt_extended import current_user, get_current_user
 from lin import manager
 from lin.exception import ParameterException, AuthFailed
 from lin.interface import InfoCrud as Base
-from sqlalchemy import Column, Integer, String, SmallInteger
+from sqlalchemy import Column, Integer, String, SmallInteger, between
 from lin.db import db
 
 from app.libs.case_log import log, edit_log
@@ -691,3 +691,118 @@ class Case(Base):
             project_list.append(p)
 
         return project_list
+
+    # 用例总数
+    @classmethod
+    def total(cls):
+        return cls.query.filter_by(delete_time=None).count()
+
+    # 今日新增用例数
+    @classmethod
+    def today(cls):
+
+        add = db.session.execute("SELECT * FROM `easy-test`.`case` where delete_time is null "
+                                 "and DATE_FORMAT(create_time,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')")
+        return len(list(add))
+
+    # 执行次数top
+    @classmethod
+    def top(cls):
+        total_top_pipeline = [
+            {
+                '$group': {
+                    '_id': {
+                        'id': '$id',
+                        'name': '$name',
+                    },
+                    'count': {
+                        '$sum': 1
+                    }
+                }
+            },
+            {
+                '$sort': {
+                    'count': -1
+                }
+            },
+            {
+                '$limit': 10
+            }
+        ]
+        total_top = mongo.db.easy.aggregate(total_top_pipeline)
+        total_top = list(total_top)
+        for t in total_top:
+            t['name'] = t['_id']['name']
+            t.pop('_id')
+
+        total_pipeline = [
+            {
+                '$group': {
+                    '_id': {
+                        'id': '$id',
+                        'name': '$name',
+                    },
+                    'count': {
+                        '$sum': 1
+                    }
+                }
+            }
+        ]
+        total_test = mongo.db.easy.aggregate(total_pipeline)
+        total_test = list(total_test)
+        pass_pipeline = [
+            {
+                '$match': {
+                    'actual_result': True
+                }
+            },
+            {
+                '$group': {
+                    '_id': {
+                        'id': '$id',
+                        'name': '$name',
+                    },
+                    'count': {
+                        '$sum': 1
+                    }
+                }
+            }
+        ]
+        pass_test = mongo.db.easy.aggregate(pass_pipeline)
+        pass_test = list(pass_test)
+
+        pass_rate = []
+
+        for t in total_test:
+            t_copy = t
+            t_copy['name'] = t['_id']['name']
+            t_copy['pass'] = 0
+            t_copy['rate'] = 0
+            for p in pass_test:
+                if t['_id']['id'] == p['_id']['id']:
+                    t_copy['pass'] = p['count']
+                    t_copy['rate'] = float(format(float(t_copy['pass']) / float(t_copy['count']) * 100, '.2f'))
+                    continue
+            t_copy.pop('_id')
+            pass_rate.append(t_copy)
+
+        # 按通过率排序
+        length = len(pass_rate)
+        for index in range(length):
+            # 标志位
+            flag = True
+            for j in range(1, length - index):
+                if pass_rate[j - 1]['rate'] < pass_rate[j]['rate']:
+                    pass_rate[j - 1], pass_rate[j] = pass_rate[j], pass_rate[j - 1]
+                    flag = False
+            if flag:
+                # 没有发生交换，直接返回list
+                break
+
+        if len(pass_rate) > 10:
+            pass_rate = pass_rate[11]
+
+        return {
+            'total_top': total_top,
+            'pass_rate_top': pass_rate
+        }

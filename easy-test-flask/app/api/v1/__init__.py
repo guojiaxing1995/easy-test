@@ -4,7 +4,7 @@
 """
 
 from flask import Blueprint
-from app.api.v1 import book, CaseGroup, case, project, task, scheduler, user, mock
+from app.api.v1 import book, CaseGroup, case, project, task, scheduler, user, mock, overview
 
 
 def create_v1():
@@ -17,4 +17,5 @@ def create_v1():
     scheduler.scheduler_api.register(bp_v1)
     user.user_api.register(bp_v1)
     mock.mock_api.register(bp_v1)
+    overview.overview_api.register(bp_v1)
     return bp_v1

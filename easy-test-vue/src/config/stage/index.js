@@ -21,6 +21,7 @@ let homeRouter = [
     route: '/about',
     filePath: 'views/about/About.vue',
     inNav: true,
+    keepAlive: true,
     icon: 'iconfont icon-shanzi',
     order: 0,
   },

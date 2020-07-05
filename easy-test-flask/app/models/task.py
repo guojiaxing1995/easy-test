@@ -161,3 +161,16 @@ class Task(Base):
         results.items = items
         data = paging(results)
         return data
+
+    # 获取今日执行得测试次数、测试得工程数
+    @classmethod
+    def today(cls):
+
+        execute_task = db.session.execute("SELECT * FROM `easy-test`.`task` where delete_time is null "
+                                          "and DATE_FORMAT(create_time,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')")
+
+        execute_project = db.session.execute("SELECT project_id, count(*) FROM `easy-test`.`task` WHERE delete_time IS "
+                                             "NULL AND DATE_FORMAT( create_time, '%Y-%m-%d' ) = "
+                                             "DATE_FORMAT( NOW( ), '%Y-%m-%d' ) GROUP BY project_id")
+
+        return len(list(execute_task)), len(list(execute_project))
