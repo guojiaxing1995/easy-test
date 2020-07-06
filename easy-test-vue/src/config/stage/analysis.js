@@ -3,7 +3,7 @@ const analysisRouter = {
   name: 'analysis',
   title: '用例分析',
   type: 'view', // 类型: folder, tab, view
-  icon: 'iconfont icon-tushuguanli',
+  icon: 'iconfont icon-analysis',
   filePath: 'views/analysis/CaseAnalysis.vue', // 文件路径
   order: 7,
   inNav: true,

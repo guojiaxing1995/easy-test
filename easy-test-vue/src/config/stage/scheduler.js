@@ -3,7 +3,7 @@ const schedulerRouter = {
   name: null,
   title: '定时任务',
   type: 'tab',
-  icon: 'iconfont icon-caseStore',
+  icon: 'iconfont icon-corn',
   filePath: 'views/scheduler/',
   order: 6,
   inNav: true,
@@ -16,7 +16,7 @@ const schedulerRouter = {
       inNav: true,
       filePath: 'views/scheduler/SchedulerList.vue',
       title: '任务列表',
-      icon: 'iconfont icon-fenzu',
+      icon: 'iconfont icon-corn',
       keepAlive: true,
     },
     {

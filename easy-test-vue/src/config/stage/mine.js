@@ -6,7 +6,7 @@ const MineRouter = {
   filePath: 'views/mine/MineList.vue',
   title: '我的数据',
   order: 8,
-  icon: 'iconfont icon-fenzu',
+  icon: 'iconfont icon-mine',
   keepAlive: true,
 }
 

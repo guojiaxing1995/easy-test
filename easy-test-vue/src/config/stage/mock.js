@@ -3,7 +3,7 @@ const mockRouter = {
   name: 'mock',
   title: 'mock管理',
   type: 'view', // 类型: folder, tab, view
-  icon: 'iconfont icon-tushuguanli',
+  icon: 'iconfont icon-mock',
   filePath: 'views/mock/MockManage.vue', // 文件路径
   order: 9,
   inNav: true,

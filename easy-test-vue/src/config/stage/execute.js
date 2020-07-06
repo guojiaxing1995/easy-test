@@ -3,7 +3,7 @@ const executeRouter = {
   name: 'executeTest',
   title: '测试执行',
   type: 'view', // 类型: folder, tab, view
-  icon: 'iconfont icon-tushuguanli',
+  icon: 'iconfont icon-execute',
   filePath: 'views/execute/ExecuteTest.vue', // 文件路径
   order: 2,
   inNav: true,
