@@ -10,9 +10,14 @@
 
 
 ### 项目介绍
-<font face="楷体" color=gray>接口自动化测试平台技术栈为 vue + python falsk 前后端分离实现，数据库使用的是mysql和mongodb，异步任务用到了rabbitmq。现在已经实现了多接口批量测试、用例管理、测试集内用例依赖关系处理、分布式异步测试执行、测试集灵活配置、测试结果多维度查看、定时任务、用例调试、mock数据管理和测试结果邮件通知等功能。</font>
+<font face="楷体" color=gray>接口自动化测试平台现在已经实现了多接口批量测试、用例管理、测试集内用例依赖关系处理、分布式异步测试执行、测试集灵活配置、测试结果多维度查看、定时任务、用例调试、mock数据管理和测试结果邮件通知等功能。</font>
+
+<font face="楷体" color=gray>平台技术栈为 vue + python falsk 前后端分离实现，数据库使用的是mysql和mongodb，异步任务用到了rabbitmq。</font>
+
 <font face="楷体" color=gray>源码地址：[https://github.com/guojiaxing1995/easy-test](https://github.com/guojiaxing1995/easy-test)</font>
+
 <font face="楷体" color=gray>在线接口文档：[https://www.showdoc.cc/easyTest](https://www.showdoc.cc/easyTest)</font>
+
 <font face="楷体" color=gray>使用文档：[https://blog.csdn.net/qq_36450484/article/details/107332571](https://blog.csdn.net/qq_36450484/article/details/107332571)</font>
 
 ### 部分模块展示
@@ -25,7 +30,7 @@
 
 ![mock管理](https://img-blog.csdnimg.cn/20200715173300210.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM2NDUwNDg0,size_16,color_FFFFFF,t_70#pic_center)
 ### 系统架构
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20200714182757692.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM2NDUwNDg0,size_16,color_FFFFFF,t_70#pic_center)
+![系统架构图](https://img-blog.csdnimg.cn/20200714182757692.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM2NDUwNDg0,size_16,color_FFFFFF,t_70#pic_center)
 浏览器请求从web前端到api服务后端，包括http请求和socketio请求。api后端服务访问mysql和mongodb数据库对数据增删改查，同时其也作为生产者将任务数据加入到rabbitmq队列中。worker作为消费者连接队列后消费队列数据执行任务，执行过程中操作数据库并请求api服务后端通过websocket连接向前端广播数据。
 
 
