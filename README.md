@@ -52,7 +52,7 @@ npm run serve
 
 ``` shell
 pip install -r requirements.txt
-python app.py
+python starter.py
 ```
 worker 启动
 ``` shell
@@ -63,7 +63,7 @@ celery -A starter.celery worker -l info --pool=solo
 
 ### 平台docker部署
 平台的所有服务、中间件和数据库都使用docker进行部署。
-前端vue项目使用nginx部署，`default.conf`配置文件在vue项目目录下，我配置了域名，部署时可以根据自己情况修改。
+前端打包命令`npm run build`。前端vue项目使用nginx部署，`default.conf`配置文件在vue项目目录下，我配置了域名，部署时可以根据自己情况修改。
 后端flask配置文件路径为`\app\config`，只需要修改静态服务地址`SITE_DOMAIN`（此处我在nginx配置中做了转发，如果不需要则删除nginx配置文件中assets相关配置）。
 worker可以根据自己的资源启动多个，修改compose文件即可。
 flask工程目录下有api服务镜像构建文件`Dockerfile-api`和worker服务镜像构建文件`Dockerfile-worker`，vue工程目录下有前端服务镜像构建文件`Dockerfile`,工程目录下有`docker-compose.yaml`文件,该文件只需要酌情修改端口映射。镜像无需手动执行构建命令构建，服务启动会自动构建。
@@ -79,3 +79,6 @@ docker-compose down
 ```
 ![服务部署](https://img-blog.csdnimg.cn/20200715190204815.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM2NDUwNDg0,size_16,color_FFFFFF,t_70#pic_center)
 上图红框标注处为部署成功后所有的服务。
+
+<br>
+<span">关于系统有任何问题请联系： 302802003@qq.com</span>
