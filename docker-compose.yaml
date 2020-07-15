@@ -1,0 +1,118 @@
+version: "3"
+
+services:
+  
+  api:
+    build: 
+      context: ./easy-test-flask
+      dockerfile: Dockerfile-api
+    image: guojiaxing1995/easy-test-api:v1
+    container_name: api
+    restart: always
+    expose:
+      - 5000
+    networks:
+      - easy-test
+    ports:
+      - 8085:5000
+    volumes:
+      - ./logs/api/:/easy-test-flask/logs/
+      
+  worker1:
+    build: 
+      context: ./easy-test-flask
+      dockerfile: Dockerfile-worker
+    image: guojiaxing1995/easy-test-worker:v1
+    container_name: worker1
+    restart: always
+    expose:
+      - 5000
+    networks:
+      - easy-test
+    volumes:
+      - ./logs/worker1/:/easy-test-flask/logs/
+
+  worker2:
+    build: 
+      context: ./easy-test-flask
+      dockerfile: Dockerfile-worker
+    image: guojiaxing1995/easy-test-worker:v1
+    container_name: worker2
+    restart: always
+    expose:
+      - 5000
+    networks:
+      - easy-test
+    volumes:
+      - ./logs/worker2/:/easy-test-flask/logs/
+           
+  web:
+    build: ./easy-test-vue
+    image: guojiaxing1995/easy-test-web:v1
+    container_name: web
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - easy-test
+      
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    ports:
+      - 8081:3306
+    expose:
+      - 3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - mysql5.7:/var/lib/mysql
+      - ./mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+    networks:
+      - easy-test
+      
+  mongo:
+    image: mongo:4.2
+    container_name: mongo
+    restart: always
+    expose:
+      - 27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=mongo2020
+    volumes:
+      - mongodb4.2:/data/db
+    ports:
+      - 8090:27017
+    networks:
+      - easy-test
+      
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    container_name: rabbitmq
+    restart: always
+    expose:
+      - 15672
+      - 5672
+    environment:
+      - RABBITMQ_DEFAULT_VHOST=my_vhost
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=ftlb2000
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - 8084:15672
+      - 8083:5672
+    networks:
+      - easy-test
+  
+networks:
+  easy-test:
+    driver: bridge
+    
+volumes:
+  mysql5.7:
+  rabbitmq_data:
+  mongodb4.2:

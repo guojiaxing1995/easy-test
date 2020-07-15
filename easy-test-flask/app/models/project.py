@@ -283,7 +283,8 @@ class Project(Base):
             task = ConfigRelation.batch(self, create_user)
 
         # 执行完毕将结果广播给客户端
-        res = requests.get(url='http://127.0.0.1:5000/v1/task/finish/' + str(self.id))
+        api_server = current_app.config.get('API_SERVER')
+        res = requests.get(url=api_server + '/v1/task/finish/' + str(self.id))
         current_app.logger.debug(res.text)
 
         # 发送邮件
@@ -297,7 +298,8 @@ class Project(Base):
         self.progress = progress
         db.session.commit()
         # 将执行进度广播给客户端
-        res = requests.get(url='http://127.0.0.1:5000/v1/task/progress')
+        api_server = current_app.config.get('API_SERVER')
+        res = requests.get(url=api_server + '/v1/task/progress')
         current_app.logger.debug(res.text)
 
     # 查询指定用户的工程数据，如果不指定，则查询当前用户

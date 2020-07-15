@@ -1,0 +1,10 @@
+[mysqld]
+skip_external_locking
+lower_case_table_names=1
+skip_host_cache
+skip_name_resolve
+character-set-server = utf8mb4
+collation-server = utf8mb4_general_ci
+init_connect='SET NAMES utf8mb4'
+default-storage-engine=INNODB
+default-time_zone = '+8:00'

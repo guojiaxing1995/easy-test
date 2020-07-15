@@ -2,7 +2,10 @@
   <div class="login">
     <div class="team-name hidden-sm-and-down"><img src="@/assets/img/login/team-name.png" alt="logo" /></div>
     <div class="form-box" v-loading="loading" element-loading-background="rgba(0, 0, 0, 0)">
-      <div class="title"><h1 title="Lin">Easy  Test</h1></div>
+      <div class="title">
+        <!-- <h1 title="Easy  Test">Easy  Test</h1> -->
+        <h1 title="个人自动化测试">个人自动化测试</h1>
+      </div>
       <form class="login-form" autocomplete="off" @submit.prevent="throttleLogin()">
         <div class="form-item nickname">
           <span class="icon account-icon"></span>
@@ -14,6 +17,9 @@
         </div>
         <button class="submit-btn" type="submit">登录</button>
       </form>
+    </div>
+    <div class="record">
+      <el-link type="primary" :underline="false" href="http://www.beian.miit.gov.cn" target="_blank">晋ICP备18013433号-1</el-link>
     </div>
   </div>
 </template>
@@ -31,10 +37,10 @@ export default {
       wait: 2000, // 2000ms之内不能重复发起请求
       throttleLogin: null, // 节流登录
       form: {
-        username: 'super',
+        username: '麦克雷',
         password: '123456',
         confirm_password: '123456',
-        email: '2285901508@qq.com',
+        email: '302802003@qq.com',
       },
     }
   },
@@ -177,6 +183,12 @@ export default {
         cursor: pointer;
       }
     }
+  }
+  .record {
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    bottom: 1%;
   }
 }
 </style>

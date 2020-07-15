@@ -12,7 +12,7 @@ mongo = PyMongo()
 socket_io = SocketIO()
 
 # 集成celery flask_celery
-# 启动worker: celery -A starter.celery worker -l info --pool=solo
+# 启动worker: celery -A starter.celery worker -l info --pool=solo -f logs/celery.log
 celery = Celery()
 
 # 集成flask_apscheduler

@@ -20,7 +20,7 @@
             filterable
             size="small"
             :show-all-levels="false"
-            v-model="user"
+            v-model="user_id"
             :options="users"
             :props="{ expandTrigger: 'hover' }"
           ></el-cascader>
@@ -518,7 +518,7 @@ export default {
       this.page = 1
       this.getJobs()
     },
-    user() {
+    user_id() {
       this.page = 1
       this.getJobs()
     },

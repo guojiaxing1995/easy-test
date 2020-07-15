@@ -44,7 +44,8 @@ class Task(Base):
         db.session.commit()
 
         # 将执行结果广播给客户端
-        res = requests.get(url='http://127.0.0.1:5000/v1/task/task/' + str(self.project_id))
+        api_server = current_app.config.get('API_SERVER')
+        res = requests.get(url=api_server + '/v1/task/task/' + str(self.project_id))
         current_app.logger.debug(res.text)
 
     @classmethod

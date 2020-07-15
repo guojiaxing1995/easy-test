@@ -7,6 +7,7 @@ from app.app import create_app
 from app.libs.init import celery
 
 app = create_app(environment='development')
+# app = create_app()
 
 celery.conf.update(imports='app.libs.tasks')
 
@@ -21,4 +22,4 @@ def lin_slogan():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')

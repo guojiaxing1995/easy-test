@@ -389,6 +389,7 @@ export default {
     await this.getUserTop()
     await this.getCaseTop()
     await this.getToday()
+    await this.getProjectData()
   },
   computed: {
     bar_option() {

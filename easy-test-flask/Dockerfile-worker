@@ -1,0 +1,13 @@
+FROM python:3.6-slim
+
+MAINTAINER guojiaxing<302802003@qq.com>
+
+EXPOSE 5000
+
+COPY . ./easy-test-flask/
+
+WORKDIR /easy-test-flask/
+
+RUN ["pip", "install", "-i", "https://pypi.tuna.tsinghua.edu.cn/simple", "-r", "requirements.txt"]
+
+CMD ["celery", "-A", "starter.celery", "worker", "-l", "info", "--pool=solo", "-f", "logs/celery.log"]

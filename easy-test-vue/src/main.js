@@ -46,7 +46,8 @@ Vue.component('source-code', SourceCode)
 
 Vue.use(new VueSocketIO({
   debug: true,
-  connection: 'http://127.0.0.1:5000/',
+  connection: process.env.VUE_APP_SOCKETIO_URL,
+  // connection: 'http://127.0.0.1:5000/',
 }))
 
 /* eslint no-unused-vars: 0 */

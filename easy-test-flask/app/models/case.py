@@ -263,17 +263,19 @@ class Case(Base):
             self.return_deal(project.var_dick, res.json())
             self.get_result(res)
             self.assert_result()
-            self.update_task_result(task)
         except Exception as e:
             self.actual_result = False
             self.reason = str(e)
             current_app.logger.debug(self.reason)
 
+        # 更新task表 成功、失败
+        self.update_task_result(task)
         # 用例执行日志插入mongoDB数据库
         case_log = log(self, project, task, create_user)
         mongo.db.easy.insert(case_log)
         # 向客户端广播用例日志
-        res = requests.get(url='http://127.0.0.1:5000/v1/task/log/' + str(task.task_no))
+        api_server = current_app.config.get('API_SERVER')
+        res = requests.get(url=api_server + '/v1/task/log/' + str(task.task_no))
         current_app.logger.debug(res.text)
 
     # 拼接请求地址

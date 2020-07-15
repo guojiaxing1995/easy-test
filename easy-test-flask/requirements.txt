@@ -28,5 +28,5 @@ Flask-PyMongo==2.3.0
 flask-socketio==4.3.0
 celery==4.4.2
 flask-celery-helper==1.1.0
-flask-apscheduler==2.22.0
+flask-apscheduler==1.11.0
 flask-mail==0.9.1
