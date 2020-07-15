@@ -67,6 +67,7 @@ celery -A starter.celery worker -l info --pool=solo
 后端flask配置文件路径为`\app\config`，只需要修改静态服务地址`SITE_DOMAIN`（此处我在nginx配置中做了转发，如果不需要则删除nginx配置文件中assets相关配置）。
 worker可以根据自己的资源启动多个，修改compose文件即可。
 flask工程目录下有api服务镜像构建文件`Dockerfile-api`和worker服务镜像构建文件`Dockerfile-worker`，vue工程目录下有前端服务镜像构建文件`Dockerfile`,工程目录下有`docker-compose.yaml`文件,该文件只需要酌情修改端口映射。镜像无需手动执行构建命令构建，服务启动会自动构建。
+<br>
 **服务启动**
 
 ```shell
