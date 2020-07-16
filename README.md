@@ -29,6 +29,7 @@
 ![测试结果详情](https://img-blog.csdnimg.cn/20200715085628153.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM2NDUwNDg0,size_16,color_FFFFFF,t_70#pic_center)
 
 ![mock管理](https://img-blog.csdnimg.cn/20200715173300210.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM2NDUwNDg0,size_16,color_FFFFFF,t_70#pic_center)
+
 ### 系统架构
 ![系统架构图](https://img-blog.csdnimg.cn/20200714182757692.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM2NDUwNDg0,size_16,color_FFFFFF,t_70#pic_center)
 浏览器请求从web前端到api服务后端，包括http请求和socketio请求。api后端服务访问mysql和mongodb数据库对数据增删改查，同时其也作为生产者将任务数据加入到rabbitmq队列中。worker作为消费者连接队列后消费队列数据执行任务，执行过程中操作数据库并请求api服务后端通过websocket连接向前端广播数据。
