@@ -69,7 +69,7 @@ services:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
       - mysql5.7:/var/lib/mysql
-      - ./mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
     networks:
       - easy-test
       

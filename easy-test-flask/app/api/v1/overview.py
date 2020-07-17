@@ -2,6 +2,7 @@ from flask import jsonify
 from lin import route_meta, group_required, login_required
 from lin.redprint import Redprint
 
+from app.libs.error_code import ProjectNotFound
 from app.models.case import Case
 from app.models.mock import Mock
 from app.models.project import Project
@@ -56,5 +57,7 @@ def case_top():
 @login_required
 def project_collect(pid):
     project = Project.query.filter_by(id=pid).first()
+    if not project:
+        raise ProjectNotFound(msg='暂无工程数据')
     return project.collect()
 

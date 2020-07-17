@@ -36,6 +36,12 @@ class ConfigNotFound(APIException):
     error_code = 92002
 
 
+class ProjectNotFound(APIException):
+    code = 404
+    msg = '工程不存在'
+    error_code = 92003
+
+
 class CaseRemoveException(APIException):
     code = 403
     msg = '用例删除失败'
