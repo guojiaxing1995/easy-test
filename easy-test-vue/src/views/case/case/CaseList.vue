@@ -451,6 +451,9 @@ export default {
     },
     handleUploadSuccess() {
       this.$message.success('上传用例成功')
+      this.dialogVisible = false
+      this.page = 1
+      this.getCases()
     },
     async myUpload(content) {
       const formData = new FormData()
