@@ -839,7 +839,7 @@ class Case(Base):
                                                str(row + 1) + '行第' + str(CaseExcelEnum.GROUP.value + 1) + '列')
 
             if Case.query.filter_by(name=name, case_group=case_group.id, delete_time=None).first():
-                raise CaseUploadExcelException('同一组已存在相同用户名，第' +
+                raise CaseUploadExcelException('同一组已存在相同用例名称，第' +
                                                str(row + 1) + '行第' + str(CaseExcelEnum.NAME.value + 1) + '列')
             # 请求地址
             url = excel.get_cell_value(row, CaseExcelEnum.URL.value)
