@@ -114,3 +114,20 @@ class ProjectTypeEnum(Enum):
             cls.RELATION.value: '关联',
             cls.COPY.value: '副本'
         }
+
+
+@unique
+class CaseExcelEnum(Enum):
+    """用例表格枚举类"""
+    NAME = 0
+    GROUP = 1
+    URL = 2
+    METHOD = 3
+    DATA = 4
+    HEADER = 5
+    SUBMIT = 6
+    DEAL = 7
+    CONDITION = 8
+    ASSERTION = 9
+    EXPECTION = 10
+    INFO = 11

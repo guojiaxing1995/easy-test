@@ -23,9 +23,10 @@ from lin.db import db
 from app.libs.case_log import log, edit_log
 from app.libs.deal import deal_default, get_target_value
 from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTypeEnum, CaseAssertEnum, UserAuthEnum, \
-    ProjectTypeEnum
-from app.libs.error_code import CaseRemoveException
+    ProjectTypeEnum, CaseExcelEnum
+from app.libs.error_code import CaseRemoveException, CaseUploadExcelException
 from app.libs.init import mongo
+from app.libs.opreation_excel import OperationExcel
 from app.libs.utils import paging
 from sqlalchemy import text
 
@@ -808,3 +809,119 @@ class Case(Base):
             'total_top': total_top,
             'pass_rate_top': pass_rate
         }
+
+    @classmethod
+    def upload_add(cls, file_path):
+        excel = OperationExcel(file_path)
+        excel.get_table()
+        excel.get_rowNum()
+        excel.get_colNum()
+        if excel.colNum < 12:
+            raise CaseUploadExcelException('上传模板格式错误，请检查')
+        if excel.rowNum <= 1:
+            raise CaseUploadExcelException('用例数据不存在')
+
+        for row in range(1, excel.rowNum):
+            # 用例名称
+            name = excel.get_cell_value(row, CaseExcelEnum.NAME.value)
+            if not name:
+                raise CaseUploadExcelException('用例名称不能为空，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.NAME.value + 1) + '列')
+            # 用例分组
+            group = excel.get_cell_value(row, CaseExcelEnum.GROUP.value)
+            if not group:
+                raise CaseUploadExcelException('分组名称不能为空，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.GROUP.value + 1) + '列')
+            from app.models.CaseGroup import CaseGroup
+            case_group = CaseGroup.query.filter_by(name=group, delete_time=None).first()
+            if not case_group:
+                raise CaseUploadExcelException('分组不存在，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.GROUP.value + 1) + '列')
+
+            if Case.query.filter_by(name=name, case_group=case_group.id, delete_time=None).first():
+                raise CaseUploadExcelException('同一组已存在相同用户名，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.NAME.value + 1) + '列')
+            # 请求地址
+            url = excel.get_cell_value(row, CaseExcelEnum.URL.value)
+            if not url:
+                raise CaseUploadExcelException('URL不能为空，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.URL.value + 1) + '列')
+            # 请求方法
+            method = excel.get_cell_value(row, CaseExcelEnum.METHOD.value)
+            if not method:
+                raise CaseUploadExcelException('请求方法不能为空，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.METHOD.value + 1) + '列')
+            if method == CaseMethodEnum.GET.name:
+                method_code = CaseMethodEnum.GET.value
+            elif method == CaseMethodEnum.POST.name:
+                method_code = CaseMethodEnum.POST.value
+            elif method == CaseMethodEnum.PUT.name:
+                method_code = CaseMethodEnum.PUT.value
+            elif method == CaseMethodEnum.DELETE.name:
+                method_code = CaseMethodEnum.DELETE.value
+            else:
+                raise CaseUploadExcelException('请求方法填写错误，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.METHOD.value + 1) + '列')
+            # 请求体
+            body = excel.get_cell_value(row, CaseExcelEnum.DATA.value)
+            # 请求头
+            header = excel.get_cell_value(row, CaseExcelEnum.HEADER.value)
+            # 请求方式
+            submit = excel.get_cell_value(row, CaseExcelEnum.SUBMIT.value)
+            if not submit:
+                raise CaseUploadExcelException('提交方式不能为空，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.SUBMIT.value + 1) + '列')
+            if submit == CaseSubmitEnum.JSON.name:
+                submit_code = CaseSubmitEnum.JSON.value
+            elif submit == CaseSubmitEnum.FORM.name:
+                submit_code = CaseSubmitEnum.FORM.value
+            else:
+                raise CaseUploadExcelException('提交方式填写错误，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.SUBMIT.value + 1) + '列')
+            # 后置处理
+            deal = excel.get_cell_value(row, CaseExcelEnum.DEAL.value)
+            if not deal:
+                raise CaseUploadExcelException('处理方法不能为空，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.DEAL.value + 1) + '列')
+            if deal == CaseDealEnum.NOT.name:
+                deal_code = CaseDealEnum.NOT.value
+            elif deal == CaseDealEnum.JSON.name:
+                deal_code = CaseDealEnum.JSON.value
+            elif deal == CaseDealEnum.DEFAULT.name:
+                deal_code = CaseDealEnum.DEFAULT.value
+            elif deal == CaseDealEnum.REGULAR.name:
+                deal_code = CaseDealEnum.REGULAR.value
+            else:
+                raise CaseUploadExcelException('处理方法填写错误，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.DEAL.value + 1) + '列')
+            # 处理语句
+            condition = excel.get_cell_value(row, CaseExcelEnum.CONDITION.value)
+            # 断言方式
+            assertion = excel.get_cell_value(row, CaseExcelEnum.ASSERTION.value)
+            if not assertion:
+                raise CaseUploadExcelException('断言方法不能为空，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.ASSERTION.value + 1) + '列')
+            if assertion == CaseAssertEnum.EQUAL.name:
+                assertion_code = CaseAssertEnum.EQUAL.value
+            elif assertion == CaseAssertEnum.NOTEQUAL.name:
+                assertion_code = CaseAssertEnum.NOTEQUAL.value
+            elif assertion == CaseAssertEnum.IN.name:
+                assertion_code = CaseAssertEnum.IN.value
+            elif assertion == CaseAssertEnum.NOTIN.name:
+                assertion_code = CaseAssertEnum.NOTIN.value
+            elif assertion == CaseAssertEnum.SUCCESS.name:
+                assertion_code = CaseAssertEnum.SUCCESS.value
+            else:
+                raise CaseUploadExcelException('断言方法填写错误，第' +
+                                               str(row + 1) + '行第' + str(CaseExcelEnum.ASSERTION.value + 1) + '列')
+            # 期望结果
+            expection = excel.get_cell_value(row, CaseExcelEnum.EXPECTION.value)
+            # 描述
+            info = excel.get_cell_value(row, CaseExcelEnum.INFO.value)
+
+            case = Case(case_group.id, name, info, url, method_code, submit_code, header, body, deal_code, condition,
+                        expection, assertion_code)
+
+            db.session.add(case)
+            db.session.flush()
+        db.session.commit()

@@ -60,6 +60,9 @@
             </el-option>
           </el-select>
         </el-col>
+        <el-col :span="14" >
+          <el-button type="primary" @click="dialogVisible = true">用例上传<i class="el-icon-upload el-icon--right"></i></el-button>
+        </el-col>
       </el-row>
       </div>
       <!-- 列表页面 -->
@@ -199,18 +202,41 @@
           :total="total">
         </el-pagination>
       </div>
+
+      <el-dialog title="用例批量上传" :visible.sync="dialogVisible" width="30%" height="35%">
+        <div style="width:100%;text-align:center">
+          <div>
+            <el-upload
+              :action="UploadUrl()"
+              :multiple="false"
+              with-credentials
+              :on-success="handleUploadSuccess"
+              :limit="1"
+              :on-exceed="handleExceed"
+              :http-request="myUpload"
+              name="file"
+              :file-list="fileList">
+              <el-button  type="primary" plain style="margin:0 30px 20px 0" @click="download()">模板下载</el-button>
+              <el-button type="primary" style="margin:0 0 20px 30px">选择上传</el-button>
+              <div slot="tip" class="el-upload__tip">只能上传xls/xlsx文件，且不超过2M</div>
+            </el-upload>
+          </div>
+        </div>
+      </el-dialog>
+
     </div>
     <!-- 编辑页面 -->
     <case-add-or-edit v-else @editClose="editClose" :editCase="editCase"></case-add-or-edit>
     <!-- 調試框 -->
     <debug-case :case="debugCase" :drawerShow="drawer" :type="type" @closed="drawerClose" :ruleShow="ruleShow"></debug-case>
+
   </div>
 </template>
 
 <script>
 import Utils from 'lin/utils/util'
 
-import { get, _delete } from '@/lin/plugins/axios'
+import { get, post, _delete } from '@/lin/plugins/axios'
 import CaseAddOrEdit from './CaseAddOrEdit'
 import DebugCase from '../../../components/DebugCase'
 
@@ -222,6 +248,8 @@ export default {
   inject: ['eventBus'],
   data() {
     return {
+      fileList: [],
+      dialogVisible: false,
       ruleShow: true,
       debugCase: {
         url: '',
@@ -253,7 +281,7 @@ export default {
         submit: {},
         deal: {},
         assert: {}
-      }
+      },
     }
   },
   activated() {
@@ -412,6 +440,23 @@ export default {
       this.page = val
       this.getCases()
     },
+    download() {
+      window.location.href = `${process.env.VUE_APP_BASE_URL}v1/case/downloadTemplate`
+    },
+    UploadUrl() {
+      return `${process.env.VUE_APP_BASE_URL}v1/case/upload`
+    },
+    handleExceed(files, fileList) {
+      this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
+    },
+    handleUploadSuccess() {
+      this.$message.success('上传用例成功')
+    },
+    async myUpload(content) {
+      const formData = new FormData()
+      formData.append('file', content.file)
+      await post(content.action, formData, { showBackend: true })
+    },
   },
   watch: {
     caseGroup() {
@@ -523,4 +568,8 @@ export default {
   }
 
 }
+.container /deep/ .el-dialog__body {
+  height: 12vh;
+  overflow: auto;
+  }
 </style>

@@ -5,12 +5,15 @@
 @File    : case.py
 @Desc    : 用例视图
 """
-from flask import jsonify, current_app
+import os
+
+from flask import jsonify, current_app, request, send_from_directory, make_response
 from lin import manager
 from lin.exception import NotFound, Success, ParameterException
 from lin.redprint import Redprint
 from lin import route_meta, group_required, login_required
 
+from app.libs.case_uploader import CaseUploader
 from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTypeEnum, CaseAssertEnum
 from app.models.UserAuth import UserAuth
 from app.models.case import Case
@@ -189,3 +192,32 @@ def used_by_project(cid):
     project = case.used_by_project()
 
     return project
+
+
+# 用例批量上传
+@case_api.route('/upload', methods=['POST'])
+@login_required
+def upload_case():
+    config = {
+        'INCLUDE': ['xlsx', 'xls'],
+        'SINGLE_LIMIT': 2048 * 1000,
+        'NUMS': 1,
+        'STORE_DIR': 'app/excel'
+    }
+
+    files = request.files
+    uploader = CaseUploader(files, config)
+    ret = uploader.upload()
+    Case.upload_add(ret[0]['url'])
+    return Success(msg='用例上传成功')
+
+
+# 用例模板下载
+@case_api.route('/downloadTemplate', methods=['GET'])
+# @login_required
+def download_case_template():
+    directory = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))) + '/excel/template'
+    filename = 'caseUploadTemplate.xlsx'
+    response = make_response(send_from_directory(directory, filename, as_attachment=True))
+    return response
+

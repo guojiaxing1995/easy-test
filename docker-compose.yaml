@@ -67,6 +67,7 @@ services:
       - 3306
     environment:
       - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=easy-test
     volumes:
       - mysql5.7:/var/lib/mysql
       - ./mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
