@@ -39,12 +39,16 @@
       <el-row v-show="resultShow">
         <el-col :lg="16" :md="20" :sm="24" :xs="24">
           <el-form label-position="left" inline class="demo-table-expand" :model="detail">
-            <el-form-item label="状态码">
+            <el-form-item label="状态码" v-if="detail.result.statusCode">
               <el-tag v-if="detail.result.statusCode>=400" type="danger">{{detail.result.statusCode}}</el-tag>
               <el-tag v-else type="success">{{detail.result.statusCode}}</el-tag>
             </el-form-item>
-            <el-form-item label="响应时间">
+            <el-form-item label="状态码" v-else>
+            </el-form-item>
+            <el-form-item label="响应时间" v-if="detail.result.totalSeconds">
               {{ detail.result.totalSeconds }} 秒
+            </el-form-item>
+            <el-form-item label="响应时间" v-else>
             </el-form-item>
             <el-form-item label="响应头" v-if="detail.result.headers">
               <pre>{{ detail.result.headers }}</pre>
