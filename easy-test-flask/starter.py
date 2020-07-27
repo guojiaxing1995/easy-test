@@ -6,7 +6,9 @@ from app.app import create_app
 
 from app.libs.init import celery
 
+# 开发环境
 app = create_app(environment='development')
+# 生产环境
 # app = create_app()
 
 celery.conf.update(imports='app.libs.tasks')

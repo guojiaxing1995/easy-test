@@ -31,7 +31,7 @@ class ConfigCopy(Base):
                      comment='请求方法 ;  1 -> get |  2 -> post |  3 -> put |  4-> delete')
     _submit = Column('submit', SmallInteger, nullable=False, comment='提交方法 ;  1 -> json提交 |  2 -> 表单提交')
     header = Column(String(500), comment='请求头')
-    data = Column(String(500), comment='请求体')
+    data = Column(String(3000), comment='请求体')
     _deal = Column('deal', SmallInteger, nullable=False,
                    comment='后置处理方法 ;  1 -> 不做处理 |  2 -> 默认处理 |  3 -> 指定key获取数据 |  4-> 正则表达')
     condition = Column(String(50), comment='后置处理方法的条件语句，在后置处理方法为指定key或正则表达时为必填')

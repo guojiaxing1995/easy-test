@@ -42,7 +42,7 @@ class Case(Base):
                      comment='请求方法 ;  1 -> get |  2 -> post |  3 -> put |  4-> delete')
     _submit = Column('submit', SmallInteger, nullable=False, comment='提交方法 ;  1 -> json提交 |  2 -> 表单提交')
     header = Column(String(500), comment='请求头')
-    data = Column(String(500), comment='请求体')
+    data = Column(String(3000), comment='请求体')
     _deal = Column('deal', SmallInteger, nullable=False,
                    comment='后置处理方法 ;  1 -> 不做处理 |  2 -> 默认处理 |  3 -> 指定key获取数据 |  4-> 正则表达')
     condition = Column(String(50), comment='后置处理方法的条件语句，在后置处理方法为指定key或正则表达时为必填')
@@ -281,9 +281,10 @@ class Case(Base):
 
     # 拼接请求地址
     def stitch_url(self, server):
-        self.url = server + self.url
+        if 'http' not in server:
+            server = 'http://' + server
         if 'http' not in self.url:
-            self.url = 'http://' + self.url
+            self.url = server + self.url
 
     # 找到${var} 替换变量的值
     # re.search(r'\${(.*)\}','/v1/${job}o').group(0)  '${job}' |  re.search(r'\${(.*)\}','/v1/${job}o').group(1)  'job'
@@ -291,7 +292,12 @@ class Case(Base):
         # url 处理
         url_var = re.search(r'\${(.*)\}', self.url)
         if url_var:
-            var = var_dick[url_var.group(1)]
+            try:
+                var = var_dick[url_var.group(1)]
+            except Exception:
+                # 如果变量不在全局字典中则赋值变量为 ''
+                current_app.logger.debug('变量【' + url_var.group(1) + '】不在工程全局字典中')
+                var = ''
             self.url = self.url.replace(url_var.group(0), str(var))
         # header 处理
         if self.header:
@@ -299,14 +305,24 @@ class Case(Base):
                 if type(value) == str:
                     header_var = re.search(r'\${(.*)\}', value)
                     if header_var:
-                        self.header[key] = var_dick[header_var.group(1)]
+                        try:
+                            self.header[key] = var_dick[header_var.group(1)]
+                        except Exception:
+                            # 如果变量不在全局字典中则赋值变量为 None
+                            current_app.logger.debug('变量【' + header_var.group(1) + '】不在工程全局字典中')
+                            self.header[key] = None
         # data 处理
         if self.data:
             for key, value in self.data.items():
                 if type(value) == str:
                     data_var = re.search(r'\${(.*)\}', value)
                     if data_var:
-                        self.data[key] = var_dick[data_var.group(1)]
+                        try:
+                            self.data[key] = var_dick[data_var.group(1)]
+                        except Exception:
+                            # 如果变量不在全局字典中则赋值变量为 None
+                            current_app.logger.debug('变量【' + data_var.group(1) + '】不在工程全局字典中')
+                            self.data[key] = None
 
     # 后置处理
     def return_deal(self, var_dick, interface_return):
@@ -453,7 +469,7 @@ class Case(Base):
             'body': body,
             'text': res.text,
             'headers': res.headers,
-            'cookies': res.cookies,
+            # 'cookies': res.cookies,
             'encoding': res.encoding,
             'totalSeconds': res.elapsed.total_seconds()
         }
@@ -803,7 +819,7 @@ class Case(Base):
                 break
 
         if len(pass_rate) > 10:
-            pass_rate = pass_rate[11]
+            pass_rate = pass_rate[0:10]
 
         return {
             'total_top': total_top,
