@@ -81,7 +81,7 @@
                   width="500"
                   trigger="click">
                   <!-- 编辑 -->
-                  <project-case-edit :caseDate="element" :caseTypeCode="type" :projectId="selectProject"></project-case-edit>
+                  <project-case-edit :caseDate="element" :caseTypeCode="type" :projectId="selectProject" @editResult="editResult"></project-case-edit>
                   <i slot="reference" class="el-icon-edit-outline" v-show="currentProject.type === 2"></i>
                 </el-popover>
                 <!-- 调试 -->
@@ -267,6 +267,10 @@ export default {
     // 关闭调试框后父组件修改状态
     drawerClose() {
       this.drawer = false
+    },
+    // 子组件修改成功通知父组件刷新列表
+    editResult() {
+      this.getProjectConfig()
     },
   },
   watch: {

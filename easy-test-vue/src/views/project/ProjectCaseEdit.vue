@@ -128,6 +128,7 @@ export default {
             this.loading = false
             if (res.error_code === 0) {
               this.$message.success(`${res.msg}`)
+              this.$emit('editResult')
             } else {
               this.$message.error(`${res.msg}`)
             }
