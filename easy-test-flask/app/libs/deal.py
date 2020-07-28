@@ -1,18 +1,14 @@
-import json
-import re
-
-
-# var_dick  变量字典  data  被处理的数据
+# var_dick  变量字典 , data  被处理的数据, target_key 要找的目标key, new_key 赋值的新key, true_key  真实key,用来判断和目标key是否相等
 def deal_default(var_dick, data, target_key=None, new_key=None, true_key=None):
     if type(data) == list:
         for i in data:
             deal_default(var_dick, i, target_key, new_key)
     if type(data) == dict:
         for key, value in data.items():
-            if type(value) == str or type(value) == int or type(value) == bool:
-                var_dick[key] = value
-            if type(value) == dict:
+            if type(value) == bool or type(value) == int or type(value) == str:
                 deal_default(var_dick, value, target_key, new_key, key)
+            if type(value) == dict:
+                deal_default(var_dick, value, target_key, new_key)
             if type(value) == list:
                 for i in value:
                     deal_default(var_dick, i, target_key, new_key)
@@ -32,6 +28,8 @@ def deal_default(var_dick, data, target_key=None, new_key=None, true_key=None):
                     var_dick[new_key] = data
                 else:
                     var_dick[true_key] = data
+        else:
+            var_dick[true_key] = data
     if type(data) is None:
         if target_key:
             if target_key == true_key:
@@ -39,6 +37,8 @@ def deal_default(var_dick, data, target_key=None, new_key=None, true_key=None):
                     var_dick[new_key] = data
                 else:
                     var_dick[true_key] = data
+        else:
+            var_dick[true_key] = data
     if type(data) == bool:
         if target_key:
             if target_key == true_key:
@@ -46,6 +46,8 @@ def deal_default(var_dick, data, target_key=None, new_key=None, true_key=None):
                     var_dick[new_key] = data
                 else:
                     var_dick[true_key] = data
+        else:
+            var_dick[true_key] = data
 
     return var_dick
 

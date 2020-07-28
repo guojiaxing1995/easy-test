@@ -335,7 +335,10 @@ class Case(Base):
                 # 目标key
                 target_key = item.split(',')[0]
                 # 新key
-                new_key = item.split(',')[1]
+                if len(item.split(',')) > 1:
+                    new_key = item.split(',')[1]
+                else:
+                    new_key = None
                 var_dick = deal_default(var_dick, interface_return, target_key, new_key)
         # condition  'pattern,key  pattern,key'
         elif self.deal == CaseDealEnum.REGULAR.value:
