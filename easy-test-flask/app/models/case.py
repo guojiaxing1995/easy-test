@@ -323,6 +323,31 @@ class Case(Base):
                             # 如果变量不在全局字典中则赋值变量为 None
                             current_app.logger.debug('变量【' + data_var.group(1) + '】不在工程全局字典中')
                             self.data[key] = None
+                # 处理value为列表的情况
+                if type(value) == list:
+                    for i in range(len(value)):
+                        if type(value[i]) == str:
+                            data_var = re.search(r'\${(.*)\}', value[i])
+                            if data_var:
+                                try:
+                                    self.data[key][i] = var_dick[data_var.group(1)]
+                                except Exception:
+                                    # 如果变量不在全局字典中则赋值变量为 None
+                                    current_app.logger.debug('变量【' + data_var.group(1) + '】不在工程全局字典中')
+                                    self.data[key][i] = None
+
+                # 处理value为字典的情况
+                if type(value) == dict:
+                    for key_second, value_second in value.items():
+                        if type(value_second) == str:
+                            data_var = re.search(r'\${(.*)\}', value_second)
+                            if data_var:
+                                try:
+                                    self.data[key][key_second] = var_dick[data_var.group(1)]
+                                except Exception:
+                                    # 如果变量不在全局字典中则赋值变量为 None
+                                    current_app.logger.debug('变量【' + data_var.group(1) + '】不在工程全局字典中')
+                                    self.data[key][key_second] = None
 
     # 后置处理
     def return_deal(self, var_dick, interface_return):
