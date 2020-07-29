@@ -13,19 +13,19 @@ class DevelopmentSecure(BaseConfig):
     """
     开发环境安全性配置
     """
-    SQLALCHEMY_DATABASE_URI = 'mysql+cymysql://root:root@www.guojiaxing.red:8081/easy-test'
+    SQLALCHEMY_DATABASE_URI = 'mysql+cymysql://root:root@127.0.0.1:8081/easy-test'
 
     SQLALCHEMY_ECHO = False
 
     SECRET_KEY = '\x88W\xf09\x91\x07\x98\x85\x87\x96\xb0A\xc68\xf9\xecJJU\x12\xc5V\xbe\x8b\xef\xd7\xd8\xd3\xe6\x95*6'
 
-    MONGO_URI = 'mongodb://root:mongo2020@www.guojiaxing.red:8090/easyTest?authSource=admin'
+    MONGO_URI = 'mongodb://root:mongo2020@127.0.0.1:8090/easyTest?authSource=admin'
 
-    CELERY_BROKER_URL = 'amqp://admin:ftlb2000@www.guojiaxing.red:8083/my_vhost'
+    CELERY_BROKER_URL = 'amqp://admin:ftlb2000@127.0.0.1:8083/my_vhost'
 
     # scheduler
     SCHEDULER_JOBSTORES = {
-        'default': MongoDBJobStore(host='www.guojiaxing.red', port=8090, username='root', password='mongo2020')
+        'default': MongoDBJobStore(host='127.0.0.1', port=8090, username='root', password='mongo2020')
     }
 
     # mail
@@ -33,9 +33,9 @@ class DevelopmentSecure(BaseConfig):
     MAIL_PORT = 465
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
-    MAIL_DEFAULT_SENDER = '15234093915@sina.cn'
-    MAIL_USERNAME = '15234093915@sina.cn'
-    MAIL_PASSWORD = '1353a7a662f4e7fb'
+    MAIL_DEFAULT_SENDER = '23456789@sina.cn'
+    MAIL_USERNAME = '23456789@sina.cn'
+    MAIL_PASSWORD = 'sdf62f4e7fb'
 
     # mock server
     MOCK_SERVER = 'http://127.0.0.1:5000'
@@ -78,4 +78,4 @@ class ProductionSecure(BaseConfig):
 
     API_SERVER = 'http://api:5000'
 
-    SITE_DOMAIN = 'https://www.guojiaxing.red'
+    SITE_DOMAIN = 'http://127.0.0.1'
