@@ -37,6 +37,19 @@ class DevelopmentConfig(BaseConfig):
                 'allowed_extensions': ['jpg', 'gif', 'png', 'bmp']}
     }
 
+    SCHEDULER_EXECUTORS = {
+        'default': {'type': 'threadpool', 'max_workers': 20}
+    }
+    SCHEDULER_JOB_DEFAULTS = {
+        'coalesce': True,  # 累计的 任务是否执行。True不执行，False,执行
+        'max_instances': 30,  # 同一个任务在线程池中最多跑的实例数
+        'misfire_grace_time': 600  # 超过用户设定的时间范围外，该任务依旧执行的时间(单位时间s)
+    }
+
+    SCHEDULER_TIMEZONE = 'Asia/Shanghai'
+
+    SCHEDULER_API_ENABLED = True
+
 
 class ProductionConfig(BaseConfig):
     """
@@ -56,3 +69,17 @@ class ProductionConfig(BaseConfig):
                 'bucket_name': 'not complete', 'upload_folder': 'app',
                 'allowed_extensions': ['jpg', 'gif', 'png', 'bmp']}
     }
+
+    SCHEDULER_EXECUTORS = {
+        'default': {'type': 'threadpool', 'max_workers': 20}
+    }
+    SCHEDULER_JOB_DEFAULTS = {
+        'coalesce': True,  # 累计的 任务是否执行。True不执行，False,执行
+        'max_instances': 30,  # 同一个任务在线程池中最多跑的实例数
+        'misfire_grace_time': 600  # 超过用户设定的时间范围外，该任务依旧执行的时间(单位时间s)
+    }
+
+    # Etc/UTC
+    SCHEDULER_TIMEZONE = 'Asia/Shanghai'
+
+    SCHEDULER_API_ENABLED = True

@@ -2,14 +2,22 @@
     :copyright: © 2019 by the Lin team.
     :license: MIT, see LICENSE for more details.
 """
+import sys
 from app.app import create_app
 
 from app.libs.init import celery
 
-# 开发环境
-app = create_app(environment='development')
-# 生产环境
-# app = create_app()
+app = None
+environment = None
+env_param = [i for i in sys.argv if i.startswith('--env') or i.startswith('--host')]
+if env_param:
+    environment = env_param[0].split('=')[1]
+if not environment or environment == 'dev':
+    # 开发环境
+    app = create_app(environment='development')
+elif environment == 'prod':
+    # 生产环境
+    app = create_app()
 
 celery.conf.update(imports='app.libs.tasks')
 

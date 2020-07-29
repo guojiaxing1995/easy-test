@@ -12,4 +12,4 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shangh
 
 RUN ["pip", "install", "-i", "https://pypi.tuna.tsinghua.edu.cn/simple", "-r", "requirements.txt"]
 
-CMD ["celery", "-A", "starter.celery", "worker", "-l", "info", "--pool=solo", "-f", "logs/celery.log"]
+CMD ["celery", "-A", "starter.celery", "worker", "-l", "info", "--pool=solo", "-f", "logs/celery.log", "--host=prod"]
