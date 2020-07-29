@@ -69,9 +69,9 @@ class ProductionSecure(BaseConfig):
     MAIL_PORT = 465
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
-    MAIL_DEFAULT_SENDER = '15234093915@sina.cn'
-    MAIL_USERNAME = '15234093915@sina.cn'
-    MAIL_PASSWORD = '1353a7a662f4e7fb'
+    MAIL_DEFAULT_SENDER = '12345675@sina.cn'
+    MAIL_USERNAME = '15234xxxxx15@sina.cn'
+    MAIL_PASSWORD = '63xx7a66xx7fb'
 
     # mock server
     MOCK_SERVER = 'http://api:5000'
