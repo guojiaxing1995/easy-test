@@ -28,17 +28,6 @@ class DevelopmentSecure(BaseConfig):
         'default': MongoDBJobStore(host='ip', port=27017, username='root', password='root')
     }
 
-    SCHEDULER_EXECUTORS = {
-        'default': {'type': 'threadpool', 'max_workers': 20}
-    }
-    SCHEDULER_JOB_DEFAULTS = {
-        'coalesce': True,  # 累计的 任务是否执行。True不执行，False,执行
-        'max_instances': 30,  # 同一个任务在线程池中最多跑的实例数
-        'misfire_grace_time': 600  # 超过用户设定的时间范围外，该任务依旧执行的时间(单位时间s)
-    }
-
-    SCHEDULER_API_ENABLED = True
-
     # mail
     MAIL_SERVER = 'smtp.sina.cn'
     MAIL_PORT = 465
@@ -74,17 +63,6 @@ class ProductionSecure(BaseConfig):
     SCHEDULER_JOBSTORES = {
         'default': MongoDBJobStore(host='mongo', port=27017, username='root', password='mongo2020')
     }
-
-    SCHEDULER_EXECUTORS = {
-        'default': {'type': 'threadpool', 'max_workers': 20}
-    }
-    SCHEDULER_JOB_DEFAULTS = {
-        'coalesce': True,  # 累计的 任务是否执行。True不执行，False,执行
-        'max_instances': 30,  # 同一个任务在线程池中最多跑的实例数
-        'misfire_grace_time': 600  # 超过用户设定的时间范围外，该任务依旧执行的时间(单位时间s)
-    }
-
-    SCHEDULER_API_ENABLED = True
 
     # mail
     MAIL_SERVER = 'smtp.sina.cn'
