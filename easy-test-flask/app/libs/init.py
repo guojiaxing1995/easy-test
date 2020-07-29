@@ -1,4 +1,6 @@
 import logging
+
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask_mail import Mail
 from flask_apscheduler import APScheduler
 from flask_celery import Celery
@@ -16,7 +18,7 @@ socket_io = SocketIO()
 celery = Celery()
 
 # 集成flask_apscheduler
-scheduler = APScheduler()
+scheduler = APScheduler(BackgroundScheduler(timezone='Asia/Shanghai'))
 # apscheduler日志
 # logging.basicConfig()
 # logging.getLogger('apscheduler').setLevel(logging.DEBUG)
