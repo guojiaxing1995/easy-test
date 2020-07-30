@@ -54,6 +54,12 @@ class CaseUploadExcelException(APIException):
     error_code = 93002
 
 
+class CaseDownloadException(APIException):
+    code = 400
+    msg = '用例导出数据异常'
+    error_code = 93003
+
+
 class RecordRemoveException(APIException):
     code = 403
     msg = '运行记录删除失败'

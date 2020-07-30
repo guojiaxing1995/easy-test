@@ -60,7 +60,10 @@
             </el-option>
           </el-select>
         </el-col>
-        <el-col :span="14" >
+        <el-col :span="6" >
+          <el-button type="primary" @click="caseDownload">用例下载<i class="el-icon-download el-icon--right"></i></el-button>
+        </el-col>
+        <el-col :span="7" >
           <el-button type="primary" @click="dialogVisible = true">用例上传<i class="el-icon-upload el-icon--right"></i></el-button>
         </el-col>
       </el-row>
@@ -423,6 +426,62 @@ export default {
             message: `${res.msg}`,
           })
         }
+      })
+    },
+    caseDownload() {
+      this.$confirm('将按当前查询条件导出用例, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info',
+      }).then(async () => {
+        if (this.datetime) {
+          [this.startTime, this.endTime] = this.datetime
+        } else {
+          this.startTime = null
+          this.endTime = null
+        }
+        let methodPara = null
+        let dealPara = null
+        if (this.method) {
+          methodPara = parseInt(this.method, 10)
+        }
+        if (this.deal) {
+          dealPara = parseInt(this.deal, 10)
+        }
+        this.$axios({
+          baseURL: `${process.env.VUE_APP_BASE_URL}`,
+          url: '/v1/case/caseDownload',
+          method: 'get',
+          responseType: 'blob',
+          params: {
+            caseGroup: this.caseGroup,
+            name: this.name,
+            method: methodPara,
+            deal: dealPara,
+            url: this.url,
+            start: this.startTime,
+            end: this.endTime,
+            handleError: true
+          }
+        }).then(res => {
+          const fileName = 'cases.xls'
+          const blob = new Blob([res])
+          const link = document.createElement('a')
+          link.download = fileName
+          link.style.display = 'none'
+          link.href = URL.createObjectURL(blob)
+          document.body.appendChild(link)
+          link.click()
+          URL.revokeObjectURL(link.href)
+          document.body.removeChild(link)
+        }).catch(error => {
+          const reader = new FileReader()
+          reader.readAsText(error.data, 'utf-8')
+          reader.onload = e => {
+            this.$message.warning(JSON.parse(reader.result).msg)
+            console.log(e.target.result)
+          }
+        })
       })
     },
     handleDebug(index, row) {

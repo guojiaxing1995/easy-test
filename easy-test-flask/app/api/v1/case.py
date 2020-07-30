@@ -214,10 +214,26 @@ def upload_case():
 
 # 用例模板下载
 @case_api.route('/downloadTemplate', methods=['GET'])
-# @login_required
 def download_case_template():
     directory = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))) + '/excel/template'
     filename = 'caseUploadTemplate.xlsx'
     response = make_response(send_from_directory(directory, filename, as_attachment=True))
     return response
 
+
+# 用例下载
+@case_api.route('/caseDownload', methods=['GET'])
+@login_required
+def case_download():
+    form = CaseSearchForm().validate_for_api()
+    # 查询用例
+    search_result = Case.case_download_search(form.name.data, form.url.data, form.caseGroup.data, form.start.data,
+                                              form.end.data, form.id.data, form.method.data, form.deal.data)
+    # 复制模板
+    download_file_path, directory, filename = Case.copy_excel_template()
+    # 写入用例
+    Case.write_case_excel(search_result, download_file_path)
+    # 下载
+    response = make_response(send_from_directory(directory, filename, as_attachment=True))
+
+    return response

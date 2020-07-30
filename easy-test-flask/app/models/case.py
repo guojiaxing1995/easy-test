@@ -7,6 +7,8 @@
 """
 import math
 import operator
+import os
+import shutil
 import time
 from datetime import datetime
 import json
@@ -24,7 +26,7 @@ from app.libs.case_log import log, edit_log
 from app.libs.deal import deal_default, get_target_value
 from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTypeEnum, CaseAssertEnum, UserAuthEnum, \
     ProjectTypeEnum, CaseExcelEnum
-from app.libs.error_code import CaseRemoveException, CaseUploadExcelException
+from app.libs.error_code import CaseRemoveException, CaseUploadExcelException, CaseDownloadException
 from app.libs.init import mongo
 from app.libs.opreation_excel import OperationExcel
 from app.libs.utils import paging
@@ -969,3 +971,71 @@ class Case(Base):
             db.session.add(case)
             db.session.flush()
         db.session.commit()
+
+    @classmethod
+    def case_download_search(cls, name, url, case_group, start, end, cid, method, deal):
+        # auths = UserAuth.query.filter_by(user_id=current_user.id, _type=UserAuthEnum.GROUP.value).all()
+        # gids = [auth.auth_id for auth in auths]
+        from app.models.CaseGroup import CaseGroup
+        results = cls.query.join(CaseGroup, CaseGroup.id == cls.case_group). \
+            join(manager.user_model, manager.user_model.id == cls.create_user).filter(
+            cls.id == cid if cid else '',
+            cls._method == method if method else '',
+            cls._deal == deal if deal else '',
+            cls.case_group == case_group if case_group else '',
+            cls.name.like(f'%{name}%') if name is not None else '',
+            cls.url.like(f'%{url}%') if url is not None else '',
+            cls._update_time.between(start, end) if start and end else '',
+            # cls.case_group.in_(gids) if current_user.id != 1 else '',
+            cls.delete_time == None,
+        ).with_entities(
+            cls.name,
+            CaseGroup.name.label('group_name'),
+            cls.url,
+            cls._method.label('method'),
+            cls.data,
+            cls.header,
+            cls._submit.label('submit'),
+            cls._deal.label('deal'),
+            cls.condition,
+            cls._assertion.label('assertion'),
+            cls.expect.label('expect'),
+            cls.info,
+        ).order_by(
+            text('Case.update_time desc')
+        ).all()
+
+        if len(results) == 0:
+            raise CaseDownloadException('无导出数据')
+        elif len(results) > 300:
+            raise CaseDownloadException('导出用例条数过大，导出用例数需小于300条')
+
+        return results
+
+    @staticmethod
+    def copy_excel_template():
+        directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/excel/template'
+        template_filename = 'caseUploadTemplate.xlsx'
+        download_filename = 'caseDownload_' + str(int(round(time.time()) * 1000)) + '.xls'
+        # 复制用例下载模板作为被写入的文件
+        shutil.copyfile(directory + '/' + template_filename, directory + '/' + download_filename)
+
+        return directory + '/' + download_filename, directory, download_filename
+
+    @classmethod
+    def write_case_excel(cls, cases, file_path):
+        excel = OperationExcel(file_path)
+        excel.get_sheet_write()
+        for row in range(len(cases)):
+            for col in range(len(cases[row])):
+                if col == CaseExcelEnum.METHOD.value:
+                    excel.write_execel(row+1, col, CaseMethodEnum(cases[row][col]).name)
+                elif col == CaseExcelEnum.SUBMIT.value:
+                    excel.write_execel(row+1, col, CaseSubmitEnum(cases[row][col]).name)
+                elif col == CaseExcelEnum.DEAL.value:
+                    excel.write_execel(row+1, col, CaseDealEnum(cases[row][col]).name)
+                elif col == CaseExcelEnum.ASSERTION.value:
+                    excel.write_execel(row+1, col, CaseAssertEnum(cases[row][col]).name)
+                else:
+                    excel.write_execel(row+1, col, cases[row][col])
+        excel.write_save()

@@ -31,3 +31,4 @@ flask-celery-helper==1.1.0
 flask-apscheduler==1.11.0
 flask-mail==0.9.1
 xlrd==1.2.0
+xlutils==2.0.0
