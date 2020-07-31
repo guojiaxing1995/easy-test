@@ -57,7 +57,7 @@ def get_target_value(data, target_key):
     target_value = None
     if type(data) == list:
         for i in data:
-            deal_default(i, target_key)
+            get_target_value(i, target_key)
     if type(data) == dict:
         for key, value in data.items():
             if key == target_key:

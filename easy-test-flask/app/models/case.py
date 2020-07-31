@@ -6,7 +6,6 @@
 @Desc    : 测试用例模型
 """
 import math
-import operator
 import os
 import shutil
 import time
@@ -504,7 +503,6 @@ class Case(Base):
             'totalSeconds': res.elapsed.total_seconds()
         }
         self.result = result
-
         return result
 
     # 用例调试
