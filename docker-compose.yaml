@@ -17,6 +17,8 @@ services:
       - 8085:5000
     volumes:
       - ./logs/api/:/easy-test-flask/logs/
+      - ./static/assets/:/easy-test-flask/app/assets/
+      - ./static/excel:/easy-test-flask/app/excel/upload/
       
   worker1:
     build: 

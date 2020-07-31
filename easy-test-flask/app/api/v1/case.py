@@ -202,7 +202,7 @@ def upload_case():
         'INCLUDE': ['xlsx', 'xls'],
         'SINGLE_LIMIT': 2048 * 1000,
         'NUMS': 1,
-        'STORE_DIR': 'app/excel'
+        'STORE_DIR': 'app/excel/upload'
     }
 
     files = request.files
