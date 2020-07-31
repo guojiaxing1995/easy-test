@@ -974,8 +974,8 @@ class Case(Base):
 
     @classmethod
     def case_download_search(cls, name, url, case_group, start, end, cid, method, deal):
-        # auths = UserAuth.query.filter_by(user_id=current_user.id, _type=UserAuthEnum.GROUP.value).all()
-        # gids = [auth.auth_id for auth in auths]
+        auths = UserAuth.query.filter_by(user_id=current_user.id, _type=UserAuthEnum.GROUP.value).all()
+        gids = [auth.auth_id for auth in auths]
         from app.models.CaseGroup import CaseGroup
         results = cls.query.join(CaseGroup, CaseGroup.id == cls.case_group). \
             join(manager.user_model, manager.user_model.id == cls.create_user).filter(
@@ -986,7 +986,7 @@ class Case(Base):
             cls.name.like(f'%{name}%') if name is not None else '',
             cls.url.like(f'%{url}%') if url is not None else '',
             cls._update_time.between(start, end) if start and end else '',
-            # cls.case_group.in_(gids) if current_user.id != 1 else '',
+            cls.case_group.in_(gids) if current_user.id != 1 else '',
             cls.delete_time == None,
         ).with_entities(
             cls.name,
