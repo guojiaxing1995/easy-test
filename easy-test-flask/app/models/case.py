@@ -1012,13 +1012,16 @@ class Case(Base):
 
     @staticmethod
     def copy_excel_template():
-        directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/excel/template'
+        template_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/excel/template'
+        download_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/excel/download'
+        if not os.path.exists(download_directory):
+            os.makedirs(download_directory)
         template_filename = 'caseUploadTemplate.xlsx'
         download_filename = 'caseDownload_' + str(int(round(time.time()) * 1000)) + '.xls'
         # 复制用例下载模板作为被写入的文件
-        shutil.copyfile(directory + '/' + template_filename, directory + '/' + download_filename)
+        shutil.copyfile(template_directory + '/' + template_filename, download_directory + '/' + download_filename)
 
-        return directory + '/' + download_filename, directory, download_filename
+        return download_directory + '/' + download_filename, download_directory, download_filename
 
     @classmethod
     def write_case_excel(cls, cases, file_path):
