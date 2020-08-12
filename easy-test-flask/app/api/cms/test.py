@@ -96,7 +96,7 @@ def test_c():
     return jsonify({
         "address_new": address,
         "age": 10
-    })
+    }), 205, {}
 
 
 @test_api.route('/d', methods=['DELETE'])

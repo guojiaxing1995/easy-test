@@ -430,7 +430,7 @@ class Case(Base):
                 self.actual_result = False
                 self.reason = '实际结果在预期结果中'
         elif self.assertion == CaseAssertEnum.SUCCESS.value:
-            if self.result['statusCode'] == 200:
+            if 200 <= self.result['statusCode'] < 300:
                 self.actual_result = True
             else:
                 self.actual_result = False
