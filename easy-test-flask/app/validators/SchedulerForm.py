@@ -10,6 +10,8 @@ class SchedulerForm(Form):
     sendEmail = BooleanField(validators=[Optional()])
     copyPerson = StringField(length(max=50, message='抄送人需小于50字符'), validators=[Optional()])
     cron = StringField(length(max=30, message='cron表达式需小于30字符'), validators=[DataRequired(message='请输入cron表达式')])
+    # 邮件发送策略
+    emailStrategy = IntegerField(default=1)
 
 
 class SchedulerEditForm(Form):
@@ -17,6 +19,8 @@ class SchedulerEditForm(Form):
     sendEmail = BooleanField(validators=[Optional()])
     copyPerson = StringField(length(max=50, message='抄送人需小于50字符'), validators=[Optional()])
     cron = StringField(length(max=30, message='cron表达式需小于30字符'), validators=[DataRequired(message='请输入cron表达式')])
+    # 邮件发送策略
+    emailStrategy = IntegerField(default=1)
 
 
 class SchedulerSearchForm(Form):

@@ -39,6 +39,9 @@ class ProjectForm(Form):
     # 是否发送邮件
     sendEmail = BooleanField(validators=[Optional()])
 
+    # 邮件发送策略
+    emailStrategy = IntegerField(default=1)
+
     # 邮件抄送人
     copyPerson = StringField(length(max=50, message='抄送人需小于50字符'), validators=[Optional()])
 

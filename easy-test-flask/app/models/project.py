@@ -9,7 +9,7 @@ from lin.exception import NotFound, ParameterException, UnknownException, Forbid
 from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, String, SmallInteger, Boolean, text
 
-from app.libs.enums import UserAuthEnum, ProjectTypeEnum
+from app.libs.enums import UserAuthEnum, ProjectTypeEnum, EmailStrategyEnum
 from app.libs.error_code import ProjectConfigException
 from app.libs.init import socket_io
 from app.libs.utils import paging
@@ -29,6 +29,8 @@ class Project(Base):
     progress = Column(Integer, default=0, comment='运行进度')
     user = Column(Integer, nullable=False, comment='维护人员')
     send_email = Column(Boolean, nullable=False, default=True, comment='是否发送邮件')
+    _email_strategy = Column('email_strategy', SmallInteger, nullable=False, comment='邮件发送策略; 1 -> 总是发送 | '
+                                                                                     '2 -> 成功时发送 | 3 ''->失败时发送')
     copy_person = Column(String(50), comment='邮件抄送人员')
 
     @property
@@ -38,6 +40,14 @@ class Project(Base):
     @type.setter
     def type(self, typeEnum):
         self._type = typeEnum.value
+
+    @property
+    def email_strategy(self):
+        return EmailStrategyEnum(self._email_strategy).value
+
+    @email_strategy.setter
+    def email_strategy(self, strategyEnum):
+        self._email_strategy = strategyEnum.value
 
     @classmethod
     def new_project(cls, form):
@@ -56,6 +66,7 @@ class Project(Base):
             project.user = form.user.data
             project.running = False
             project.send_email = form.sendEmail.data
+            project.email_strategy = EmailStrategyEnum(form.emailStrategy.data)
             project.copy_person = form.copyPerson.data
             db.session.add(project)
             db.session.flush()
@@ -111,6 +122,7 @@ class Project(Base):
             cls.header,
             cls.info,
             cls._type.label('type'),
+            cls._email_strategy.label('email_strategy'),
             cls.running,
             cls.progress,
             cls.user,
@@ -187,6 +199,7 @@ class Project(Base):
                 project.header = form.header.data
                 project.info = form.info.data
                 project.send_email = form.sendEmail.data
+                project.email_strategy = EmailStrategyEnum(form.emailStrategy.data)
                 project.copy_person = form.copyPerson.data
                 # 维护人
                 project.user = form.user.data

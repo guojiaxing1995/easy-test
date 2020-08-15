@@ -106,6 +106,7 @@
       :append-to-body="true"
       :visible.sync="dialogFormVisible"
       :before-close="handleClose"
+      top="5vh"
       class="groupListInfoDialog"
     >
       <div style="margin-top:-25px;">
@@ -155,6 +156,13 @@
               <el-form-item label="发送邮件" prop="sendEmail">
                 <el-switch v-model="form.sendEmail"></el-switch>
               </el-form-item>
+            <el-form-item label="邮件策略" v-if="form.sendEmail">
+              <el-radio-group v-model="form.emailStrategy">
+                <label v-for="(val,key) in strategy" :key="key" class="el-radio">
+                  <el-radio :label="key">{{val}}</el-radio>
+                </label>
+              </el-radio-group>
+            </el-form-item>
               <el-form-item label="抄送人员" prop="copyPerson">
                 <el-cascader
                   style="width:60%"
@@ -217,6 +225,7 @@ export default {
         users: [],
         type: '1',
         sendEmail: true,
+        emailStrategy: '3',
         // 维护人
         user: null,
         copyPerson: [],
@@ -227,6 +236,13 @@ export default {
       groupUsers: [], // 拥有的分组权限
       loading: false,
       editLoading: false,
+      strategy: {
+        1: '总是发送',
+        2: '成功发送',
+        3: '失败发送',
+      },
+      total: 0,
+      page: 1,
       activeTab: '修改信息', // tab 标题
       rules: {
         server: [
@@ -346,6 +362,7 @@ export default {
               users: this.form.users,
               type: this.form.type,
               sendEmail: this.form.sendEmail,
+              emailStrategy: parseInt(this.form.emailStrategy, 10),
               user: this.form.user[1],
               copyPerson: this.copyPersonDeal(),
             }, { showBackend: true })
@@ -378,6 +395,7 @@ export default {
       this.form.server = val.server
       this.form.header = val.header
       this.form.type = val.type.toString()
+      this.form.emailStrategy = val.email_strategy.toString()
       this.form.sendEmail = val.send_email
       this.form.user = this.getUserData(val.user)
       this.form.copyPerson = this.getCopyPersonData(val.copy_person)

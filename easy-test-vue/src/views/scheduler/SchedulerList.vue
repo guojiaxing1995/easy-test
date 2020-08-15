@@ -191,6 +191,13 @@
               <el-form-item label="发送邮件" prop="sendEmail">
                 <el-switch v-model="form.sendEmail"></el-switch>
               </el-form-item>
+              <el-form-item label="邮件策略" v-if="form.sendEmail">
+                <el-radio-group v-model="form.emailStrategy">
+                  <label v-for="(val,key) in strategy" :key="key" class="el-radio">
+                    <el-radio :label="key">{{val}}</el-radio>
+                  </label>
+                </el-radio-group>
+              </el-form-item>
               <el-form-item label="抄送人员" prop="copyPerson">
                 <el-cascader
                   style="width:60%"
@@ -264,9 +271,15 @@ export default {
       projects: [],
       form: {
         sendEmail: true,
+        emailStrategy: '3',
         user: null,
         copyPerson: [],
         cron: null,
+      },
+      strategy: {
+        1: '总是发送',
+        2: '成功发送',
+        3: '失败发送',
       },
       rules: {
         user: [{ required: true, message: '请选择维护人员', trigger: 'blur, change' }],
@@ -432,6 +445,7 @@ export default {
       this.form.sendEmail = row.send_email
       this.form.user = this.getUserData(row.user)
       this.form.copyPerson = this.getCopyPersonData(row.copy_person)
+      this.form.emailStrategy = row.email_strategy.toString()
       this.form.cron = row.cron
     },
     handleCron(index, row) {
@@ -470,6 +484,7 @@ export default {
               this.editLoading = true
               res = await put(`/v1/scheduler/edit/${this.currentEditId}`, {
                 sendEmail: this.form.sendEmail,
+                emailStrategy: parseInt(this.form.emailStrategy, 10),
                 user: this.form.user[1],
                 copyPerson: this.copyPersonDeal(),
                 cron: this.form.cron,

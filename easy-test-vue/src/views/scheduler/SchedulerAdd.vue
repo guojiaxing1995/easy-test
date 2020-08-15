@@ -38,6 +38,13 @@
             <el-form-item label="发送邮件" prop="sendEmail">
               <el-switch v-model="form.sendEmail"></el-switch>
             </el-form-item>
+            <el-form-item label="邮件策略" v-if="form.sendEmail">
+              <el-radio-group v-model="form.emailStrategy">
+                <label v-for="(val,key) in strategy" :key="key" class="el-radio">
+                  <el-radio :label="key">{{val}}</el-radio>
+                </label>
+              </el-radio-group>
+            </el-form-item>
             <el-form-item label="抄送人员" prop="copyPerson">
               <el-cascader
                 style="width:50%"
@@ -84,12 +91,18 @@ export default {
       form: {
         project: null,
         sendEmail: true,
+        emailStrategy: '3',
         user: null,
         copyPerson: [],
         cron: null,
       },
       users: [],
       projectData: [],
+      strategy: {
+        1: '总是发送',
+        2: '成功发送',
+        3: '失败发送',
+      },
       rules: {
         project: [{ required: true, message: '请选择工程', trigger: 'blur, change' }],
         user: [{ required: true, message: '请选择维护人员', trigger: 'blur, change' }],
@@ -143,6 +156,7 @@ export default {
             res = await post('/v1/scheduler/add', {
               project: this.form.project,
               sendEmail: this.form.sendEmail,
+              emailStrategy: parseInt(this.form.emailStrategy, 10),
               user: this.form.user[1],
               copyPerson: this.copyPersonDeal(),
               cron: this.form.cron,

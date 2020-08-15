@@ -131,3 +131,12 @@ class CaseExcelEnum(Enum):
     ASSERTION = 9
     EXPECTION = 10
     INFO = 11
+
+
+@unique
+class EmailStrategyEnum(Enum):
+    """邮件发送策略枚举类"""
+    ALL = 1
+    SUCCESS = 2
+    FAIL = 3
+

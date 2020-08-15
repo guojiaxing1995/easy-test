@@ -52,6 +52,13 @@
             <el-form-item label="发送邮件" prop="sendEmail">
               <el-switch v-model="form.sendEmail"></el-switch>
             </el-form-item>
+            <el-form-item label="邮件策略" v-if="form.sendEmail">
+              <el-radio-group v-model="form.emailStrategy">
+                <label v-for="(val,key) in strategy" :key="key" class="el-radio">
+                  <el-radio :label="key">{{val}}</el-radio>
+                </label>
+              </el-radio-group>
+            </el-form-item>
             <el-form-item label="抄送人员" prop="copyPerson">
               <el-cascader
                 style="width:50%"
@@ -104,6 +111,7 @@ export default {
         sendEmail: true,
         user: null,
         copyPerson: [],
+        emailStrategy: '3',
       },
       // 按首字母分类数组
       users: [],
@@ -123,6 +131,11 @@ export default {
       },
       loading: false,
       type: {},
+      strategy: {
+        1: '总是发送',
+        2: '成功发送',
+        3: '失败发送',
+      },
     }
   },
   async created() {
@@ -184,6 +197,7 @@ export default {
             this.loading = true
             const newForm = this.form
             newForm.type = parseInt(this.form.type, 10)
+            newForm.emailStrategy = parseInt(this.form.emailStrategy, 10)
             const [, user] = this.form.user
             newForm.user = user
             newForm.copyPerson = this.copyPersonDeal()

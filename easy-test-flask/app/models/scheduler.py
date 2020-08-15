@@ -4,8 +4,9 @@ from flask import current_app
 from flask_jwt_extended import current_user
 from lin import db, manager
 from lin.interface import InfoCrud as Base
-from sqlalchemy import Column, Integer, String, Boolean, text
+from sqlalchemy import Column, Integer, String, Boolean, text, SmallInteger
 
+from app.libs.enums import EmailStrategyEnum
 from app.libs.init import scheduler
 from app.libs.job import execute_job
 from app.libs.utils import paging
@@ -18,24 +19,35 @@ class Scheduler(Base):
     project_id = Column(Integer, nullable=False, comment='主键id')
     user = Column(Integer, nullable=False, comment='维护人员')
     send_email = Column(Boolean, nullable=False, default=True, comment='是否发送邮件')
+    _email_strategy = Column('email_strategy', SmallInteger, nullable=False, comment='邮件发送策略; 1 -> 总是发送 | '
+                                                                                     '2 -> 成功时发送 | 3 ''->失败时发送')
     cron = Column(String(30), nullable=False, comment='cron表达式')
     copy_person = Column(String(50), comment='邮件抄送人员')
     next_run_time = ''
     # 运行状态
     state = True
 
+    @property
+    def email_strategy(self):
+        return EmailStrategyEnum(self._email_strategy).value
+
+    @email_strategy.setter
+    def email_strategy(self, strategyEnum):
+        self._email_strategy = strategyEnum.value
+
     def create_scheduler_id(self):
         project = Project.query.filter_by(id=self.project_id).first_or_404()
         self.scheduler_id = project.name + '_scheduler_' + str(self.id)
 
     # 数据库添加数据
-    def add_scheduler(self, project_id, user, send_email, copy_person, cron):
+    def add_scheduler(self, project_id, user, send_email, copy_person, cron, email_strategy):
         self.project_id = project_id
         self.user = user
         self.state = True
         self.send_email = send_email
         self.copy_person = copy_person
         self.cron = cron
+        self.email_strategy = EmailStrategyEnum(email_strategy)
         db.session.add(self)
         db.session.flush()
         self.create_scheduler_id()
@@ -51,8 +63,8 @@ class Scheduler(Base):
                                         day_of_week=day_of_week, year=year, replace_existing=True)
 
     # 新增任务
-    def new_job(self, project_id, user, send_email, copy_person, cron):
-        self.add_scheduler(project_id, user, send_email, copy_person, cron)
+    def new_job(self, project_id, user, send_email, copy_person, cron, email_strategy):
+        self.add_scheduler(project_id, user, send_email, copy_person, cron, email_strategy)
         self.add_job()
 
     @classmethod
@@ -90,6 +102,7 @@ class Scheduler(Base):
             cls.user,
             cls.copy_person,
             cls.send_email,
+            cls._email_strategy.label('email_strategy'),
             cls.cron,
         ).order_by(
             text('Scheduler.update_time desc')
@@ -133,7 +146,7 @@ class Scheduler(Base):
     def stop_job(self):
         scheduler.pause_job(self.scheduler_id)
 
-    def edit_job(self, user, send_email, copy_person, cron):
+    def edit_job(self, user, send_email, copy_person, cron, email_strategy):
         old_cron = self.cron
         # cron表达式有变动修改定时任务
         if old_cron != cron:
@@ -142,6 +155,7 @@ class Scheduler(Base):
         self.send_email = send_email
         self.copy_person = copy_person
         self.cron = cron
+        self.email_strategy = EmailStrategyEnum(email_strategy)
         db.session.commit()
 
     # 修改cron定时任务执行

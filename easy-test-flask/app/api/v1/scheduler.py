@@ -15,7 +15,8 @@ scheduler_api = Redprint('scheduler')
 def add_job():
     form = SchedulerForm().validate_for_api()
     scheduler = Scheduler()
-    scheduler.new_job(form.project.data, form.user.data, form.sendEmail.data, form.copyPerson.data, form.cron.data)
+    scheduler.new_job(form.project.data, form.user.data, form.sendEmail.data, form.copyPerson.data, form.cron.data,
+                      form.emailStrategy.data)
 
     return Success('新增定时任务成功')
 
@@ -57,7 +58,8 @@ def stop_job():
 def edit_job(sid):
     form = SchedulerEditForm().validate_for_api()
     scheduler = Scheduler.query.filter_by(id=sid, delete_time=None).first()
-    scheduler.edit_job(form.user.data, form.sendEmail.data, form.copyPerson.data, form.cron.data)
+    scheduler.edit_job(form.user.data, form.sendEmail.data, form.copyPerson.data, form.cron.data,
+                       form.emailStrategy.data)
     return Success(msg='修改成功')
 
 
