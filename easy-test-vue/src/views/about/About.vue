@@ -209,7 +209,15 @@ export default {
         currentSuccessRate: 0,
         yoyGrowth: 0,
         dayExecute: [],
-        radarChart: {},
+        radarChart: {
+          indicator: [
+            { text: '成功率', max: 0 },
+            { text: '用例数', max: 0 },
+            { text: '执行频率', max: 0 },
+            { text: '定时任务', max: 0 },
+            { text: '测试人数', max: 0 }
+          ],
+        },
         successRate: 0,
       },
       barData: {
@@ -491,18 +499,17 @@ export default {
     radar_option() {
       const that = this
       const option = {
-        radar: [{},
+        radar: [
           {
             indicator: that.projectData.radarChart.indicator,
             center: ['50%', '50%'],
-            radius: 90
+            radius: 90,
           }
         ],
         series: [
           {
             name: '工程分析',
             type: 'radar',
-            radarIndex: 1,
             data: [
               {
                 value: that.projectData.radarChart.value,
