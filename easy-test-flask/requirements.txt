@@ -9,7 +9,7 @@ Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
 idna==2.6
 itsdangerous==1.1.0
-Jinja2==2.10
+Jinja2==2.11.3
 Lin-CMS==0.2.0b2
 MarkupSafe==1.1.1
 pipfile==0.0.2
