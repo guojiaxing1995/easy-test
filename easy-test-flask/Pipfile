@@ -11,7 +11,7 @@ oss2 = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==2.6.1"}
 Flask = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==1.0.2"}
 Flask-SQLAlchemy = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==2.3.2"}
 Flask-WTF = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==0.14.2"}
-Flask-Cors = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==2.1.0"}
+Flask-Cors = {index = "https://pypi.tuna.tsinghua.edu.cn/simple",version = "==3.0.9"}
 Lin-CMS = "==0.2.0b2"
 
 [dev-packages]
