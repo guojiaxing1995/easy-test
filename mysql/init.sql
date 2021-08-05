@@ -1,10 +1,10 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : 10.10.77.53
+ Source Server         : 
  Source Server Type    : MySQL
  Source Server Version : 50731
- Source Host           : 10.10.77.53:8081
+ Source Host           : 
  Source Schema         : easy-test
 
  Target Server Type    : MySQL
@@ -47,6 +47,8 @@ CREATE TABLE `lin_user`  (
 -- ----------------------------
 -- Records of lin_user
 -- ----------------------------
+
 INSERT INTO `lin_user` VALUES ('2020-07-17 06:27:46', '2020-07-17 06:27:46', NULL, 1, 'super', NULL, NULL, 2, 1, '1234995678@qq.com', NULL, 'pbkdf2:sha256:50000$BUN0Mf0a$61294b144679014cdd7b40bf9a2233d987911273c9eb20935aa8eac4a14b66d4', NULL, NULL);
+INSERT INTO `lin_user` VALUES ('2020-04-06 09:47:23', '2020-04-06 10:05:55', NULL, 2, 'cron', NULL, NULL, 1, 2, NULL, NULL, NULL, NULL, NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
