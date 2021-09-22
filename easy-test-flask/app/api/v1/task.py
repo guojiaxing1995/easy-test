@@ -1,6 +1,6 @@
 import time
 
-from flask import jsonify, current_app, request
+from flask import jsonify, current_app, request, make_response, send_from_directory
 from flask_jwt_extended import current_user
 from lin import login_required, route_meta, group_required
 
@@ -130,3 +130,13 @@ def disconnect():
 @socket_io.on('connect')
 def connect():
     current_app.logger.info(request.sid + ' is connect')
+
+
+@task_api.route('/report/<taskNo>', methods=['GET'])
+@route_meta('报告下载', module='测试结果')
+@group_required
+def download_report(taskNo):
+    task = Task.query.filter_by(task_no=taskNo, delete_time=None).first_or_404()
+    download_file, download_directory, download_filename = task.build_report()
+    response = make_response(send_from_directory(download_directory, download_filename, as_attachment=True))
+    return response

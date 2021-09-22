@@ -202,7 +202,7 @@ def upload_case():
         'INCLUDE': ['xlsx', 'xls'],
         'SINGLE_LIMIT': 2048 * 1000,
         'NUMS': 1,
-        'STORE_DIR': 'app/excel/upload'
+        'STORE_DIR': 'app/document/excel/upload'
     }
 
     files = request.files
@@ -215,7 +215,8 @@ def upload_case():
 # 用例模板下载
 @case_api.route('/downloadTemplate', methods=['GET'])
 def download_case_template():
-    directory = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))) + '/excel/template'
+    directory = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))) + '/document/excel' \
+                                                                                                '/template'
     filename = 'caseUploadTemplate.xlsx'
     response = make_response(send_from_directory(directory, filename, as_attachment=True))
     return response

@@ -5,7 +5,7 @@
 from app.app import create_app
 from tests.utils import get_token
 
-app = create_app()
+app = create_app(environment='development')
 
 
 def test_create():

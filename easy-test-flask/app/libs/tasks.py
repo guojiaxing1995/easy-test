@@ -1,6 +1,7 @@
 import sys
 import time
 
+from flask import current_app
 from flask_mail import Message
 from lin import manager
 
@@ -83,6 +84,8 @@ def send_text_email(task_id, project_id, scheduler_id):
     if not is_send:
         return
 
+    file, directory, filename = task.build_report()
+
     msg = Message(
         subject='接口自动化测试(' + project.name + ')',
         html=user.username + ',你好：<br><br><p style="text-indent: 2em;">接口自动化测试已完成，测试工程为' + project.name +
@@ -97,6 +100,9 @@ def send_text_email(task_id, project_id, scheduler_id):
         recipients=[user.email],
         cc=copy_person_email
     )
-
+    # 将html报告加入附件
+    with current_app.open_resource(file) as f:
+        msg.attach(filename, 'html/htm', f.read())
+    f.close()
     mail.send(msg)
     log.logger.info('邮件发送成功')

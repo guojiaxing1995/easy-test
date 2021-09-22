@@ -1,3 +1,5 @@
+import os
+import shutil
 from datetime import datetime
 
 import requests
@@ -175,3 +177,80 @@ class Task(Base):
                                              "DATE_FORMAT( NOW( ), '%Y-%m-%d' ) GROUP BY project_id")
 
         return len(list(execute_task)), len(list(execute_project))
+
+    def copy_report_template(self):
+        template_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/document/report/template'
+        download_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/document/report/download'
+        if not os.path.exists(download_directory):
+            os.makedirs(download_directory)
+        template_filename = 'report.html'
+        from app.models.project import Project
+        project = Project.query.filter_by(id=self.project_id).first()
+        download_filename = 'report_' + project.name + '_' + self.task_no + '.html'
+        # 复制用例下载模板作为被写入的文件
+        shutil.copyfile(template_directory + '/' + template_filename, download_directory + '/' + download_filename)
+
+        return download_directory + '/' + download_filename, download_directory, download_filename
+
+    def build_report(self):
+        # 测试时间
+        report_time = self._create_time.strftime("%Y-%m-%d %H:%M")
+        # 被测试工程
+        from app.models.project import Project
+        project = Project.query.filter_by(id=self.project_id).first()
+        # 测试人员
+        tester = manager.user_model.query.filter_by(id=self.create_user).first()
+        # task 成功个数
+        if self.success:
+            input_success = '<input checked="true" class="filter" data-test-result="passed" hidden="true" ' \
+                            'name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span ' \
+                            'class="passed">' + str(self.success) + ' passed</span>'
+        else:
+            input_success = '<input checked="true" class="filter" disabled="true" data-test-result="passed" ' \
+                            'hidden="true" name="filter_checkbox" onChange="filter_table(this)" ' \
+                            'type="checkbox"/><span class="passed">' + str(self.success) + ' passed</span>'
+        # task 失败个数
+        if self.fail:
+            input_fail = '<input checked="true" class="filter" data-test-result="failed" hidden="true" ' \
+                            'name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span ' \
+                            'class="failed">' + str(self.fail) + ' passed</span>'
+        else:
+            input_fail = '<input checked="true" class="filter" disabled="true" data-test-result="failed" ' \
+                            'hidden="true" name="filter_checkbox" onChange="filter_table(this)" ' \
+                            'type="checkbox"/><span class="failed">' + str(self.fail) + ' failed</span>'
+        # 用例记录
+        logs = Case.case_log_search_all(self.task_no)
+        table_logs = ''
+        for log in logs:
+            result = 'Passed' if log['actual_result'] else 'Failed'
+            expect = log['expect'] if log['expect'] else ''
+            interface_return = log['result']['text'] if log['result'] else ''
+            if log['actual_result']:
+                table_tr = '<tbody class="passed results-table-row"><tr><td class="col-result">' + result + \
+                           '</td><td class="col-name">' + log['name'] + \
+                           '</td><td class="col-method">' + log['method_text'] + '</td><td class="col-url">' + \
+                           log['url'] + '</td><td class="col-assertion">' + log['assertion_text'] + \
+                           '</td><td class="col-expect">' + expect + \
+                           '</td></tr><tr><td class="extra" colspan="6"><div class="empty log">' \
+                           + interface_return + '</div></td></tr></tbody>'
+            else:
+                table_tr = '<tbody class="failed results-table-row"><tr><td class="col-result">' + result + \
+                           '</td><td class="col-name">' + log['name'] + \
+                           '</td><td class="col-method">' + log['method_text'] + '</td><td class="col-url">' + \
+                           log['url'] + '</td><td class="col-assertion">' + log['assertion_text'] + \
+                           '</td><td class="col-expect">' + expect + \
+                           '</td></tr><tr><td class="extra" colspan="6"><div class="empty log">' \
+                           + interface_return + '</div></td></tr></tbody>'
+            table_logs = table_logs + table_tr
+
+        download_file, download_directory, download_filename = self.copy_report_template()
+        old_file = open(download_file, "r", encoding='utf-8')
+        report = old_file.read()
+        old_file.close()
+        new_file = report.replace('{{ logs }}', table_logs).replace('{{ input_success }}', input_success).replace(
+            '{{ input_fail }}', input_fail).replace('{{ project }}', project.name).replace(
+            '{{ report_time }}', report_time).replace('{{ tester }}', tester.username)
+        with open(download_file, "w", encoding='utf-8') as f:
+            f.write(new_file)
+
+        return download_file, download_directory, download_filename

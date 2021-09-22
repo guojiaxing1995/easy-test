@@ -26,7 +26,7 @@ class CaseUploader(Uploader):
                     "key": single.name,
                     "id": exists.id,
                     "path": exists.path,
-                    "url": os.path.join(current_app.root_path, 'excel/upload', exists.path).replace('\\', '/')
+                    "url": os.path.join(current_app.root_path, 'document/excel/upload', exists.path).replace('\\', '/')
                 })
             else:
                 absolute_path, relative_path, real_name = self._get_store_path(single.filename)
@@ -44,6 +44,6 @@ class CaseUploader(Uploader):
                     "key": single.name,
                     "id": file.id,
                     "path": file.path,
-                    "url": os.path.join(current_app.root_path, 'excel/upload', file.path).replace('\\', '/')
+                    "url": os.path.join(current_app.root_path, 'document/excel/upload', file.path).replace('\\', '/')
                 })
         return ret

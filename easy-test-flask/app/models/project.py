@@ -11,7 +11,6 @@ from sqlalchemy import Column, Integer, String, SmallInteger, Boolean, text
 
 from app.libs.enums import UserAuthEnum, ProjectTypeEnum, EmailStrategyEnum
 from app.libs.error_code import ProjectConfigException
-from app.libs.init import socket_io
 from app.libs.utils import paging
 from app.models.ConfigCopy import ConfigCopy
 from app.models.ConfigRelation import ConfigRelation

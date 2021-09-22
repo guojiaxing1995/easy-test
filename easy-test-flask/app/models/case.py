@@ -1012,8 +1012,8 @@ class Case(Base):
 
     @staticmethod
     def copy_excel_template():
-        template_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/excel/template'
-        download_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/excel/download'
+        template_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/document/excel/template'
+        download_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + '/document/excel/download'
         if not os.path.exists(download_directory):
             os.makedirs(download_directory)
         template_filename = 'caseUploadTemplate.xlsx'
