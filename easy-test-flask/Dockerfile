@@ -12,4 +12,6 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shangh
 
 RUN ["pip", "install", "-i", "https://pypi.tuna.tsinghua.edu.cn/simple", "-r", "requirements.txt"]
 
-CMD ["python", "starter.py", "--env=prod"]
+ENTRYPOINT ["sh", "./docker-entrypoint.sh"]
+
+CMD ["api"]

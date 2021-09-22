@@ -5,12 +5,13 @@ services:
   api:
     build: 
       context: ./easy-test-flask
-      dockerfile: Dockerfile-api
+      dockerfile: Dockerfile
     image: guojiaxing1995/easy-test-api:v1
     container_name: api
     restart: always
     expose:
       - 5000
+    command: ["api"]
     networks:
       - easy-test
     ports:
@@ -23,12 +24,13 @@ services:
   worker1:
     build: 
       context: ./easy-test-flask
-      dockerfile: Dockerfile-worker
-    image: guojiaxing1995/easy-test-worker:v1
+      dockerfile: Dockerfile
+    image: guojiaxing1995/easy-test-api:v1
     container_name: worker1
     restart: always
     expose:
       - 5000
+    command: ["worker"]
     networks:
       - easy-test
     volumes:
@@ -37,12 +39,13 @@ services:
   worker2:
     build: 
       context: ./easy-test-flask
-      dockerfile: Dockerfile-worker
-    image: guojiaxing1995/easy-test-worker:v1
+      dockerfile: Dockerfile
+    image: guojiaxing1995/easy-test-api:v1
     container_name: worker2
     restart: always
     expose:
       - 5000
+    command: ["worker"]
     networks:
       - easy-test
     volumes:
