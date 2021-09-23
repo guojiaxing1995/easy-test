@@ -27,8 +27,12 @@
         <el-col :span="6">
           <div style="height: 32px;line-height: 32px"><label class="label" >测试时间</label>{{ currentTask.time/1000 | filterTimeYmdHms }}</div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="4">
           <div style="height: 32px;line-height: 32px"><label class="label" >测试人员</label>{{ currentTask.user }}</div>
+        </el-col>
+        <el-col :span="2">
+          <l-icon name="HTMLreport" height="1.9em" width="1.9em" style="cursor: pointer" @click="reportDownload" v-if="!this.currentProject.running"
+          v-auth="{ auth: '报告下载', type: 'disabled'}"></l-icon>
         </el-col>
       </el-row>
       <el-row :gutter="30" style="margin-bottom:30px">
@@ -262,7 +266,8 @@ export default {
       },
       currentProject: {
         running: false,
-        progress: 0
+        progress: 0,
+        name: null
       },
       CaseLogData: [],
       type: {
@@ -336,11 +341,13 @@ export default {
           if (this.project === this.projectList[index].id) {
             this.currentProject.progress = this.projectList[index].progress
             this.currentProject.running = this.projectList[index].running
+            this.currentProject.name = this.projectList[index].name
           }
         }
       } else {
         this.currentProject.progress = 0
         this.currentProject.running = false
+        this.currentProject.name = null
       }
     },
     task() {
@@ -517,6 +524,32 @@ export default {
       const mm = `${date.getMinutes()}`
       const val = `${m.substring(m.length - 2, m.length)}-${d.substring(d.length - 2, d.length)}  ${hh}:${mm}`
       return val
+    },
+    reportDownload() {
+      this.$axios({
+        baseURL: `${process.env.VUE_APP_BASE_URL}`,
+        url: `/v1/task/report/${this.task}`,
+        method: 'get',
+        responseType: 'blob',
+      }).then(res => {
+        const fileName = `report_${this.currentProject.name}_${this.task}.html`
+        const blob = new Blob([res])
+        const link = document.createElement('a')
+        link.download = fileName
+        link.style.display = 'none'
+        link.href = URL.createObjectURL(blob)
+        document.body.appendChild(link)
+        link.click()
+        URL.revokeObjectURL(link.href)
+        document.body.removeChild(link)
+      }).catch(error => {
+        const reader = new FileReader()
+        reader.readAsText(error.data, 'utf-8')
+        reader.onload = e => {
+          this.$message.warning(JSON.parse(reader.result).msg)
+          console.log(e.target.result)
+        }
+      })
     },
   },
   mounted() {
