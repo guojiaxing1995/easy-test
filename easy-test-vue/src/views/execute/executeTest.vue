@@ -2,6 +2,9 @@
   <div class="container">
     <div class="title">
       工程进度信息
+      <div class="audioState">
+        <l-icon :name="audioState.name" color="#3963bc" height="1.6em" width="1.6em" style="margin:auto" @click="changeAudioState"></l-icon>
+      </div>
       <el-input size="small" v-model="searchProject" filterable placeholder="请输入工程名称查询" class="search" clearable>
         <el-option
           v-for="item in selectData"
@@ -79,12 +82,14 @@
         </template>
       </el-table-column>
     </el-table>
+    <audio controls  :src="audioUrl" ref="audio" style="display:none;" preload="auto"></audio>
   </div>
 </template>
 
 <script>
 import Utils from 'lin/utils/util'
 import { get } from '@/lin/plugins/axios'
+import over from '../../assets/video/over.wav'
 
 export default {
   components: {
@@ -96,6 +101,11 @@ export default {
       selectData: [], // 拉框数据
       searchProject: '',
       loading: false,
+      audioUrl: over,
+      audioState: {
+        name: 'audioOpen',
+        state: true
+      },
     }
   },
   sockets: {
@@ -109,6 +119,9 @@ export default {
         duration: 0,
         type: 'success'
       })
+      // 播放完成提示音
+      this.$refs.audio.currentTime = 0
+      this.$refs.audio.play()
     },
     progress: function progress(data) {
       if (this.searchProject === '') {
@@ -163,6 +176,17 @@ export default {
     toTestDetail(index, val) {
       this.$router.push({ path: '/test/detail', query: { pid: val.id } })
     },
+    changeAudioState() {
+      if (this.audioState.state) {
+        this.audioState.state = false
+        this.audioState.name = 'audioClose'
+        this.$refs.audio.muted = true
+      } else {
+        this.audioState.state = true
+        this.audioState.name = 'audioOpen'
+        this.$refs.audio.muted = false
+      }
+    }
   },
   async created() {
     await this.getProjects()
@@ -199,6 +223,12 @@ export default {
       position: absolute;
       width: 15%;
       right: 0;
+    }
+    .audioState {
+      position: absolute;
+      right: 16%;
+      top: 8px;
+      cursor:pointer;
     }
   }
 }
