@@ -19,7 +19,7 @@ services:
     volumes:
       - ./logs/api/:/easy-test-flask/logs/
       - ./static/assets/:/easy-test-flask/app/assets/
-      - ./static/excel:/easy-test-flask/app/excel/upload/
+      - ./static/document/:/easy-test-flask/app/document/
       
   worker1:
     build: 

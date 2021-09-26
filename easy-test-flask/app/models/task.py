@@ -186,7 +186,7 @@ class Task(Base):
         template_filename = 'report.html'
         from app.models.project import Project
         project = Project.query.filter_by(id=self.project_id).first()
-        download_filename = 'report_' + project.name + '_' + self.task_no + '.html'
+        download_filename = 'report_' + project.name + '.html'
         # 复制用例下载模板作为被写入的文件
         shutil.copyfile(template_directory + '/' + template_filename, download_directory + '/' + download_filename)
 

@@ -60,7 +60,9 @@ def send_text_email(task_id, project_id, scheduler_id):
         user = manager.user_model.query.filter_by(id=scheduler.user).first()
         # 抄送人 邮件列表
         copy_person_email = [manager.user_model.query.filter_by(id=uid).first().email
-                             for uid in scheduler.copy_person.split(',')] if scheduler.copy_person else []
+                             for uid in scheduler.copy_person.split(',')
+                             if manager.user_model.query.filter_by(id=uid).first().email] \
+            if scheduler.copy_person else []
     else:
         if project.send_email:
             if EmailStrategyEnum(project.email_strategy) == EmailStrategyEnum.SUCCESS and task_result is True:
@@ -78,7 +80,8 @@ def send_text_email(task_id, project_id, scheduler_id):
         user = manager.user_model.query.filter_by(id=project.user).first()
         # 抄送人 邮件列表
         copy_person_email = [manager.user_model.query.filter_by(id=uid).first().email
-                             for uid in project.copy_person.split(',')] if project.copy_person else []
+                             for uid in project.copy_person.split(',')
+                             if manager.user_model.query.filter_by(id=uid).first().email] if project.copy_person else []
 
     # 不发送邮件
     if not is_send:
@@ -96,13 +99,12 @@ def send_text_email(task_id, project_id, scheduler_id):
                 '%</p><br><br><p style="text-indent: 2em;">此次测试由' +
                 manager.user_model.query.filter_by(id=task.create_user).first().username +
                 '执行</p><br><br><span style="color:#CCCCCC">此邮件由接口自动化平台发送，请勿回复~</span>',
-        sender=("自动化测试平台", '15234093915@sina.cn'),
         recipients=[user.email],
         cc=copy_person_email
     )
     # 将html报告加入附件
     with current_app.open_resource(file) as f:
-        msg.attach(filename, 'html/htm', f.read())
+        msg.attach('report.html', 'html/htm', f.read())
     f.close()
     mail.send(msg)
     log.logger.info('邮件发送成功')
