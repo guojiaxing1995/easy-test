@@ -82,3 +82,9 @@ class MethodMockException(APIException):
     code = 405
     msg = '请求方法错误'
     error_code = 95003
+
+
+class RequestParamException(APIException):
+    code = 400
+    msg = '请求参数异常'
+    error_code = 96001

@@ -5,6 +5,7 @@
 @File    : ConfigRelation.py
 @Desc    : 工程配置-关联
 """
+from celery.utils import log
 from flask_jwt_extended import current_user
 from lin.exception import UnknownException
 from lin.interface import InfoCrud as Base
@@ -110,6 +111,11 @@ class ConfigRelation(Base):
     @classmethod
     def batch(cls, project, create_user):
         project.var_dick = {}
+        # 获取用户自定义的运行时变量
+        param = project.get_user_parameters()['param']
+        # 将变量加入到全局字典
+        project.var_dick.update(param)
+        log.logger.info(project.var_dick)
         configs = cls.query.filter_by(project_id=project.id, is_run=True).order_by(cls.order).all()
         if not configs:
             raise ConfigNotFound(msg='工程下无可运行用例')

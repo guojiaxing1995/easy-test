@@ -116,3 +116,21 @@ def copy_config():
                         form.deal.data, form.condition.data, form.expect.data, form.assertion.data)
 
     return Success('修改配置成功')
+
+
+@project_api.route('/userParam', methods=['POST'])
+def set_user_parame():
+    form = ProjectSearchForm().validate_for_api()
+    project = Project.query.filter_by(id=form.id.data).first_or_404()
+    project.set_user_parameters(form.userParam.data)
+
+    return Success('参数设置成功')
+
+
+@project_api.route('/userParam', methods=['GET'])
+def get_user_parame():
+    form = ProjectSearchForm().validate_for_api()
+    project = Project.query.filter_by(id=form.id.data).first_or_404()
+    parame = project.get_user_parameters()
+
+    return jsonify(parame)

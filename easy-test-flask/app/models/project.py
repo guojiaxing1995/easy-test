@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 import requests
@@ -10,7 +11,8 @@ from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, String, SmallInteger, Boolean, text
 
 from app.libs.enums import UserAuthEnum, ProjectTypeEnum, EmailStrategyEnum
-from app.libs.error_code import ProjectConfigException
+from app.libs.error_code import ProjectConfigException, RequestParamException
+from app.libs.init import mongo
 from app.libs.utils import paging
 from app.models.ConfigCopy import ConfigCopy
 from app.models.ConfigRelation import ConfigRelation
@@ -550,3 +552,34 @@ class Project(Base):
             'day_execute': day_execute,
             'radar_chart': radar_chart
         }
+
+    def set_user_parameters(self, parameters=None):
+        # param 存在 则为新增/修改 否则为删除
+        if parameters:
+            if type(parameters) != dict:
+                try:
+                    parameters = json.loads(parameters.strip())
+                except Exception:
+                    raise RequestParamException(msg='请填写json格式数据')
+            # 如果目标工程设置过参数则更新 否则新增
+            mongo.db.user_parameters.update_one(
+                {'project_id': self.id},
+                {'$set': {
+                    'project_id': self.id,
+                    'parameters': parameters
+                }},
+                upsert=True
+            )
+        else:
+            mongo.db.user_parameters.delete_one({'project_id': self.id})
+
+        return True
+
+    def get_user_parameters(self):
+        param = mongo.db.user_parameters.find_one({'project_id': self.id}, {"_id": 0})['parameters'] if \
+            mongo.db.user_parameters.find_one({'project_id': self.id}) else None
+        data = {
+            'pid': self.id,
+            'param': param
+        }
+        return data

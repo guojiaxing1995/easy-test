@@ -55,7 +55,7 @@
           prop="info"
           label="描述"
           :show-overflow-tooltip="true"
-          min-width="350">
+          min-width="290">
         </el-table-column>
         <el-table-column
           label="类型"
@@ -69,7 +69,7 @@
           </template>
         </el-table-column>
         <el-table-column
-          width="180"
+          width="240"
           align="center"
           fixed="right"
           label="操作">
@@ -80,6 +80,12 @@
               plain
               style="margin:auto"
               @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            <el-button
+              size="mini"
+              type="primary"
+              plain
+              style="margin:auto"
+              @click="handleParam(scope.$index, scope.row)">运行参数</el-button>
             <el-button
               v-auth="{ auth: '删除工程', type: 'disabled'}"
               size="mini"
@@ -194,12 +200,38 @@
         <el-button @click="resetForm('form')">重 置</el-button>
       </div>
     </el-dialog>
+    <el-dialog
+      :visible.sync="userParam.dialogVisible"
+      :close-on-click-modal="false"
+      top="15vh"
+      width="35%"
+      title="工程变量"
+      v-loading="userParam.loading"
+      center
+    >
+      <div style="margin-top:-25px;">
+        <el-form
+          status-icon
+          v-if="userParam.dialogVisible"
+          ref="userParam"
+          label-width="80px"
+          :model="userParam"
+          style="margin-bottom:-15px;margin-top:15px;"
+        >
+          <el-input size="medium" type="textarea"  clearable v-model="userParam.param" :autosize="{ minRows: 12, maxRows: 16}" placeholder="请输入json格式"></el-input>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer" style="text-align: center;">
+        <el-button type="primary" @click="confirmSetParam()" style="margin-right:20px">确 定</el-button>
+        <el-button @click="resetParam('userParam')" style="margin-left:20px">重 置</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import Utils from 'lin/utils/util'
-import { get, put, _delete } from '@/lin/plugins/axios'
+import { get, put, post, _delete } from '@/lin/plugins/axios'
 import GroupUsers from '../../components/GroupUsers'
 
 export default {
@@ -256,6 +288,12 @@ export default {
         ],
         info: [],
       },
+      userParam: {
+        loading: false,
+        param: null,
+        dialogVisible: false,
+        id: null
+      }
     }
   },
   methods: {
@@ -383,9 +421,32 @@ export default {
         }
       })
     },
+    async confirmSetParam() {
+      let res
+      this.userParam.loading = true
+      try {
+        res = await post('/v1/project/userParam', {
+          userParam: this.userParam.param,
+          id: this.userParam.id,
+        }, { showBackend: true })
+        if (res.error_code === 0) {
+          this.$message.success(`${res.msg}`)
+          this.userParam.dialogVisible = false
+        } else {
+          this.$message.error(`${res.msg}`)
+        }
+        this.userParam.loading = false
+      } catch (error) {
+        this.userParam.loading = false
+      }
+    },
     resetForm(formName) {
       this.$refs[formName].resetFields()
-      this.$refs.groupAuths.getGroupAuths()
+      this.$refs.userParam.getGroupAuths()
+    },
+    resetParam(formName) {
+      this.$refs[formName].resetFields()
+      this.handleParam(0, this.userParam)
     },
     // 获取所拥有的权限并渲染  由子组件提供
     handleEdit(index, val) {
@@ -400,6 +461,28 @@ export default {
       this.form.user = this.getUserData(val.user)
       this.form.copyPerson = this.getCopyPersonData(val.copy_person)
       this.dialogFormVisible = true
+    },
+    async handleParam(index, val) {
+      let res
+      this.userParam.dialogVisible = true
+      this.userParam.id = val.id
+      try {
+        this.userParam.loading = true
+        res = await get('/v1/project/userParam', { id: val.id }, { showBackend: true })
+        if (res.param) {
+          if (res.param.constructor === String) {
+            this.userParam.param = res.param
+          } else {
+            this.userParam.param = JSON.stringify(res.param, null, '\t')
+          }
+        } else {
+          this.userParam.param = null
+        }
+        this.userParam.loading = false
+      } catch (e) {
+        this.userParam.loading = false
+        console.log(e)
+      }
     },
     handleDelete(index, val) {
       let res

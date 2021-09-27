@@ -6,7 +6,7 @@
 @Desc    :
 """
 from lin.forms import Form
-from wtforms import StringField, FieldList, IntegerField, BooleanField, FormField, Field
+from wtforms import StringField, FieldList, IntegerField, BooleanField, Field
 from wtforms.validators import DataRequired, length, Optional
 
 
@@ -49,6 +49,8 @@ class ProjectForm(Form):
 class ProjectSearchForm(Form):
     # 工程 name
     name = StringField(validators=[Optional()])
+    id = IntegerField(validators=[Optional()])
+    userParam = Field()
 
 
 class ProjectPaginateForm(Form):
