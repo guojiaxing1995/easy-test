@@ -16,9 +16,9 @@
     </div>
     <el-table
       :data="tableData"
+      class="processTable"
       stripe
-      v-loading="loading"
-      style="width: 100%">
+      v-loading="loading">
       <el-table-column
         fixed
         prop="name"
@@ -211,6 +211,15 @@ export default {
 .container {
   padding: 0 30px;
 
+  .processTable /deep/ .el-table__fixed-right {
+    height: 100% !important;
+  }
+  .processTable /deep/ .el-table__fixed {
+    height: 100% !important;
+  }
+  .processTable {
+    width: 100%;
+  }
   .title {
     height: 59px;
     line-height: 59px;
