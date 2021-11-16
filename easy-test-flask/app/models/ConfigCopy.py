@@ -186,7 +186,7 @@ class ConfigCopy(Base):
         # 获取用户自定义的运行时变量
         param = project.get_user_parameters()['param']
         # 将变量加入到全局字典
-        project.var_dick.update(param)
+        project.var_dick.update(param) if param else ''
         configs = cls.query.filter_by(project_id=project.id, is_run=True).order_by(cls.order).all()
         if not configs:
             raise ConfigNotFound(msg='工程下无可运行用例')
