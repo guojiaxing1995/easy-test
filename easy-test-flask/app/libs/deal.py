@@ -1,4 +1,8 @@
 # var_dick  变量字典 , data  被处理的数据, target_key 要找的目标key, new_key 赋值的新key, true_key  真实key,用来判断和目标key是否相等
+import re
+from flask import current_app
+
+
 def deal_default(var_dick, data, target_key=None, new_key=None, true_key=None):
     if type(data) == list:
         for i in data:
@@ -75,3 +79,40 @@ def get_target_value(data, target_key):
                     get_target_value(value, target_key)
 
     return target_value
+
+
+def substitution(data, var_dick):
+    for key, value in data.items():
+        if type(value) == str:
+            data_var = re.search(r'\${(.*)\}', value)
+            if data_var:
+                try:
+                    data[key] = var_dick[data_var.group(1)]
+                except Exception:
+                    # 如果变量不在全局字典中则赋值变量为 None
+                    current_app.logger.debug('变量【' + data_var.group(1) + '】不在工程全局字典中')
+                    data[key] = None
+        # 处理value为列表的情况
+        if type(value) == list:
+            for i in range(len(value)):
+                if type(value[i]) == str:
+                    data_var = re.search(r'\${(.*)\}', value[i])
+                    if data_var:
+                        try:
+                            data[key][i] = var_dick[data_var.group(1)]
+                        except Exception:
+                            # 如果变量不在全局字典中则赋值变量为 None
+                            current_app.logger.debug('变量【' + data_var.group(1) + '】不在工程全局字典中')
+                            data[key][i] = None
+        # 处理value为字典的情况
+        if type(value) == dict:
+            for key_second, value_second in value.items():
+                if type(value_second) == str:
+                    data_var = re.search(r'\${(.*)\}', value_second)
+                    if data_var:
+                        try:
+                            data[key][key_second] = var_dick[data_var.group(1)]
+                        except Exception:
+                            # 如果变量不在全局字典中则赋值变量为 None
+                            current_app.logger.debug('变量【' + data_var.group(1) + '】不在工程全局字典中')
+                            data[key][key_second] = None
