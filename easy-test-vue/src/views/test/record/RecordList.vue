@@ -53,6 +53,7 @@
       <div class="table">
         <el-table
           :data="tableData"
+          class="recordListTable"
           stripe
           v-loading="loading"
           style="width: 100%">
@@ -343,6 +344,16 @@ export default {
 <style lang="scss" scoped>
 .container {
   padding: 30px;
+
+  .recordListTable /deep/ .el-table__fixed-right {
+    height: 100% !important;
+  }
+  .recordListTable /deep/ .el-table__fixed {
+    height: 100% !important;
+  }
+  .recordListTable {
+    width: 100%;
+  }
 
   .header {
     color: $parent-title-color;
