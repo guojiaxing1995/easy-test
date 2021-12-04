@@ -10,6 +10,7 @@ from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, String, text
 
 from app.libs.error_code import RecordRemoveException
+from app.libs.init import mongo
 from app.libs.utils import paging
 from app.models.case import Case
 
@@ -63,7 +64,8 @@ class Task(Base):
             create_user = manager.user_model.query.filter_by(id=task.create_user).first()
             setattr(task, 'create_user_name', create_user.username)
             task._fields.append('create_user_name')
-
+            setattr(task, 'global_var', task.get_global_var())
+            task._fields.append('global_var')
         return tasks
 
     @classmethod
@@ -117,6 +119,8 @@ class Task(Base):
             for task in tasks:
                 task.delete_time = datetime.now()
             db.session.commit()
+            # 删除task全局变量
+            [mongo.db.task.delete_one({'task_id': task.id}) for task in tasks]
             # 删除日志
             for task_no in task_no_list:
                 Case.case_log_remove(name=None, url=None, project=None, task=task_no, result=None, start=None, end=None)
@@ -212,12 +216,12 @@ class Task(Base):
         # task 失败个数
         if self.fail:
             input_fail = '<input checked="true" class="filter" data-test-result="failed" hidden="true" ' \
-                            'name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span ' \
-                            'class="failed">' + str(self.fail) + ' passed</span>'
+                         'name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span ' \
+                         'class="failed">' + str(self.fail) + ' passed</span>'
         else:
             input_fail = '<input checked="true" class="filter" disabled="true" data-test-result="failed" ' \
-                            'hidden="true" name="filter_checkbox" onChange="filter_table(this)" ' \
-                            'type="checkbox"/><span class="failed">' + str(self.fail) + ' failed</span>'
+                         'hidden="true" name="filter_checkbox" onChange="filter_table(this)" ' \
+                         'type="checkbox"/><span class="failed">' + str(self.fail) + ' failed</span>'
         # 用例记录
         logs = Case.case_log_search_all(self.task_no)
         table_logs = ''
@@ -254,3 +258,27 @@ class Task(Base):
             f.write(new_file)
 
         return download_file, download_directory, download_filename
+
+    def get_global_var(self):
+        var_data = mongo.db.task.find_one({'task_id': self.id}, {"_id": 0})['global_var'] if \
+            mongo.db.task.find_one({'task_id': self.id}) else None
+
+        return var_data
+
+    def set_global_var(self, project):
+        # 将vat_dick插入数据库
+        mongo.db.task.update_one(
+            {'task_id': self.id},
+            {'$set': {
+                'task_id': self.id,
+                'task_no': self.task_no,
+                'project_id': project.id,
+                'global_var': project.var_dick
+            }},
+            upsert=True
+        )
+
+        # 将执行结果广播给客户端
+        api_server = current_app.config.get('API_SERVER')
+        res = requests.get(url=api_server + '/v1/task/task/' + str(self.project_id))
+        current_app.logger.debug(res.text)

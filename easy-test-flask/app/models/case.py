@@ -76,6 +76,7 @@ class Case(Base):
         self.actual_result = False
         self.reason = None
         self.result = {}
+        self.deal_result = {}
 
     @property
     def method(self):
@@ -324,6 +325,8 @@ class Case(Base):
     def return_deal(self, var_dick, interface_return):
         if self.deal == CaseDealEnum.DEFAULT.value:
             var_dick = deal_default(var_dick, interface_return)
+            # 单用例运行时后置处理保存的参数
+            self.deal_result.update(interface_return) if type(interface_return) == dict else 1
         # condition 'target_key,new_key  target_key,new_key'
         elif self.deal == CaseDealEnum.JSON.value:
             items = self.condition.split()
@@ -336,6 +339,8 @@ class Case(Base):
                 else:
                     new_key = None
                 var_dick = deal_default(var_dick, interface_return, target_key, new_key)
+                # 单用例运行时后置处理保存的参数
+                self.deal_result.update({new_key: var_dick[new_key]}) if target_key in interface_return else 1
         # condition  'pattern,key  pattern,key'
         elif self.deal == CaseDealEnum.REGULAR.value:
             items = self.condition.split()
@@ -347,6 +352,8 @@ class Case(Base):
                 value = re.findall(pattern, json.dumps(interface_return, ensure_ascii=False))
                 if value:
                     var_dick[key] = value[0]
+                    # 单用例运行时后置处理保存的参数
+                    self.deal_result.update({key: value[0]})
         current_app.logger.debug(json.dumps(var_dick))
         return var_dick
 
@@ -1000,13 +1007,13 @@ class Case(Base):
         for row in range(len(cases)):
             for col in range(len(cases[row])):
                 if col == CaseExcelEnum.METHOD.value:
-                    excel.write_execel(row+1, col, CaseMethodEnum(cases[row][col]).name)
+                    excel.write_execel(row + 1, col, CaseMethodEnum(cases[row][col]).name)
                 elif col == CaseExcelEnum.SUBMIT.value:
-                    excel.write_execel(row+1, col, CaseSubmitEnum(cases[row][col]).name)
+                    excel.write_execel(row + 1, col, CaseSubmitEnum(cases[row][col]).name)
                 elif col == CaseExcelEnum.DEAL.value:
-                    excel.write_execel(row+1, col, CaseDealEnum(cases[row][col]).name)
+                    excel.write_execel(row + 1, col, CaseDealEnum(cases[row][col]).name)
                 elif col == CaseExcelEnum.ASSERTION.value:
-                    excel.write_execel(row+1, col, CaseAssertEnum(cases[row][col]).name)
+                    excel.write_execel(row + 1, col, CaseAssertEnum(cases[row][col]).name)
                 else:
-                    excel.write_execel(row+1, col, cases[row][col])
+                    excel.write_execel(row + 1, col, cases[row][col])
         excel.write_save()

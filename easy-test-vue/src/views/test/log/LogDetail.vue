@@ -116,6 +116,11 @@
             </el-form-item>
             <el-form-item label="" v-else>
             </el-form-item>
+            <el-form-item label="处理结果" v-if="Object.keys(detail.deal_result).length > 0">
+              <pre>{{ detail.deal_result }}</pre>
+            </el-form-item>
+            <el-form-item label="" v-if="Object.keys(detail.deal_result).length > 0">
+            </el-form-item>
             <el-form-item label="提交方式">
               {{ detail.submit_text }}
             </el-form-item>

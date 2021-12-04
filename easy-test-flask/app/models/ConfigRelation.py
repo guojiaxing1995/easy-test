@@ -148,6 +148,8 @@ class ConfigRelation(Base):
                 progress += step
                 # 更新工程进度
                 project.update_progress(progress)
+        # 将vat_dick插入数据库
+        task.set_global_var(project)
         project.update_progress(100)
 
         return task

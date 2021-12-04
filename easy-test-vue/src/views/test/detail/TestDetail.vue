@@ -31,7 +31,8 @@
           <div style="height: 32px;line-height: 32px"><label class="label" >测试人员</label>{{ currentTask.user }}</div>
         </el-col>
         <el-col :span="2">
-          <l-icon name="HTMLreport" height="1.9em" width="1.9em" style="cursor: pointer" @click="reportDownload" v-if="!this.currentProject.running"
+          <l-icon name="var" height="1.9em" width="1.9em" style="cursor: pointer" @click="showGlobalVar"></l-icon>
+          <l-icon name="HTMLreport" height="1.9em" width="1.9em" style="cursor: pointer;margin-left: 30px" @click="reportDownload"
           v-auth="{ auth: '报告下载', type: 'disabled'}"></l-icon>
         </el-col>
       </el-row>
@@ -165,6 +166,11 @@
                       </el-form-item>
                       <el-form-item label="" v-else>
                       </el-form-item>
+                      <el-form-item label="处理结果" v-if="Object.keys(detail.deal_result).length > 0">
+                        <pre>{{ detail.deal_result }}</pre>
+                      </el-form-item>
+                      <el-form-item label="" v-if="Object.keys(detail.deal_result).length > 0">
+                      </el-form-item>
                       <el-form-item label="提交方式">
                         {{ detail.submit_text }}
                       </el-form-item>
@@ -223,6 +229,18 @@
     </div>
     <!-- 調試框 -->
     <debug-case :case="debugCase" :drawerShow="drawer" :type="type" @closed="drawerClose" :ruleShow="ruleShow"></debug-case>
+    <el-dialog
+      :visible.sync="showVar"
+      :close-on-click-modal="false"
+      top="15vh"
+      width="35%"
+      title="全局关联变量"
+      center
+    >
+      <div class="varDialog">
+        <pre>{{currentTask.globalVar}}</pre>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -238,6 +256,7 @@ export default {
   },
   data() {
     return {
+      showVar: false,
       debugCase: {
         url: '',
         method: '',
@@ -263,6 +282,7 @@ export default {
         success: 0,
         fail: 0,
         total: 0,
+        globalVar: null
       },
       currentProject: {
         running: false,
@@ -280,7 +300,8 @@ export default {
       detail: {
         result: {
           statusCode: null,
-        }
+        },
+        deal_result: {}
       },
       logShow: {
         resultShow: true,
@@ -362,6 +383,7 @@ export default {
             this.currentTask.success = this.taskList[index].success
             this.currentTask.fail = this.taskList[index].fail
             this.currentTask.total = this.taskList[index].total
+            this.currentTask.globalVar = this.taskList[index].global_var
           }
         }
         this.getCaseLogs()
@@ -372,6 +394,7 @@ export default {
         this.currentTask.fail = null
         this.currentTask.total = null
         this.CaseLogData = []
+        this.currentTask.globalVar = null
       }
       // 刷新饼图
       this.circle.setOption(this.circle_option)
@@ -401,6 +424,7 @@ export default {
           this.currentTask.success = this.taskList[index].success
           this.currentTask.fail = this.taskList[index].fail
           this.currentTask.total = this.taskList[index].total
+          this.currentTask.globalVar = this.taskList[index].global_var
         }
       }
       // 刷新饼图
@@ -550,6 +574,9 @@ export default {
           console.log(e.target.result)
         }
       })
+    },
+    showGlobalVar() {
+      this.showVar = true
     },
   },
   mounted() {
@@ -820,5 +847,26 @@ export default {
       background: rgb(175, 173, 173);
     }
   }
+  .varDialog {
+    margin-top: -25px;
+    height: 400px;
+    overflow: auto;
+  }
+    .varDialog::-webkit-scrollbar{
+      width:8px;
+      height:8px;
+      /**/
+    }
+    .varDialog::-webkit-scrollbar-track{
+      background: rgb(239, 239, 239);
+      border-radius:2px;
+    }
+    .varDialog::-webkit-scrollbar-thumb{
+      background: #dad4d4;
+      border-radius:10px;
+    }
+    .varDialog::-webkit-scrollbar-thumb:hover{
+      background: rgb(175, 173, 173);
+    }
 }
 </style>

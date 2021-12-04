@@ -246,6 +246,8 @@ class Project(Base):
                     db.session.delete(user)
             # 删除工程，逻辑删除
             project.delete_time = datetime.now()
+            # 删除工程的用户自定义参数
+            project.set_user_parameters()
             # 删除工程对应的定时任务
             from app.models.scheduler import Scheduler
             schedulers = Scheduler.query.filter_by(project_id=project.id, delete_time=None).all()
@@ -562,7 +564,7 @@ class Project(Base):
                 except Exception:
                     raise RequestParamException(msg='请填写json格式数据')
             # 如果目标工程设置过参数则更新 否则新增
-            mongo.db.user_parameters.update_one(
+            mongo.db.project.update_one(
                 {'project_id': self.id},
                 {'$set': {
                     'project_id': self.id,
@@ -571,13 +573,13 @@ class Project(Base):
                 upsert=True
             )
         else:
-            mongo.db.user_parameters.delete_one({'project_id': self.id})
+            mongo.db.project.delete_one({'project_id': self.id})
 
         return True
 
     def get_user_parameters(self):
-        param = mongo.db.user_parameters.find_one({'project_id': self.id}, {"_id": 0})['parameters'] if \
-            mongo.db.user_parameters.find_one({'project_id': self.id}) else None
+        param = mongo.db.project.find_one({'project_id': self.id}, {"_id": 0})['parameters'] if \
+            mongo.db.project.find_one({'project_id': self.id}) else None
         data = {
             'pid': self.id,
             'param': param

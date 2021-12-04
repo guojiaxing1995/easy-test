@@ -84,6 +84,7 @@ def task_progress(pid):
             'total': task.total,
             'success': task.success,
             'fail': task.fail,
+            'global_var': task.get_global_var(),
             'create_time': task.create_time,
             'update_time': task.update_time,
         }

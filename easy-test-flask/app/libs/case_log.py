@@ -38,7 +38,8 @@ def log(case, project, task, user):
         'project_type': project.type,
         'project_type_name': ProjectTypeEnum.data()[project.type],
         'task_id': task.id,
-        'task_no': task.task_no
+        'task_no': task.task_no,
+        'deal_result': case.deal_result
     }
     return case_log
 
@@ -75,7 +76,8 @@ def log_format(case_log):
         'project_type': case_log['project_type'],
         'project_type_name': case_log['project_type_name'],
         'task_id': case_log['task_id'],
-        'task_no': case_log['task_no']
+        'task_no': case_log['task_no'],
+        'deal_result': case_log['deal_result']
     }
 
 
