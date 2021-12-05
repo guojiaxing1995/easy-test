@@ -4,6 +4,7 @@
 """
 
 # 安全性配置
+import os
 from apscheduler.jobstores.mongodb import MongoDBJobStore
 
 from app.config.setting import BaseConfig
@@ -78,4 +79,5 @@ class ProductionSecure(BaseConfig):
 
     API_SERVER = 'http://api:5000'
 
-    SITE_DOMAIN = 'http://127.0.0.1'
+    # 前端访问地址
+    SITE_DOMAIN = os.getenv('SITE_DOMAIN')
