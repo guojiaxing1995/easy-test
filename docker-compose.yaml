@@ -12,6 +12,8 @@ services:
     expose:
       - 5000
     command: ["api"]
+    environment:
+      - SITE_DOMAIN=http://yourwebsite
     networks:
       - easy-test
     ports:
