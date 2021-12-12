@@ -10,7 +10,7 @@ from flask_jwt_extended import current_user
 from lin import db
 from lin.exception import UnknownException
 from lin.interface import InfoCrud as Base
-from sqlalchemy import Column, Integer, Boolean, String, SmallInteger
+from sqlalchemy import Column, Integer, Boolean, String, SmallInteger, Text
 
 from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseAssertEnum, CaseTypeEnum
 from app.libs.error_code import ConfigNotFound
@@ -33,8 +33,8 @@ class ConfigCopy(Base):
     header = Column(String(500), comment='请求头')
     data = Column(String(3000), comment='请求体')
     _deal = Column('deal', SmallInteger, nullable=False,
-                   comment='后置处理方法 ;  1 -> 不做处理 |  2 -> 默认处理 |  3 -> 指定key获取数据 |  4-> 正则表达')
-    condition = Column(String(50), comment='后置处理方法的条件语句，在后置处理方法为指定key或正则表达时为必填')
+                   comment='后置处理方法 ;  1 -> 不做处理 |  2 -> 默认处理 |  3 -> 指定key获取数据 |  4-> 正则表达 |  5-> 自定义处理')
+    condition = Column(Text(65535), comment='后置处理方法的条件语句，在后置处理方法为指定key或正则表达时为必填')
     expect = Column(String(500), comment='预期结果')
     _assertion = Column('assertion', SmallInteger, nullable=False,
                         comment='断言类型 ;  1 -> key value 等于 |  2 -> key value 不等于 |  3 -> 包含|  4-> 不包含|  4-> http返回码200')

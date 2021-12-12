@@ -49,15 +49,16 @@
               </el-radio-group>
             </el-form-item>
             <el-form-item label="后置处理">
-              <el-radio-group v-model="form.deal">
+              <el-radio-group v-model="form.deal" @change="resetDeal">
                 <label v-for="(val,key) in type.deal" :key="key" class="el-radio">
                   <el-radio :label="key">{{val}}</el-radio>
                 </label>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="处理语句" prop="condition">
-              <el-input size="medium" type="textarea" :autosize="{ minRows: 1, maxRows: 3}" placeholder="请输入处理语句" v-model="form.condition" maxlength="50" show-word-limit>
-              </el-input>
+              <codemirror v-show="form.deal==5" ref="dealConditionCode" v-model="form.condition"  :options="cmOptions"></codemirror>
+              <el-input v-if="form.deal!=5" size="medium" type="textarea" :autosize="{ minRows: 1, maxRows: 3}" placeholder="请输入处理语句"
+              v-model="form.condition" maxlength="50" show-word-limit></el-input>
             </el-form-item>
             <el-form-item label="断言方式">
               <el-radio-group v-model="form.assertion">
@@ -86,9 +87,24 @@
 </template>
 
 <script>
+import { codemirror } from 'vue-codemirror'
 import { get, post, put } from '@/lin/plugins/axios'
+/* eslint-disable*/
+import 'codemirror/mode/python/python.js'
+import 'codemirror/theme/material-palenight.css'
+import 'codemirror/addon/scroll/simplescrollbars.css'
+import 'codemirror/addon/scroll/simplescrollbars'
+import 'codemirror/addon/hint/show-hint';
+import 'codemirror/addon/hint/show-hint.css';
+import 'codemirror/addon/edit/matchbrackets'
+import 'codemirror/addon/edit/closebrackets'
+import 'codemirror/addon/display/autorefresh'
+import 'codemirror/addon/comment/comment'
 
 export default {
+  components: {
+    codemirror
+  },
   inject: ['eventBus'],
   props: {
     editCase: {
@@ -100,6 +116,25 @@ export default {
       loading: false,
       allGroup: [],
       oldCase: {},
+      cmOptions: {
+        theme: 'material-palenight',
+        mode: 'python',
+        indentUnit: 4,
+        indentWithTabs: true,
+        autofocus: true,
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        styleActiveLine: true,
+        smartIndent: true,
+        lineNumbers: true,
+        line: true,
+        lineWrapping: true,
+        autoRefresh: true,
+        scrollbarStyle: 'overlay',
+        hintOptions: {
+          completeSingle: false
+        },
+      },
       form: {
         name: null,
         info: null,
@@ -149,8 +184,38 @@ export default {
       this.form.caseGroup = this.editCase.case_group
     }
     this.loading = false
+    this.$nextTick(()=>{
+      this.$refs.dealConditionCode.codemirror.on('keypress', () => {
+        //编译器内容更改事件
+        this.$refs.dealConditionCode.codemirror.showHint();
+      }) 
+   }) 
   },
   methods: {
+    async resetDeal(val) {
+      if (this.editCase) {
+        const reult = await get('/v1/case', {id: this.editCase.id}, { showBackend: true })
+        const [form] = reult.data
+        if (val==form.deal){
+          this.form.condition = form.condition
+        }else{
+          if (val==5){
+            this.form.condition = '# 规则：自定义python函数，入参为2个字典，param1->接口返回数据  param2->当前运行工程的全局变量, 需要返回一个变量字典'
+          }else{
+            this.form.condition = ''
+          }
+        }
+      }else {
+        if (val==5){
+          this.form.condition = '# 规则：自定义python函数，入参为2个字典，param1->接口返回数据  param2->当前运行工程的全局变量, 需要返回一个变量字典'
+        }else{
+          this.form.condition = ''
+        }
+      }
+      setTimeout(() => {
+        this.$refs.dealConditionCode.codemirror.refresh()
+      },5)
+    },
     async getAllGroups() {
       try {
         this.allGroup = await get('/v1/caseGroup/auth', { showBackend: true })
@@ -260,6 +325,9 @@ export default {
 }
 
 .container {
+  .vue-codemirror {
+    line-height: 150%;
+  }
   .title {
     height: 59px;
     line-height: 59px;

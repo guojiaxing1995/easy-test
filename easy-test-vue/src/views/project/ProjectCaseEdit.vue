@@ -37,7 +37,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="处理语句" prop="condition">
-        <el-input size="mini" type="textarea" :autosize="{ minRows: 1, maxRows: 3}" placeholder="请输入处理语句" v-model="element.condition" maxlength="50" show-word-limit>
+        <el-input size="mini" type="textarea" :autosize="{ minRows: 1, maxRows: 3}" placeholder="请输入处理语句" v-model="element.condition" maxlength="5000" show-word-limit>
         </el-input>
       </el-form-item>
       <el-form-item label="断言方式" prop="assertion">

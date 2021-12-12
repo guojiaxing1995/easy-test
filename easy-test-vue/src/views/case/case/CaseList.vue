@@ -84,7 +84,7 @@
                   </div>
                 </el-form-item>
                 <el-form-item label="处理语句">
-                  <span>{{ props.row.condition }}</span>
+                  <pre>{{ props.row.condition }}</pre>
                 </el-form-item>
                 <el-form-item label="断言方式">
                   <div v-for="(val,key) in type.assert" :key="key">
@@ -560,7 +560,15 @@ export default {
     }
   }
 
+  .table /deep/ .el-table__fixed-right {
+    height: 100% !important;
+  }
+  .table /deep/ .el-table__fixed {
+    height: 100% !important;
+  }
+
   .table{
+    width: 100%;
     margin-top: 30px;
     .method {
       .get {

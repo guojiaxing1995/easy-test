@@ -124,6 +124,8 @@ import 'codemirror/theme/mdn-like.css'
 import 'codemirror/theme/paraiso-light.css'
 import 'codemirror/addon/scroll/simplescrollbars.css'
 import 'codemirror/addon/scroll/simplescrollbars'
+import 'codemirror/addon/edit/matchbrackets'
+import 'codemirror/addon/edit/closebrackets'
 
 
 export default {
@@ -185,6 +187,7 @@ export default {
         lineNumbers: true,
         line: true,
         matchBrackets: true,
+        autoCloseBrackets: true,
         autoRefresh: true,
         scrollbarStyle: 'overlay',
         readOnly: false

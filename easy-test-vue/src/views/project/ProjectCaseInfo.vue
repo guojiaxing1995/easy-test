@@ -5,7 +5,7 @@
               :header-cell-style="headerClass"
               :cell-style="cellClass"
               :row-style="rowClass">
-      <el-table-column width="150" property="method" label="请求方法" :show-overflow-tooltip="true">
+      <el-table-column width="125" property="method" label="请求方法" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           <div :key="key" v-for="(val,key) in type.method">
             <div v-show="parseInt(scope.row.method)  === parseInt(key)">{{val}}</div>
@@ -19,21 +19,25 @@
               :cell-style="cellClass"
               :header-cell-style="headerClass"
               :row-style="rowClass">
-      <el-table-column width="150" property="deal" label="后置处理" :show-overflow-tooltip="true">
+      <el-table-column width="125" property="deal" label="后置处理" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           <div :key="key" v-for="(val,key) in type.deal">
             <div v-show="parseInt(scope.row.deal)  === parseInt(key)">{{val}}</div>
           </div>
         </template>
       </el-table-column>
-      <el-table-column min-width="150" property="condition" label="处理语句" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column min-width="150" property="condition" label="处理语句" :show-overflow-tooltip="true">
+        <template slot-scope="scope">
+            <pre>{{scope.row.condition}}</pre>
+        </template>
+      </el-table-column>
     </el-table>
     <el-table :data="element"
               size="mini"
               :cell-style="cellClass"
               :header-cell-style="headerClass"
               :row-style="rowClass">
-      <el-table-column width="150" property="assertion" label="断言类型" :show-overflow-tooltip="true">
+      <el-table-column width="125" property="assertion" label="断言类型" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           <div :key="key" v-for="(val,key) in type.assert">
             <div v-show="parseInt(scope.row.assertion)  === parseInt(key)">{{val}}</div>

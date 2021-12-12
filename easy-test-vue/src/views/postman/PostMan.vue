@@ -65,6 +65,8 @@ import 'codemirror/mode/javascript/javascript.js'
 import 'codemirror/theme/erlang-dark.css'
 import 'codemirror/addon/scroll/simplescrollbars.css'
 import 'codemirror/addon/scroll/simplescrollbars'
+import 'codemirror/addon/edit/matchbrackets'
+import 'codemirror/addon/edit/closebrackets'
 
 
 export default {
@@ -107,6 +109,8 @@ export default {
         tabSize: 2,
         mode: 'text/javascript',
         theme: 'erlang-dark',
+        autoCloseBrackets: true,
+        matchBrackets: true,
         lineNumbers: true,
         line: true,
         matchBrackets: true,

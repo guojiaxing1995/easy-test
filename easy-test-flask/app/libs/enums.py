@@ -57,6 +57,16 @@ class CaseDealEnum(Enum):
     JSON = 3
     # 正则表达式
     REGULAR = 4
+    # 自定义处理,支持写一个python方法,参数为接口返回数据\当前运行工程的全局变量字典，返回一个字典，如下：
+    """
+    def my_customize(data, var_dick):
+        age = var_dick['age']
+        for i in data:
+            if i['age'] == age:
+                name = i['name']
+                return {'name': name}
+    """
+    CUSTOMIZE = 5
 
     @classmethod
     def data(cls):
@@ -64,7 +74,8 @@ class CaseDealEnum(Enum):
             cls.NOT.value: '不做处理',
             cls.DEFAULT.value: '保存全部键值对',
             cls.JSON.value: 'json提取器',
-            cls.REGULAR.value: '正则表达式'
+            cls.REGULAR.value: '正则表达式',
+            cls.CUSTOMIZE.value: '自定义处理'
         }
 
 

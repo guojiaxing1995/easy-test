@@ -162,7 +162,7 @@
                         {{ detail.deal_text }}
                       </el-form-item>
                       <el-form-item label="处理语句" v-if="detail.condition">
-                        {{ detail.condition }}
+                        <pre>{{ detail.condition }}</pre>
                       </el-form-item>
                       <el-form-item label="" v-else>
                       </el-form-item>

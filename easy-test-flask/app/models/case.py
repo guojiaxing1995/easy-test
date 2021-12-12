@@ -8,6 +8,7 @@
 import math
 import os
 import shutil
+import sys
 import time
 from datetime import datetime
 import json
@@ -18,10 +19,11 @@ from flask_jwt_extended import current_user, get_current_user
 from lin import manager
 from lin.exception import ParameterException, AuthFailed
 from lin.interface import InfoCrud as Base
-from sqlalchemy import Column, Integer, String, SmallInteger, between
+from sqlalchemy import Column, Integer, String, SmallInteger, Text
 from lin.db import db
 
 from app.libs.case_log import log, edit_log
+from app.libs.customize_deal import make_deal_file, remove_deal_file
 from app.libs.deal import deal_default, get_target_value, substitution
 from app.libs.enums import CaseMethodEnum, CaseSubmitEnum, CaseDealEnum, CaseTypeEnum, CaseAssertEnum, UserAuthEnum, \
     ProjectTypeEnum, CaseExcelEnum
@@ -45,8 +47,8 @@ class Case(Base):
     header = Column(String(500), comment='请求头')
     data = Column(String(3000), comment='请求体')
     _deal = Column('deal', SmallInteger, nullable=False,
-                   comment='后置处理方法 ;  1 -> 不做处理 |  2 -> 默认处理 |  3 -> 指定key获取数据 |  4-> 正则表达')
-    condition = Column(String(50), comment='后置处理方法的条件语句，在后置处理方法为指定key或正则表达时为必填')
+                   comment='后置处理方法 ;  1 -> 不做处理 |  2 -> 默认处理 |  3 -> 指定key获取数据 |  4-> 正则表达 |  5-> 自定义处理')
+    condition = Column(Text(65535), comment='后置处理方法的条件语句，在后置处理方法为指定key或正则表达时为必填')
     expect = Column(String(500), comment='预期结果')
     _assertion = Column('assertion', SmallInteger, nullable=False,
                         comment='断言类型 ;  1 -> key value 等于 |  2 -> key value 不等于 |  3 -> 包含|  4-> 不包含|  4-> http返回码200')
@@ -354,6 +356,20 @@ class Case(Base):
                     var_dick[key] = value[0]
                     # 单用例运行时后置处理保存的参数
                     self.deal_result.update({key: value[0]})
+        # 用户自定义的python函数处理
+        elif self.deal == CaseDealEnum.CUSTOMIZE.value:
+            deal_path = make_deal_file(json.dumps(interface_return, ensure_ascii=False), self.condition,
+                                       json.dumps(var_dick, ensure_ascii=False))
+            try:
+                result = os.popen('python ' + deal_path)
+                result_str = re.sub('\'', '\"', result.read())
+                deal_res = json.loads(result_str)
+                self.deal_result.update(deal_res) if deal_res else 1
+                var_dick.update(self.deal_result)
+            except Exception:
+                current_app.logger.error('自定义后置处理异常' + str(sys.exc_info()))
+            finally:
+                remove_deal_file(deal_path)
         current_app.logger.debug(json.dumps(var_dick))
         return var_dick
 
