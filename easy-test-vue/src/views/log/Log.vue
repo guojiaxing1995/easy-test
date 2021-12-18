@@ -35,7 +35,7 @@
         <section v-for="log in logs" :key="log.id">
           <span class="point-time"></span>
           <aside>
-            <p class="things" v-html="log.message"></p>
+            <p class="things" v-html="$xss(log.message)"></p>
             <p class="brief">
               <span class="text-yellow">{{ log.user_name }}</span> {{ log.time | dateTimeFormatter }}
             </p>

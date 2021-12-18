@@ -12,6 +12,8 @@ import '@/lin/directives'
 
 import echarts from 'echarts'
 
+import xss from 'xss'
+
 import VueSocketIO from 'vue-socket.io'
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition'
 import router from '@/router'
@@ -30,6 +32,7 @@ import 'element-ui/lib/theme-chalk/display.css'
 import 'codemirror/lib/codemirror.css'
 
 Vue.prototype.$echarts = echarts
+Vue.prototype.$xss = xss
 
 Vue.config.productionTip = false
 
