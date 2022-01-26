@@ -39,6 +39,18 @@ class LoginForm(Form):
     password = PasswordField('密码', validators=[DataRequired(message='密码不可为空')])
 
 
+# 登陆校验
+class LoginMiniForm(Form):
+    code = StringField('code', validators=[DataRequired(message='code不可为空')])
+
+
+# 小程序和业务系统账户绑定校验
+class BindMiniForm(Form):
+    username = StringField(validators=[DataRequired()])
+    password = PasswordField('密码', validators=[DataRequired(message='密码不可为空')])
+    code = StringField('code', validators=[DataRequired(message='code不可为空')])
+
+
 # 重置密码校验
 class ResetPasswordForm(Form):
     new_password = PasswordField('新密码', validators=[

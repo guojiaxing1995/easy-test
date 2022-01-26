@@ -6,13 +6,14 @@
 """
 from operator import and_
 
+import requests
 from flask import jsonify, current_app
 from flask_jwt_extended import create_access_token, get_jwt_identity, get_current_user, \
     create_refresh_token, verify_jwt_refresh_token_in_request
 from lin.core import manager, route_meta, Log
 from lin.db import db
 from lin.enums import UserAdmin, UserActive
-from lin.exception import NotFound, Success, Failed, RepeatException, ParameterException
+from lin.exception import NotFound, Success, Failed, RepeatException, ParameterException, AuthFailed
 from lin.jwt import login_required, admin_required, get_tokens
 from lin.log import Logger
 from lin.redprint import Redprint
@@ -22,7 +23,7 @@ from app.libs.utils import json_res, pinyin, group_by_initials
 from app.models.UserAuth import UserAuth
 from app.validators.CaseForm import UserGroupAuthForm
 from app.validators.forms import LoginForm, RegisterForm, ChangePasswordForm, UpdateInfoForm, \
-    AvatarUpdateForm
+    AvatarUpdateForm, LoginMiniForm, BindMiniForm
 
 user_api = Redprint('user')
 
@@ -253,3 +254,53 @@ def user_by_initials():
     users_by_initials.append({'name': '其他', 'users': others})
 
     return jsonify(users_by_initials)
+
+
+# 小程序登录
+@user_api.route('/login/mini', methods=['POST'])
+def login_mini():
+    form = LoginMiniForm().validate_for_api()
+    appid = current_app.config.get('APP_ID')
+    secret = current_app.config.get('APP_SECRET')
+    code = form.code.data
+    url = 'https://api.weixin.qq.com/sns/jscode2session?appid=' + appid + '&secret=' + secret + '&js_code=' + code + \
+          '&grant_type=authorization_code'
+    res = requests.get(url)
+    if 'openid' not in res.json().keys():
+        return Failed('小程序用户异常')
+    openid = res.json()['openid']
+    user = manager.user_model.query.filter_by(openid=openid).first_or_404()
+    # 此处不能用装饰器记录日志
+    Log.create_log(
+        message=f'{user.username}小程序登陆成功获取了令牌',
+        user_id=user.id, user_name=user.username,
+        status_code=200, method='post', path='/cms/user/login/mini',
+        authority='无', commit=True
+    )
+    access_token, refresh_token = get_tokens(user)
+    return json_res(access_token=access_token, refresh_token=refresh_token)
+
+
+# 小程序账号和业务系统账户绑定
+@user_api.route('/bind/mini', methods=['POST'])
+def bind_mini():
+    form = BindMiniForm().validate_for_api()
+    user = manager.user_model.verify(form.username.data, form.password.data)
+
+    appid = current_app.config.get('APP_ID')
+    secret = current_app.config.get('APP_SECRET')
+    code = form.code.data
+    url = 'https://api.weixin.qq.com/sns/jscode2session?appid=' + appid + '&secret=' + secret + '&js_code=' + code + \
+          '&grant_type=authorization_code'
+    res = requests.get(url)
+    if 'openid' not in res.json().keys():
+        return Failed('小程序用户异常')
+    openid = res.json()['openid']
+    if manager.user_model.query.filter_by(openid=openid).first():
+        return Failed('小程序已经与其他账号绑定')
+    if user.openid:
+        return Failed('当前账号已经被其他用户绑定')
+    with db.auto_commit():
+        user.openid = openid
+
+    return Success('绑定成功')
