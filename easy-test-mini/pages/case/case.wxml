@@ -1,0 +1,36 @@
+<!--pages/case/case.wxml-->
+<view class="header">
+  <l-icon name='list' l-class='iconfont' size="50" bindtap="showCaseGroup"/>
+  <l-search-bar class="search" placeholder="请输入用例名称" bind:linconfirm="confirm" 
+                bind:linblur="linblur" bind:linclear="clear"/>
+</view>
+<l-loading show="{{!showCaseList}}" type="circle" full-screen="{{true}}"></l-loading>
+<view class="body">
+  <l-list gap="20" class="list" tag-position="right" tag-shape="circle" 
+          tag-plain tag-content="{{item.create_user}}" bind:lintap="onGoToDetail" data-case="{{item}}"
+          wx:for="{{caseList}}" wx:for-item="item" wx:key="index" >
+   <view slot="left-section">
+      <view class="l-text">
+        <view class="title">
+          <view class="title-name">{{item.name}}</view>
+          <l-tag wx:if="{{item.method===1}}" class="method" bg-color="#00c292" size="super-mini">GET</l-tag>
+          <l-tag wx:if="{{item.method===2}}" class="method" bg-color="#e6a23c" size="super-mini">POST</l-tag>
+          <l-tag wx:if="{{item.method===3}}" class="method" bg-color="#3963bc" size="super-mini">PUT</l-tag>
+          <l-tag wx:if="{{item.method===4}}" class="method" bg-color="#e46a76" size="super-mini">DELETE</l-tag>
+        </view>
+        <view class="url">{{item.url}}</view>
+      </view>
+    </view>
+   </l-list>
+</view>
+<l-popup show="{{showPopup}}" content-align="left" z-index="9999999999">
+  <view class="popup">
+    <scroll-view scroll-y="true" style="height: 100%;">
+      <l-list title="{{item.name}}" gap="25" class="list" bind:lintap="clickGroup" data-group="{{item}}"
+      wx:for="{{caseGroups}}" wx:for-item="item" wx:key="index"
+      l-content-class="{{ item.id === group.id ? 'list-content-select' : 'list-content' }}"/>
+    </scroll-view>
+  </view>
+</l-popup>
+<l-status-show show="{{showNoData}}" type="data"></l-status-show>
+<l-loadmore show="{{loadmoreShow}}" type="{{loadmoreType}}" line="{{true}}"></l-loadmore>

@@ -1,0 +1,35 @@
+/* pages/case-detail/case-detail.wxss */
+.detail {
+  margin: 15rpx;
+  width: 97%;
+}
+.name {
+  font-size: 40rpx;
+  margin: 0 0 30rpx 0;
+}
+.row {
+  display: flex;
+  width: 100%;
+}
+.colume {
+  width: 50%;
+  white-space:normal;
+  word-break:break-all;
+  word-wrap:break-word; 
+  margin: 5rpx;
+  color: #3963bc;
+  display: flex;
+  align-items: center;
+}
+.colume-all {
+  white-space:normal;
+  word-break:break-all;
+  word-wrap:break-word; 
+  margin: 5rpx;
+  color: #3963bc;
+  display: flex;
+  align-items: center;
+}
+.text {
+  color: #333333;
+}

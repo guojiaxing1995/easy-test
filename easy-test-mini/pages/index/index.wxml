@@ -1,0 +1,30 @@
+<!--index.wxml-->
+<view class="container">
+  <view class="userinfo">
+    <block wx:if="{{canIUseOpenData}}">
+      <view class="userinfo-avatar">
+        <open-data type="userAvatarUrl"></open-data>
+      </view>
+      <open-data type="userNickName"></open-data>
+    </block>
+    <block wx:elif="{{!hasUserInfo}}">
+      <button wx:if="{{canIUseGetUserProfile}}" bindtap="getUserProfile"> 获取头像昵称 </button>
+      <button wx:elif="{{canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
+      <view wx:else> 请使用1.4.4及以上版本基础库 </view>
+    </block>
+    <block wx:else>
+      <image class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+    </block>
+  </view>
+  <view class="usermotto">
+    <l-button width="380" height="90" plain bind:lintap="login" loading="{{loading}}">{{motto}}</l-button>
+  </view>
+  <text id='copyright'>©2020-2022 easy-test created by 郭家兴</text>
+  <l-toast id="toast" />
+  <l-dialog show="{{showBind}}" id="bind-dialog" type="confirm" title="绑定账户" confirm-text="绑定" bind:linconfirm="bindUser" >
+    <l-input required label="用户名" showRow="{{false}}" bind:lininput="usernameInput"  placeholder="请输入用户名" tipType="text" rules="{{userRule}}" />
+    <l-input required label="密码" showRow="{{false}}" bind:lininput="passwordInput" type="password"  placeholder="请输入密码" tipType="text" rules="{{userRule}}" />
+  </l-dialog>
+</view>
+<l-message show="msgShow" content="登录失效请重新登录" duration="3000" type="error"/>

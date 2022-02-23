@@ -1,0 +1,2 @@
+<!--pages/test/test.wxml-->
+<l-status-show show="{{true}}" type="data"></l-status-show>

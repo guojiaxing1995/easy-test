@@ -1,0 +1,66 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/logs/logs",
+    "pages/home/home",
+    "pages/test/test",
+    "pages/case/case",
+    "pages/case-detail/case-detail"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#2c61b4",
+    "navigationBarTitleText": "easy-test",
+    "navigationBarTextStyle": "white"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "usingComponents": {
+    "l-button": "/miniprogram_npm/lin-ui/button/index",
+    "l-dialog": "/miniprogram_npm/lin-ui/dialog/index",
+    "l-toast": "/miniprogram_npm/lin-ui/toast/index",
+    "l-input": "/miniprogram_npm/lin-ui/input/index",
+    "l-tab-bar": "/miniprogram_npm/lin-ui/tab-bar/index",
+    "l-grid": "/miniprogram_npm/lin-ui/grid/index",
+    "l-grid-item": "/miniprogram_npm/lin-ui/grid-item/index",
+    "l-card": "/miniprogram_npm/lin-ui/card/index",
+    "l-popup": "/miniprogram_npm/lin-ui/popup/index",
+    "l-list": "/miniprogram_npm/lin-ui/list/index",
+    "l-status-show": "/miniprogram_npm/lin-ui/status-show/index",
+    "l-message": "/miniprogram_npm/lin-ui/message/index",
+    "l-search-bar": "/miniprogram_npm/lin-ui/search-bar/index",
+    "l-icon": "/miniprogram_npm/lin-ui/icon/index",
+    "l-loading": "/miniprogram_npm/lin-ui/loading/index",
+    "l-tag": "/miniprogram_npm/lin-ui/tag/index",
+    "l-loadmore": "/miniprogram_npm/lin-ui/loadmore/index",
+    "ec-canvas": "/ec-canvas/ec-canvas"
+  },
+  "tabBar": {
+    "borderStyle": "white",
+    "selectedColor": "#2c61b4",
+    "color": "#666666",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "总览",
+        "iconPath": "/images/tab/home.png",
+        "selectedIconPath": "/images/tab/home-select.png"
+      },
+      {
+        "pagePath": "pages/test/test",
+        "text": "测试",
+        "iconPath": "/images/tab/test.png",
+        "selectedIconPath": "/images/tab/test-select.png"
+      },
+      {
+        "pagePath": "pages/case/case",
+        "text": "用例",
+        "iconPath": "/images/tab/case.png",
+        "selectedIconPath": "/images/tab/case-select.png"
+      }
+    ]
+  },
+  "useExtendedLib": {
+    "weui": true
+  }
+}

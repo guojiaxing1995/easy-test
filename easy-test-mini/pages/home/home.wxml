@@ -1,0 +1,70 @@
+<!--pages/home/home.wxml-->
+<image src="/images/banner.png" class="banner"></image>
+<l-grid row-num="4" is-hover="{{false}}" l-class="grid">
+    <l-grid-item key="one" slot="one">
+        <view class="num">{{total.project}}</view>
+        <view class="text">工程</view>
+     </l-grid-item>
+    <l-grid-item key="two" slot="two">
+        <view class="num">{{total.scheduler}}</view>
+        <view class="text">定时任务</view>
+    </l-grid-item>
+    <l-grid-item key="three" slot="three">
+        <view class="num">{{total.mock}}</view>
+        <view class="text">mock接口</view>
+    </l-grid-item>
+    <l-grid-item key="four" slot="four">
+        <view class="num">{{total.case}}</view>
+        <view class="text">用例</view>
+    </l-grid-item>
+</l-grid>
+<l-grid is-hover="{{false}}" l-class="grid">
+    <l-grid-item key="one" slot="one">
+        <view class="num">{{today.test_count}}</view>
+        <view class="text">今日执行测试</view>
+     </l-grid-item>
+    <l-grid-item key="two" slot="two">
+        <view class="num">{{today.test_project_count}}</view>
+        <view class="text">今日测试工程</view>
+    </l-grid-item>
+    <l-grid-item key="three" slot="three">
+        <view class="num">{{today.case_add_count}}</view>
+        <view class="text">今日新增用例</view>
+    </l-grid-item>
+</l-grid>
+<view class="grid-echarts">
+  <l-button type="default" size="long" bind:lintap="showPopup" class="project-btn">{{project.name}}</l-button>
+  <l-grid is-hover="{{false}}" row-num="2">
+    <l-grid-item key="one" slot="one">
+        <view class="text">
+          当前成功率 
+          <text class="{{ projectData.currentSuccessRate > 80 ? 'data-green' : 'data-red' }}">{{projectData.currentSuccessRate}}%</text>
+        </view>
+     </l-grid-item>
+    <l-grid-item key="two" slot="two">
+        <view class="text">同比增长
+          <text class="{{ projectData.yoyGrowth >= 0 ? 'data-green' : 'data-red' }}">{{projectData.yoyGrowth}}%</text>
+        </view>
+    </l-grid-item>
+  </l-grid>
+  <view class="container">
+    <ec-canvas id="mychart-dom-pie" canvas-id="mychart-pie" style="width: 100%; height: 400rpx;" ec="{{ ecPie }}"></ec-canvas>
+    <ec-canvas id="mychart-dom-radar" canvas-id="mychart-radar" style="width: 100%; height: 400rpx;" ec="{{ ecPie }}"></ec-canvas>
+  </view>
+  <view class="container">
+    <ec-canvas id="mychart-dom-bar" canvas-id="mychart-bar" style="width: 100%; height: 400rpx;" ec="{{ ecPie }}"></ec-canvas>
+  </view>
+</view>
+<l-popup show="{{showPopup}}" content-align="bottom" z-index="999999">
+  <view class="popup">
+    <scroll-view scroll-y="true" style="height: 100%;">
+      <l-list class="list" wx:for="{{projectList}}" wx:for-item="item" wx:key="index"
+              title="{{item.name}}" is-link="{{false}}" gap="30" desc="{{item.server}}" 
+              l-content-class="{{ item.id === project.id ? 'list-content-select' : 'list-content' }}"
+              tag-content="{{ item.type === 1 ? '关联' : '副本' }}"
+              tag-plain="{{ item.id === project.id ? false : true }}"
+              bind:lintap="chooseProject" data-project="{{item}}"
+              tag-position="right" tag-shape="circle"/>
+    </scroll-view>
+  </view>
+</l-popup>

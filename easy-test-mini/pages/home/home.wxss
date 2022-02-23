@@ -1,0 +1,56 @@
+/* pages/home/home.wxss */
+.banner{
+  width: 100%;
+  height: 300rpx;
+}
+.num{
+  color: #4577ff;
+}
+.text{
+  color: #666666;
+}
+.grid{
+  box-shadow:0 4rpx 20rpx 0 rgba(212,217,223,.5);
+  border-radius:6px;
+  margin: 5rpx;
+}
+.grid-echarts{
+  box-shadow:0 4rpx 20rpx 0 rgba(212,217,223,.5);
+  border-radius:6px;
+  margin: 5rpx;
+  padding: 10rpx;
+}
+.project-btn{
+  margin-top: 20rpx;
+}
+.popup{
+  background-color: white;
+  height: 1000rpx;
+  border-radius: 2% 2% 0 0;
+  padding-top: 20rpx;
+}
+.list{
+  height: 100%;
+}
+.list-content-select{
+  color: #2c61b4;
+  font-size: 32rpx;
+}
+.list-content{
+  font-size: 32rpx;
+}
+
+.container {
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+} 
+.data-green {
+  color: #00c292;
+  font-size: 38rpx;
+}
+.data-red {
+  color: #F4516C;
+  font-size: 38rpx;
+}

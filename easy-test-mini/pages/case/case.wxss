@@ -1,0 +1,52 @@
+/* pages/case/case.wxss */
+.header{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  padding: 15rpx 10rpx;
+  position: fixed;
+  top: 0;
+  height: 75rpx;
+  z-index: 999999999;
+  background-color: white;
+}
+.search {
+  width: 100%;
+  margin: auto;
+}
+.body{
+  /* height: 3000rpx; */
+  margin-top: 90rpx;
+}
+.popup{
+  background-color: white;
+  height: 100%;
+  width: 500rpx;
+  border-radius: 0 4% 4% 0;
+  padding-top: 20rpx;
+}
+.list {
+  height: 100%;
+}
+.list-content-select{
+  color: #2c61b4;
+  font-size: 37rpx;
+}
+.list-content{
+  font-size: 37rpx;
+}
+.url {
+  color: #adb9d3;
+  font-size: 24rpx;
+}
+.title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.method {
+  margin-left: 10rpx;
+}
+.title-name {
+  font-size: 36rpx;
+}

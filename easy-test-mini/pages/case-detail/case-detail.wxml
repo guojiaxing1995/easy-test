@@ -1,0 +1,90 @@
+<!--pages/case-detail/case-detail.wxml-->
+<wxs module="m1">
+function time_format(time) {
+  // 判断时间戳是否为13位数，如果不是则*1000，时间戳只有13位数(带毫秒)和10(不带毫秒)位数的
+  if(time.toString().length == 13){
+    var tme = getDate(time);
+  }else{
+    var tme = getDate(time * 1000);
+  }
+  var Y = tme.getFullYear();
+  var M = (tme.getMonth() + 1 < 10 ? '0' + (tme.getMonth() + 1) : tme.getMonth() + 1);
+  var D = tme.getDate();
+  var h = tme.getHours();
+  var m = tme.getMinutes();
+  var s = tme.getSeconds();
+  tem1 = Y + '-' + M + '-' + D + ' ' + h + ':' + m + ':' + s
+  return tem1;
+}
+
+function toFixed(num) {
+  return num.toFixed(2)
+}
+//导出
+module.exports.time_format = time_format;
+module.exports.toFixed = toFixed;
+</wxs>
+<view class="detail">
+<text class="name">{{detail.name}}</text>
+<view class="row">
+  <view class="colume-all">请求地址：<text class="text">{{detail.url}}</text></view>
+</view>
+<view class="row">
+  <view class="colume">请求方法：
+    <l-tag wx:if="{{detail.method===1}}" bg-color="#00c292" size="super-mini">GET</l-tag>
+    <l-tag wx:if="{{detail.method===2}}" bg-color="#e6a23c" size="super-mini">POST</l-tag>
+    <l-tag wx:if="{{detail.method===3}}" bg-color="#3963bc" size="super-mini">PUT</l-tag>
+    <l-tag wx:if="{{detail.method===4}}" bg-color="#e46a76" size="super-mini">DELETE</l-tag>
+  </view>
+  <view class="colume">提交方式：
+    <text class="text" wx:if="{{detail.submit===1}}">JSON</text>
+    <text class="text" wx:if="{{detail.submit===2}}">FORM</text>
+  </view>
+</view>
+<view class="row">
+  <view class="colume">用例分组：<text class="text">{{detail.group_name}}</text></view>
+  <view class="colume">创建人员：<text class="text">{{detail.create_user}}</text></view>
+</view>
+<view class="row">
+  <view class="colume-all">处理方法：
+    <text class="text" wx:if="{{detail.deal===1}}">不做处理</text>
+    <text class="text" wx:if="{{detail.deal===2}}">保存全部键值对</text>
+    <text class="text" wx:if="{{detail.deal===3}}">json提取器</text>
+    <text class="text" wx:if="{{detail.deal===4}}">正则表达式</text>
+    <text class="text" wx:if="{{detail.deal===5}}">自定义处理</text>
+  </view>
+</view>
+<view class="row">
+  <view class="colume-all">处理语句：<text class="text">{{detail.condition}}</text></view>
+</view>
+<view class="row">
+  <view class="colume-all">断言方式：
+    <text class="text" wx:if="{{detail.deal===1}}">EQUAL</text>
+    <text class="text" wx:if="{{detail.deal===2}}">NOTEQUAL</text>
+    <text class="text" wx:if="{{detail.deal===3}}">IN</text>
+    <text class="text" wx:if="{{detail.deal===4}}">NOTIN</text>
+    <text class="text" wx:if="{{detail.deal===5}}">SUCCESS</text>
+  </view>
+</view>
+<view class="row">
+  <view class="colume-all">预期结果：<text class="text">{{detail.expect}}</text></view>
+</view>
+<view class="row">
+  <view class="colume-all">请求头：<text class="text" wx:if="{{detail.header!==null}}">{{detail.header}}</text></view>
+</view>
+<view class="row">
+  <view class="colume-all">请求体：<text class="text" wx:if="{{detail.data!==null}}">{{detail.data}}</text></view>
+</view>
+<view class="row">
+  <view class="colume">修改次数：<text class="text">{{collect.edit_count}}</text></view>
+</view>
+<view class="row">
+  <view class="colume-all">上次修改时间：<text class="text" wx:if="{{collect.last_modify_time!==null}}">{{m1.time_format(collect.last_modify_time)}}</text></view>
+</view>
+<view class="row">
+  <view class="colume">成功率：
+    <text class="text" wx:if="{{collect.count!==0}}">{{m1.toFixed(collect.true_count/collect.count*100)}}%</text>
+    <text class="text" wx:if="{{collect.count===0}}">0</text>
+  </view>
+</view>
+</view>
