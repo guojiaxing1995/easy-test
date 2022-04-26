@@ -10,6 +10,7 @@ secure.py
 
 .DS_Store
 node_modules
+miniprogram_npm
 dist
 /script/.cache
 build
