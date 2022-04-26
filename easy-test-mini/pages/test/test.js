@@ -1,4 +1,8 @@
 // pages/test/test.js
+
+import io from 'weapp.socket.io';
+// const socket = io('http://127.0.0.1:5000');
+
 Page({
 
   /**

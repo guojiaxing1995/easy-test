@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "lin-ui": "^0.9.7"
-  }
+    "lin-ui": "^0.9.7",
+    "weapp.socket.io": "^3.0.0"
+  },
+  "devDependencies": {}
 }
