@@ -6,3 +6,6 @@ COPY dist/  /usr/share/nginx/html/
 
 COPY default.conf  /etc/nginx/conf.d/
 
+COPY www.xxx.com.pem /home/
+
+COPY www.xxx.com.key /home/
