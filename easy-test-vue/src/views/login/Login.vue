@@ -19,7 +19,7 @@
       </form>
     </div>
     <div class="record">
-      <el-link type="primary" :underline="false" href="http://www.beian.miit.gov.cn" target="_blank">晋ICP备18013433号-1</el-link>
+      <el-link type="primary" :underline="false" href="https://beian.miit.gov.cn" target="_blank">浙ICP备2022029305号</el-link>
     </div>
   </div>
 </template>
